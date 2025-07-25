@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { checkDatabaseConnection } from "./db";
 
 const app = express();
 app.use(express.json());
@@ -37,6 +38,15 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Initialize database and check connectivity
+  log('Checking database connection...');
+  const dbHealthy = await checkDatabaseConnection();
+  if (!dbHealthy) {
+    log('[WARNING] Database connection failed - some features may not work properly');
+  } else {
+    log('Database connection established successfully');
+  }
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -67,5 +77,6 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    log('ZED AI Assistant ready with optimized storage and seamless performance');
   });
 })();

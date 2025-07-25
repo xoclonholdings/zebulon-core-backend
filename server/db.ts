@@ -52,5 +52,5 @@ export async function optimizeDatabase() {
   }
 }
 
-// Run optimization every hour
-setInterval(optimizeDatabase, 60 * 60 * 1000);
+// Database optimization service will handle this
+// setInterval(optimizeDatabase, 60 * 60 * 1000);

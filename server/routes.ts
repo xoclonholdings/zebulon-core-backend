@@ -6,6 +6,7 @@ import { generateChatResponse, streamChatResponse } from "./services/openai.js";
 import { setupLocalAuth, isAuthenticated } from "./localAuth.js";
 import { insertConversationSchema, insertMessageSchema, insertFileSchema, insertSessionSchema } from "@shared/schema";
 import { FlipShopService } from "./services/flipShop.js";
+import { optimizationService } from "./services/optimizationService.js";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -464,6 +465,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("FlipShop recommendations error:", error);
       res.status(500).json({ error: "Failed to fetch recommendations" });
+    }
+  });
+
+  // Storage optimization endpoints
+  app.get("/api/admin/optimization/stats", isAuthenticated, (req, res) => {
+    try {
+      const stats = optimizationService.getStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Optimization stats error:", error);
+      res.status(500).json({ error: "Failed to fetch optimization stats" });
+    }
+  });
+
+  app.post("/api/admin/optimization/force", isAuthenticated, async (req, res) => {
+    try {
+      await optimizationService.forceOptimization();
+      res.json({ success: true, message: "Optimization completed" });
+    } catch (error) {
+      console.error("Force optimization error:", error);
+      res.status(500).json({ error: "Failed to run optimization" });
+    }
+  });
+
+  app.get("/api/admin/cache/stats", isAuthenticated, async (req, res) => {
+    try {
+      const stats = storage.getCacheStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Cache stats error:", error);
+      res.status(500).json({ error: "Failed to fetch cache stats" });
+    }
+  });
+
+  // User activity and search endpoints
+  app.get("/api/conversations/search", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const query = req.query.q as string;
+      
+      if (!query) {
+        return res.status(400).json({ error: "Search query is required" });
+      }
+      
+      const results = await storage.searchConversations(userId, query);
+      res.json(results);
+    } catch (error) {
+      console.error("Search conversations error:", error);
+      res.status(500).json({ error: "Failed to search conversations" });
+    }
+  });
+
+  app.get("/api/user/activity", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      
+      const activity = await storage.getRecentActivity(userId, limit);
+      res.json(activity);
+    } catch (error) {
+      console.error("User activity error:", error);
+      res.status(500).json({ error: "Failed to fetch user activity" });
     }
   });
 
