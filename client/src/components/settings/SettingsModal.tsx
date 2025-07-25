@@ -121,7 +121,7 @@ export default function SettingsModal() {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <img src={zLogoPath} alt="Z" className="h-4 w-4" />
-            <span><span className="text-cyan-400">ZED</span> Settings</span>
+            <span><span className="bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">ZED</span> Settings</span>
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
             Manage your account and login credentials

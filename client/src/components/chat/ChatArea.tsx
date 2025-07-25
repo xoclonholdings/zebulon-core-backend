@@ -139,7 +139,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
           <div>
             <h1 className="text-xl font-bold flex items-center space-x-2">
               <img src={zLogoPath} alt="Z" className="w-5 h-5" />
-              <span className="text-cyan-400">ZED</span>
+              <span className="bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">ZED</span>
             </h1>
             <p className="text-sm text-muted-foreground">Enhanced AI Assistant</p>
           </div>
@@ -169,7 +169,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
               <div className="flex items-center space-x-2 mb-4">
                 <div className="flex items-center space-x-2">
                   <img src={zLogoPath} alt="Z" className="w-4 h-4" />
-                  <span className="text-lg font-semibold text-cyan-400">ZED</span>
+                  <span className="text-lg font-semibold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">ZED</span>
                 </div>
                 <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-300">AI Assistant</Badge>
               </div>
@@ -199,7 +199,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
               <div className="flex items-center space-x-2 mb-4">
                 <div className="flex items-center space-x-2">
                   <img src={zLogoPath} alt="Z" className="w-4 h-4" />
-                  <span className="text-lg font-semibold text-cyan-400">ZED</span>
+                  <span className="text-lg font-semibold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">ZED</span>
                 </div>  
                 <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-300">
                   <div className="flex items-center space-x-1">
