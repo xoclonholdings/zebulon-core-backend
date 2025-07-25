@@ -86,20 +86,11 @@ export default function Login() {
       <div className="relative z-10 w-full max-w-md">
         {/* ZED Logo */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <div className="relative zed-glow">
-              <img 
-                src={zLogoPath} 
-                alt="ZED Logo" 
-                className="w-16 h-16 animate-pulse"
-              />
-            </div>
-          </div>
           <div className="flex items-center justify-center space-x-3">
             <img 
               src={zLogoPath} 
               alt="Z" 
-              className="w-8 h-8"
+              className="w-10 h-10"
             />
             <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
               ZED

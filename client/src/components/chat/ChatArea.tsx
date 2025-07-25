@@ -136,11 +136,6 @@ export default function ChatArea({ conversation, messages, files, conversationId
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b border-white/10 zed-glass relative z-10">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 zed-avatar rounded-2xl flex items-center justify-center relative">
-            <div className="relative z-10">
-              <img src={zLogoPath} alt="Z" className="w-5 h-5" />
-            </div>
-          </div>
           <div>
             <h1 className="text-xl font-bold flex items-center space-x-2 bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
               <img src={zLogoPath} alt="Z" className="w-5 h-5" />
@@ -170,12 +165,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
       <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6 relative z-10">
         {messages.length === 0 && !isStreaming ? (
           <div className="flex items-start space-x-4 max-w-4xl mx-auto">
-            <div className="w-12 h-12 zed-avatar rounded-2xl flex items-center justify-center flex-shrink-0 relative">
-              <div className="relative z-10">
-                <img src={zLogoPath} alt="Z" className="w-5 h-5" />
-              </div>
-            </div>
-            <Card className="flex-1 p-6 zed-message zed-morph-border">
+            <Card className="flex-1 p-6 zed-message zed-morph-border ml-4">
               <div className="flex items-center space-x-2 mb-4">
                 <div className="flex items-center space-x-2">
                   <img src={zLogoPath} alt="Z" className="w-4 h-4" />
@@ -205,12 +195,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
         {/* Streaming message */}
         {isStreaming && (
           <div className="flex items-start space-x-4 max-w-4xl mx-auto">
-            <div className="w-12 h-12 zed-avatar rounded-2xl flex items-center justify-center flex-shrink-0 relative">
-              <div className="relative z-10">
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              </div>
-            </div>
-            <Card className="flex-1 p-6 zed-message zed-glow">
+            <Card className="flex-1 p-6 zed-message zed-glow ml-4">
               <div className="flex items-center space-x-2 mb-4">
                 <div className="flex items-center space-x-2">
                   <img src={zLogoPath} alt="Z" className="w-4 h-4" />

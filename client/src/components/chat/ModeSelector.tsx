@@ -86,7 +86,7 @@ export default function ModeSelector({ selectedMode, onModeChange, disabled }: M
                       {mode.id === "chat" ? (
                         <MessageSquare className="text-white" size={20} />
                       ) : (
-                        <img src={zLogoPath} alt="Z" className="w-5 h-5" />
+                        <img src={zLogoPath} alt="Z" className="w-5 h-5 filter brightness-0 invert" />
                       )}
                     </div>
                     <div>

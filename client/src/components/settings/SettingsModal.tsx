@@ -120,7 +120,7 @@ export default function SettingsModal() {
       <DialogContent className="zed-glass border-white/10 max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
-            <img src={zLogoPath} alt="Z" className="h-5 w-5" />
+            <img src={zLogoPath} alt="Z" className="h-4 w-4" />
             <span>ZED Settings</span>
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
