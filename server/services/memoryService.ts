@@ -106,6 +106,13 @@ export class MemoryService {
         adminOnly: true
       });
       
+      await this.setCoreMemory({
+        key: "admin_verification",
+        value: JSON.stringify(coreMemoryConfig.admin_verification),
+        description: "ZED's admin verification system from core.memory.json",
+        adminOnly: true
+      });
+      
       console.log('[MEMORY] Core memory loaded from core.memory.json');
     } catch (error) {
       console.warn('[MEMORY] Failed to load core.memory.json, using defaults:', error);

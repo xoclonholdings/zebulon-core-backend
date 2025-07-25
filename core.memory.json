@@ -36,5 +36,40 @@
     "timezone": "EST",
     "access_level": "system",
     "admin_can_update_everything": true
+  },
+  "admin_verification": {
+    "primary_method": "username + password",  
+    "secondary_verification": {
+      "enabled": true,
+      "methods": [
+        {
+          "type": "face_verification",
+          "description": "Admin may be asked to submit a real-time selfie to match stored image hash. Facial scan never stored permanently — only matched during session."
+        },
+        {
+          "type": "document_upload",
+          "description": "Admin may optionally upload a verified ID (driver's license or passport) to be hashed and cross-checked for session validation."
+        },
+        {
+          "type": "secure_phrase",
+          "description": "Only the Admin knows the internal passphrase. This phrase can be used as a verbal or text override to grant or lock access."
+        },
+        {
+          "type": "device_fingerprint",
+          "description": "Zed may track the Admin's IP, device ID, or login behavior and flag login attempts from unknown devices for approval."
+        }
+      ]
+    },
+    "session_expiry": {
+      "type": "timed",
+      "duration_minutes": 45,
+      "description": "Admin login expires after 45 minutes of inactivity to prevent unauthorized use."
+    },
+    "recovery_method": {
+      "type": "encrypted challenge + Admin-only bypass",
+      "description": "If login fails repeatedly, Admin must answer a unique logic challenge or submit their override phrase."
+    },
+    "admin_override_permissions": true,
+    "non_admin_access": "View-only limited memory with no core access, editing, or diagnostics allowed"
   }
 }
