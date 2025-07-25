@@ -10,12 +10,14 @@ import {
   Mic,
   Sparkles,
   Zap,
-  Brain
+  Brain,
+  Rss
 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import FileUpload from "./FileUpload";
 import ChatMessage from "./ChatMessage";
+import SocialFeed from "../social/SocialFeed";
 import { useChat } from "@/hooks/use-chat";
 import type { Conversation, Message, File } from "@shared/schema";
 
@@ -29,6 +31,7 @@ interface ChatAreaProps {
 export default function ChatArea({ conversation, messages, files, conversationId }: ChatAreaProps) {
   const [inputValue, setInputValue] = useState("");
   const [showFileUpload, setShowFileUpload] = useState(false);
+  const [showSocialFeed, setShowSocialFeed] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
@@ -93,7 +96,9 @@ export default function ChatArea({ conversation, messages, files, conversationId
   }, [inputValue]);
 
   return (
-    <div className="flex-1 flex flex-col h-full relative overflow-hidden">
+    <div className="flex-1 flex h-full relative overflow-hidden">
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col h-full relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-purple-600/10 to-cyan-500/10 rounded-full blur-3xl zed-float" />
@@ -118,6 +123,14 @@ export default function ChatArea({ conversation, messages, files, conversationId
         </div>
         
         <div className="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowSocialFeed(!showSocialFeed)}
+            className={`zed-button rounded-xl ${showSocialFeed ? 'text-purple-400' : 'text-muted-foreground'}`}
+          >
+            <Rss size={16} />
+          </Button>
           <Badge variant="secondary" className="zed-glass border-purple-500/20 text-purple-300">
             <Sparkles size={12} className="mr-1" />
             Active
@@ -254,6 +267,14 @@ export default function ChatArea({ conversation, messages, files, conversationId
           </div>
         </div>
       </div>
+      </div>
+
+      {/* Social Feed Panel */}
+      {showSocialFeed && (
+        <div className="w-96 border-l border-white/10 zed-sidebar">
+          <SocialFeed />
+        </div>
+      )}
     </div>
   );
 }

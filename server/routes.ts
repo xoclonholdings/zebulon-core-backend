@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage.js";
 import { upload, processFile, cleanupFile } from "./services/fileProcessor.js";
 import { generateChatResponse, streamChatResponse } from "./services/openai.js";
+import { socialMediaService } from "./services/socialMedia.js";
 import { insertConversationSchema, insertMessageSchema, insertFileSchema, insertSessionSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -316,6 +317,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(exportData);
     } catch (error) {
       res.status(500).json({ error: "Failed to export conversation" });
+    }
+  });
+
+  // Social Media Feed Endpoints
+  app.get("/api/social/feeds", async (req, res) => {
+    try {
+      const feeds = await socialMediaService.getAllFeeds(10);
+      res.json(feeds);
+    } catch (error) {
+      console.error("Social feeds error:", error);
+      res.status(500).json({ error: "Failed to fetch social media feeds" });
+    }
+  });
+
+  app.get("/api/social/feeds/:platform", async (req, res) => {
+    try {
+      const platform = req.params.platform;
+      const limit = parseInt(req.query.limit as string) || 10;
+      
+      let feed;
+      switch (platform) {
+        case "instagram":
+          feed = await socialMediaService.getInstagramFeed(limit);
+          break;
+        case "x":
+          feed = await socialMediaService.getXFeed(limit);
+          break;
+        case "snapchat":
+          feed = await socialMediaService.getSnapchatFeed(limit);
+          break;
+        case "flip":
+          feed = await socialMediaService.getFlipFeed(limit);
+          break;
+        default:
+          return res.status(400).json({ error: "Invalid platform" });
+      }
+      
+      res.json(feed);
+    } catch (error) {
+      console.error(`${req.params.platform} feed error:`, error);
+      res.status(500).json({ error: `Failed to fetch ${req.params.platform} feed` });
     }
   });
 
