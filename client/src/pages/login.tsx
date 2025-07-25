@@ -161,17 +161,6 @@ export default function Login() {
                 )}
               </Button>
             </form>
-
-            {/* Demo Info */}
-            <div className="zed-glass border-white/10 rounded-lg p-4">
-              <div className="flex items-start space-x-3">
-                <Sparkles className="h-4 w-4 text-purple-400 mt-0.5" />
-                <div className="text-foreground text-sm">
-                  <strong>Default Login:</strong><br />
-                  admin / zed2025
-                </div>
-              </div>
-            </div>
           </CardContent>
         </Card>
 
