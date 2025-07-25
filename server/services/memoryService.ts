@@ -99,6 +99,13 @@ export class MemoryService {
         adminOnly: true
       });
       
+      await this.setCoreMemory({
+        key: "access",
+        value: JSON.stringify(coreMemoryConfig.access),
+        description: "ZED's access permissions from core.memory.json",
+        adminOnly: true
+      });
+      
       console.log('[MEMORY] Core memory loaded from core.memory.json');
     } catch (error) {
       console.warn('[MEMORY] Failed to load core.memory.json, using defaults:', error);

@@ -345,7 +345,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/memory/core", isAuthenticated, async (req: any, res) => {
     try {
       // Only allow Admin user to modify core memory
-      const username = req.user?.username || req.user?.claims?.username;
+      const sessionUser = (req.session as any)?.user;
+      const username = sessionUser?.username;
+      
       if (username !== 'Admin') {
         return res.status(403).json({ error: "Only Admin user can modify core memory" });
       }

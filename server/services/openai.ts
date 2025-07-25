@@ -15,6 +15,67 @@ export interface StreamResponse {
   done: boolean;
 }
 
+// Helper function to build system message from core memory
+async function buildSystemMessage(mode: "chat" | "agent"): Promise<string> {
+  let systemContent = "You are ZED, an advanced AI assistant with document processing capabilities.";
+  
+  try {
+    const { MemoryService } = await import("./memoryService");
+    const corePersonality = await MemoryService.getCoreMemory("zed_personality");
+    const tone = await MemoryService.getCoreMemory("tone");
+    const rules = await MemoryService.getCoreMemory("rules");
+    const defaultContext = await MemoryService.getCoreMemory("default_context");
+    const access = await MemoryService.getCoreMemory("access");
+    
+    // Build system message from core memory
+    if (corePersonality?.value) {
+      systemContent = corePersonality.value;
+    }
+    
+    if (tone?.value) {
+      systemContent += `\n\nTone: ${tone.value}`;
+    }
+    
+    if (rules?.value) {
+      try {
+        const rulesArray = JSON.parse(rules.value);
+        systemContent += `\n\nCore Rules:\n${rulesArray.map((rule: string) => `- ${rule}`).join('\n')}`;
+      } catch (e) {
+        systemContent += `\n\nCore Rules: ${rules.value}`;
+      }
+    }
+    
+    if (access?.value) {
+      try {
+        const accessConfig = JSON.parse(access.value);
+        systemContent += `\n\nAccess Permissions:\nAllowed: ${accessConfig.allowed.join(', ')}\nRestricted: ${accessConfig.restricted.join(', ')}`;
+      } catch (e) {
+        systemContent += `\n\nAccess Permissions: ${access.value}`;
+      }
+    }
+    
+    if (defaultContext?.value) {
+      try {
+        const context = JSON.parse(defaultContext.value);
+        systemContent += `\n\nDefault Context: User: ${context.default_user}, Timezone: ${context.timezone}, Access Level: ${context.access_level}`;
+      } catch (e) {
+        systemContent += `\n\nDefault Context: ${defaultContext.value}`;
+      }
+    }
+  } catch (error) {
+    console.warn('[OPENAI] Failed to load core memory, using fallback');
+  }
+  
+  // Add mode-specific instructions
+  if (mode === "agent") {
+    systemContent += "\n\nYou operate in agent mode, taking proactive actions and providing comprehensive analysis. Work independently and provide thorough solutions.";
+  } else {
+    systemContent += "\n\nYou provide helpful responses in a conversational manner. Ask clarifying questions when needed.";
+  }
+  
+  return systemContent;
+}
+
 export async function generateChatResponse(
   messages: ChatMessage[],
   mode: "chat" | "agent" = "chat",
