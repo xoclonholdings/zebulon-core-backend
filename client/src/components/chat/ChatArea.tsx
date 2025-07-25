@@ -137,9 +137,9 @@ export default function ChatArea({ conversation, messages, files, conversationId
       <div className="flex items-center justify-between p-6 border-b border-white/10 zed-glass relative z-10">
         <div className="flex items-center space-x-3">
           <div>
-            <h1 className="text-xl font-bold flex items-center space-x-2 bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold flex items-center space-x-2">
               <img src={zLogoPath} alt="Z" className="w-5 h-5" />
-              <span>ZED</span>
+              <span className="bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">ZED</span>
             </h1>
             <p className="text-sm text-muted-foreground">Enhanced AI Assistant</p>
           </div>
@@ -169,7 +169,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
               <div className="flex items-center space-x-2 mb-4">
                 <div className="flex items-center space-x-2">
                   <img src={zLogoPath} alt="Z" className="w-4 h-4" />
-                  <span className="text-lg font-semibold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">ZED</span>
+                  <span className="text-lg font-semibold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">ZED</span>
                 </div>
                 <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-300">AI Assistant</Badge>
               </div>
@@ -199,7 +199,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
               <div className="flex items-center space-x-2 mb-4">
                 <div className="flex items-center space-x-2">
                   <img src={zLogoPath} alt="Z" className="w-4 h-4" />
-                  <span className="text-lg font-semibold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">ZED</span>
+                  <span className="text-lg font-semibold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">ZED</span>
                 </div>  
                 <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-300">
                   <div className="flex items-center space-x-1">
