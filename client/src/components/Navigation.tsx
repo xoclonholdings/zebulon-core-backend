@@ -52,7 +52,7 @@ export default function Navigation() {
             <div>
               <h2 className="text-xl font-bold flex items-center space-x-2">
                 <img src={zLogoPath} alt="Z" className="w-5 h-5" />
-                <span className="bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">ZED</span>
+                <span className="text-cyan-400">ZED</span>
               </h2>
               <p className="text-xs text-muted-foreground">AI Assistant</p>
             </div>

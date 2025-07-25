@@ -93,7 +93,7 @@ export default function Login() {
               className="w-16 h-16 mx-auto opacity-70"
             />
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold text-cyan-400">
             ZED
           </h1>
           <p className="text-muted-foreground mt-2">Enhanced AI Assistant</p>
