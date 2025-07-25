@@ -3,9 +3,8 @@ import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import ChatArea from "@/components/chat/ChatArea";
-import SessionPanel from "@/components/chat/SessionPanel";
 import { apiRequest } from "@/lib/queryClient";
-import type { Conversation, Message, File, Session } from "@shared/schema";
+import type { Conversation, Message, File } from "@shared/schema";
 
 export default function Chat() {
   const { id: conversationId } = useParams<{ id?: string }>();
@@ -35,32 +34,15 @@ export default function Chat() {
     enabled: !!conversationId,
   });
 
-  // Fetch session info
-  const { data: session } = useQuery<Session>({
-    queryKey: ["/api/conversations", conversationId, "session"],
-    enabled: !!conversationId,
-  });
-
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      <ChatSidebar 
-        conversations={conversations}
-        currentConversationId={conversationId}
+    <div className="flex h-screen overflow-hidden">
+      <ChatSidebar conversations={conversations} />
+      <ChatArea 
+        conversation={currentConversation}
+        messages={messages}
+        files={files}
+        conversationId={conversationId}
       />
-      
-      <div className="flex-1 flex">
-        <ChatArea 
-          conversation={currentConversation}
-          messages={messages}
-          conversationId={conversationId}
-        />
-        
-        <SessionPanel 
-          conversation={currentConversation}
-          files={files}
-          session={session}
-        />
-      </div>
     </div>
   );
 }

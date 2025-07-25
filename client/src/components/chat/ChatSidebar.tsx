@@ -1,192 +1,220 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Brain, Plus, Trash2, FileText, User, Settings } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Plus, 
+  MessageSquare, 
+  Brain,
+  Sparkles,
+  Zap,
+  X
+} from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { Link, useLocation } from "wouter";
 import type { Conversation } from "@shared/schema";
 
 interface ChatSidebarProps {
   conversations: Conversation[];
-  currentConversationId?: string;
 }
 
-export default function ChatSidebar({ conversations, currentConversationId }: ChatSidebarProps) {
-  const [location, setLocation] = useLocation();
-  const { toast } = useToast();
+export default function ChatSidebar({ conversations }: ChatSidebarProps) {
+  const [location] = useLocation();
   const queryClient = useQueryClient();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const createConversationMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/conversations", {
-        title: "New Analysis"
+      return apiRequest("/api/conversations", {
+        method: "POST",
+        body: JSON.stringify({ title: "New Conversation" }),
+        headers: { "Content-Type": "application/json" },
       });
-      return response.json();
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
-      setLocation(`/chat/${data.id}`);
-      toast({
-        title: "New conversation created",
-        description: "Ready to start your analysis!"
-      });
+      window.history.pushState({}, '', `/chat/${data.id}`);
     },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to create new conversation",
-        variant: "destructive"
-      });
-    }
   });
 
   const deleteConversationMutation = useMutation({
     mutationFn: async (id: string) => {
-      await apiRequest("DELETE", `/api/conversations/${id}`);
+      return apiRequest(`/api/conversations/${id}`, {
+        method: "DELETE",
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
-      if (currentConversationId && conversations.find(c => c.id === currentConversationId)) {
-        setLocation("/");
-      }
-      toast({
-        title: "Conversation deleted",
-        description: "The conversation has been removed."
-      });
     },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to delete conversation",
-        variant: "destructive"
-      });
-    }
   });
 
-  const formatTimeAgo = (date: Date | string | null | undefined) => {
-    if (!date) return "Unknown";
+  const formatDate = (date: Date) => {
     const now = new Date();
-    const past = new Date(date);
-    const diffMs = now.getTime() - past.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    return `${diffDays}d ago`;
+    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+    
+    if (diffInHours < 24) {
+      return "Today";
+    } else if (diffInHours < 168) {
+      return new Intl.DateTimeFormat('en-US', { weekday: 'short' }).format(date);
+    } else {
+      return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(date);
+    }
   };
 
-  return (
-    <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-      {/* Header */}
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
-            <Brain className="text-white" size={20} />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">ZED</h1>
-            <p className="text-sm text-gray-500">AI Assistant</p>
-          </div>
-        </div>
-      </div>
+  const handleDeleteConversation = async (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    await deleteConversationMutation.mutateAsync(id);
+    
+    if (location.includes(id)) {
+      window.history.pushState({}, '', '/chat');
+    }
+  };
 
-      {/* New Conversation Button */}
-      <div className="p-4">
+  if (isCollapsed) {
+    return (
+      <div className="w-16 zed-sidebar flex flex-col items-center py-4 space-y-4">
+        <Button
+          onClick={() => setIsCollapsed(false)}
+          variant="ghost"
+          size="sm"
+          className="w-10 h-10 zed-button rounded-xl"
+        >
+          <MessageSquare size={20} />
+        </Button>
+        
         <Button 
           onClick={() => createConversationMutation.mutate()}
+          className="w-10 h-10 zed-gradient rounded-xl zed-button p-0"
           disabled={createConversationMutation.isPending}
-          className="w-full bg-primary hover:bg-primary/90"
         >
-          <Plus className="mr-2" size={16} />
-          New Analysis
+          <Plus size={20} />
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-80 zed-sidebar flex flex-col h-full relative">
+      {/* Floating Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-10 left-4 w-20 h-20 bg-purple-600/5 rounded-full blur-2xl zed-float" />
+        <div className="absolute bottom-20 right-4 w-16 h-16 bg-cyan-500/5 rounded-full blur-xl zed-float" style={{ animationDelay: '3s' }} />
+      </div>
+
+      {/* Header */}
+      <div className="p-6 border-b border-white/10 relative z-10">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 zed-avatar rounded-2xl flex items-center justify-center relative">
+              <div className="relative z-10">
+                <Brain className="text-white" size={20} />
+              </div>
+            </div>
+            <div>
+              <h2 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                ZED
+              </h2>
+              <p className="text-xs text-muted-foreground">AI Assistant</p>
+            </div>
+          </div>
+          
+          <Button
+            onClick={() => setIsCollapsed(true)}
+            variant="ghost"
+            size="sm"
+            className="w-8 h-8 zed-button rounded-xl p-0 text-muted-foreground hover:text-foreground"
+          >
+            <X size={16} />
+          </Button>
+        </div>
+        
+        <Button 
+          onClick={() => createConversationMutation.mutate()}
+          className="w-full zed-gradient hover:shadow-lg hover:shadow-purple-500/25 zed-button rounded-xl h-12"
+          disabled={createConversationMutation.isPending}
+        >
+          <Plus size={18} className="mr-2" />
+          <span className="font-medium">New Chat</span>
+          <Sparkles size={14} className="ml-2 opacity-80" />
         </Button>
       </div>
 
-      {/* Conversation History */}
-      <div className="flex-1 overflow-y-auto px-4">
-        <div className="space-y-2">
-          {conversations.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <FileText className="mx-auto mb-2" size={24} />
-              <p className="text-sm">No conversations yet</p>
-              <p className="text-xs">Start by creating a new analysis</p>
+      {/* Conversations List */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-2 relative z-10">
+        {conversations.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 zed-avatar rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <MessageSquare size={24} className="text-white" />
             </div>
-          ) : (
-            conversations.map((conversation) => (
-              <Card
-                key={conversation.id}
-                className={`group p-3 cursor-pointer transition-colors hover:bg-gray-50 ${
-                  conversation.id === currentConversationId 
-                    ? "bg-primary/5 border-primary/20" 
-                    : "border-gray-200"
-                }`}
-              >
-                <Link href={`/chat/${conversation.id}`}>
+            <p className="text-sm text-muted-foreground mb-2">No conversations yet</p>
+            <p className="text-xs text-muted-foreground/60">Start a new chat to begin</p>
+          </div>
+        ) : (
+          conversations.map((conversation) => {
+            const isActive = location.includes(conversation.id);
+            return (
+              <Link key={conversation.id} href={`/chat/${conversation.id}`}>
+                <div className={`group relative p-4 rounded-2xl cursor-pointer transition-all duration-300 ${
+                  isActive 
+                    ? 'zed-glass border-purple-500/30 zed-glow' 
+                    : 'hover:bg-white/5 border border-transparent hover:border-white/10'
+                }`}>
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
-                      <h3 className={`text-sm font-medium truncate ${
-                        conversation.id === currentConversationId 
-                          ? "text-primary" 
-                          : "text-gray-900"
-                      }`}>
-                        {conversation.title}
-                      </h3>
-                      {conversation.preview && (
-                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">
-                          {conversation.preview}
-                        </p>
-                      )}
-                      <div className="flex items-center space-x-2 mt-2">
-                        <span className={`text-xs ${
-                          conversation.id === currentConversationId 
-                            ? "text-primary" 
-                            : "text-gray-400"
+                      <div className="flex items-center space-x-2 mb-2">
+                        <div className={`w-2 h-2 rounded-full ${
+                          isActive ? 'bg-purple-400' : 'bg-muted-foreground/40'
+                        }`} />
+                        <h3 className={`text-sm font-medium truncate ${
+                          isActive ? 'text-foreground' : 'text-muted-foreground'
                         }`}>
-                          {formatTimeAgo(conversation.updatedAt)}
-                        </span>
-                        {conversation.isActive && (
-                          <span className="text-xs text-accent">Active</span>
-                        )}
+                          {conversation.title}
+                        </h3>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="outline" className={`text-xs px-2 py-0.5 ${
+                          isActive 
+                            ? 'border-purple-500/30 text-purple-300' 
+                            : 'border-white/10 text-muted-foreground/60'
+                        }`}>
+                          {formatDate(new Date(conversation.updatedAt))}
+                        </Badge>
                       </div>
                     </div>
+                    
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600 h-auto p-1"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        deleteConversationMutation.mutate(conversation.id);
-                      }}
-                      disabled={deleteConversationMutation.isPending}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 p-0 hover:bg-red-500/20 hover:text-red-400 rounded-lg"
+                      onClick={(e) => handleDeleteConversation(e, conversation.id)}
                     >
-                      <Trash2 size={12} />
+                      <X size={12} />
                     </Button>
                   </div>
-                </Link>
-              </Card>
-            ))
-          )}
-        </div>
+                </div>
+              </Link>
+            );
+          })
+        )}
       </div>
 
-      {/* User Profile */}
-      <div className="p-4 border-t border-gray-200">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-            <User className="text-gray-600" size={16} />
+      {/* Footer */}
+      <div className="p-4 border-t border-white/10 relative z-10">
+        <div className="flex items-center space-x-3 p-3 rounded-2xl zed-glass">
+          <div className="w-8 h-8 zed-avatar rounded-xl flex items-center justify-center relative">
+            <div className="relative z-10">
+              <Zap className="text-white" size={14} />
+            </div>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900">Demo User</p>
-            <p className="text-xs text-gray-500">ZED Assistant</p>
+            <p className="text-sm font-medium text-foreground">Demo User</p>
+            <p className="text-xs text-muted-foreground">Enhanced Assistant</p>
           </div>
-          <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600">
-            <Settings size={16} />
-          </Button>
+          <Badge variant="outline" className="border-purple-500/30 text-purple-300 text-xs">
+            Active
+          </Badge>
         </div>
       </div>
     </div>
