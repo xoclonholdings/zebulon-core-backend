@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { checkDatabaseConnection } from "./db";
+import { runMigrations } from "./migrations";
 
 const app = express();
 app.use(express.json());
@@ -46,6 +47,9 @@ app.use((req, res, next) => {
   } else {
     log('Database connection established successfully');
   }
+
+  // Run database migrations
+  await runMigrations();
 
   const server = await registerRoutes(app);
 

@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import multer from "multer";
-import { analyzeText, analyzeImage } from "./openai.js";
+import { analyzeText, analyzeImage } from "./openai";
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({

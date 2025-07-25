@@ -1,12 +1,12 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage.js";
-import { upload, processFile, cleanupFile } from "./services/fileProcessor.js";
-import { generateChatResponse, streamChatResponse } from "./services/openai.js";
-import { setupLocalAuth, isAuthenticated } from "./localAuth.js";
+import { storage } from "./storage";
+import { upload, processFile, cleanupFile } from "./services/fileProcessor";
+import { generateChatResponse, streamChatResponse } from "./services/openai";
+import { setupLocalAuth, isAuthenticated } from "./localAuth";
 import { insertConversationSchema, insertMessageSchema, insertFileSchema, insertSessionSchema } from "@shared/schema";
-import { FlipShopService } from "./services/flipShop.js";
-import { optimizationService } from "./services/optimizationService.js";
+import { FlipShopService } from "./services/flipShop";
+import { optimizationService } from "./services/optimizationService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   

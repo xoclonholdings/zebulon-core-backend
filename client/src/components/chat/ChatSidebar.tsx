@@ -18,7 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import type { Conversation } from "@shared/schema";
 
-import LogoutButton from "@/components/LogoutButton";
+import LogoutButton from "@/components/auth/LogoutButton";
 import SettingsModal from "@/components/settings/SettingsModal";
 
 interface ChatSidebarProps {
