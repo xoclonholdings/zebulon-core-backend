@@ -112,7 +112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get messages for conversation
-  app.get("/api/conversations/:id/messages", async (req, res) => {
+  app.get("/api/conversations/:id/messages", isAuthenticated, async (req, res) => {
     try {
       const messages = await storage.getMessagesByConversation(req.params.id);
       res.json(messages);
@@ -122,7 +122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Send message and get AI response
-  app.post("/api/conversations/:id/messages", async (req, res) => {
+  app.post("/api/conversations/:id/messages", isAuthenticated, async (req, res) => {
     try {
       const conversationId = req.params.id;
       const { content, role = "user" } = req.body;
@@ -246,7 +246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload and process files
-  app.post("/api/conversations/:id/upload", upload.array('files'), async (req, res) => {
+  app.post("/api/conversations/:id/upload", isAuthenticated, upload.array('files'), async (req, res) => {
     try {
       const conversationId = req.params.id;
       const files = req.files as any[];
