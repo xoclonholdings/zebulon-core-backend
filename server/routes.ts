@@ -3,13 +3,13 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage.js";
 import { upload, processFile, cleanupFile } from "./services/fileProcessor.js";
 import { generateChatResponse, streamChatResponse } from "./services/openai.js";
-import { setupAuth, isAuthenticated } from "./replitAuth.js";
+import { setupLocalAuth, isAuthenticated } from "./localAuth.js";
 import { insertConversationSchema, insertMessageSchema, insertFileSchema, insertSessionSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
   // Auth middleware
-  await setupAuth(app);
+  await setupLocalAuth(app);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {

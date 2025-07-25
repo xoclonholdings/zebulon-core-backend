@@ -7,14 +7,17 @@ import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Chat from "@/pages/chat";
 import Landing from "@/pages/landing";
+import Login from "@/pages/login";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
   return (
     <Switch>
-      {isLoading || !isAuthenticated ? (
+      {isLoading ? (
         <Route path="/" component={Landing} />
+      ) : !isAuthenticated ? (
+        <Route path="/" component={Login} />
       ) : (
         <>
           <Route path="/" component={Chat} />
