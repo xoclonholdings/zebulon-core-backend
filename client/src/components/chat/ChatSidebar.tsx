@@ -130,10 +130,12 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
       <div className="p-6 border-b border-white/10 relative z-10">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
-            <div>
-              <h2 className="text-xl font-bold flex items-center space-x-2 bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
-                <img src={zLogoPath} alt="Z" className="w-5 h-5" />
-                <span>ZED</span>
+            <div className="text-center">
+              <div className="mb-1">
+                <img src={zLogoPath} alt="Z" className="w-6 h-6 mx-auto opacity-70" />
+              </div>
+              <h2 className="text-xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
+                ZED
               </h2>
               <p className="text-xs text-muted-foreground">Enhanced AI Assistant</p>
             </div>

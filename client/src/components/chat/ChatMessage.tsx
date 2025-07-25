@@ -57,8 +57,12 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       <div className="flex-1">
         <Card className="zed-message p-6 ml-4">
           <div className="flex items-center space-x-2 mb-4">
-            <img src={zLogoPath} alt="Z" className="w-4 h-4" />
-            <span className="text-lg font-semibold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">ZED</span>
+            <div className="text-center">
+              <div className="mb-1">
+                <img src={zLogoPath} alt="Z" className="w-4 h-4 mx-auto opacity-70" />
+              </div>
+              <span className="text-lg font-semibold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">ZED</span>
+            </div>
             <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-300">
               <Sparkles size={10} className="mr-1" />
               Assistant

@@ -86,16 +86,16 @@ export default function Login() {
       <div className="relative z-10 w-full max-w-md">
         {/* ZED Logo */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center space-x-3">
+          <div className="mb-4">
             <img 
               src={zLogoPath} 
               alt="Z" 
-              className="w-10 h-10"
+              className="w-16 h-16 mx-auto opacity-70"
             />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
-              ZED
-            </h1>
           </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
+            ZED
+          </h1>
           <p className="text-muted-foreground mt-2">Enhanced AI Assistant</p>
         </div>
 

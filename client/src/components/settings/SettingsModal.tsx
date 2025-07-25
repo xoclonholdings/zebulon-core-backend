@@ -119,8 +119,10 @@ export default function SettingsModal() {
       </DialogTrigger>
       <DialogContent className="zed-glass border-white/10 max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-foreground">
-            <img src={zLogoPath} alt="Z" className="h-4 w-4" />
+          <DialogTitle className="text-center text-foreground">
+            <div className="mb-2">
+              <img src={zLogoPath} alt="Z" className="h-5 w-5 mx-auto opacity-70" />
+            </div>
             <span>ZED Settings</span>
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">

@@ -136,10 +136,12 @@ export default function ChatArea({ conversation, messages, files, conversationId
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b border-white/10 zed-glass relative z-10">
         <div className="flex items-center space-x-3">
-          <div>
-            <h1 className="text-xl font-bold flex items-center space-x-2 bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-              <img src={zLogoPath} alt="Z" className="w-5 h-5" />
-              <span>ZED</span>
+          <div className="text-center">
+            <div className="mb-1">
+              <img src={zLogoPath} alt="Z" className="w-6 h-6 mx-auto opacity-70" />
+            </div>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+              ZED
             </h1>
             <p className="text-sm text-muted-foreground">Enhanced AI Assistant</p>
           </div>
@@ -167,8 +169,10 @@ export default function ChatArea({ conversation, messages, files, conversationId
           <div className="flex items-start space-x-4 max-w-4xl mx-auto">
             <Card className="flex-1 p-6 zed-message zed-morph-border ml-4">
               <div className="flex items-center space-x-2 mb-4">
-                <div className="flex items-center space-x-2">
-                  <img src={zLogoPath} alt="Z" className="w-4 h-4" />
+                <div className="text-center">
+                  <div className="mb-1">
+                    <img src={zLogoPath} alt="Z" className="w-4 h-4 mx-auto opacity-70" />
+                  </div>
                   <span className="text-lg font-semibold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">ZED</span>
                 </div>
                 <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-300">AI Assistant</Badge>
@@ -197,8 +201,10 @@ export default function ChatArea({ conversation, messages, files, conversationId
           <div className="flex items-start space-x-4 max-w-4xl mx-auto">
             <Card className="flex-1 p-6 zed-message zed-glow ml-4">
               <div className="flex items-center space-x-2 mb-4">
-                <div className="flex items-center space-x-2">
-                  <img src={zLogoPath} alt="Z" className="w-4 h-4" />
+                <div className="text-center">
+                  <div className="mb-1">
+                    <img src={zLogoPath} alt="Z" className="w-4 h-4 mx-auto opacity-70" />
+                  </div>
                   <span className="text-lg font-semibold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">ZED</span>
                 </div>  
                 <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-300">
