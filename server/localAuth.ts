@@ -6,8 +6,8 @@ import { storage } from "./storage";
 let LOCAL_USERS = [
   {
     id: "user_001",
-    username: "admin",
-    password: "zed2025", // Changed to zed2025 as requested
+    username: "Admin",
+    password: "Zed2025",
     email: "admin@zed.local",
     firstName: "ZED",
     lastName: "Admin",
