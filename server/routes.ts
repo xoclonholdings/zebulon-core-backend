@@ -4,15 +4,30 @@ import { storage } from "./storage.js";
 import { upload, processFile, cleanupFile } from "./services/fileProcessor.js";
 import { generateChatResponse, streamChatResponse } from "./services/openai.js";
 import { socialMediaService } from "./services/socialMedia.js";
+import { setupAuth, isAuthenticated } from "./replitAuth.js";
 import { insertConversationSchema, insertMessageSchema, insertFileSchema, insertSessionSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Get conversations for user
-  app.get("/api/conversations", async (req, res) => {
+  // Auth middleware
+  await setupAuth(app);
+
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      // For demo purposes, using a default user ID
-      const userId = "demo-user";
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+  
+  // Get conversations for authenticated user
+  app.get("/api/conversations", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
       const conversations = await storage.getConversationsByUser(userId);
       res.json(conversations);
     } catch (error) {
@@ -21,10 +36,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create new conversation
-  app.post("/api/conversations", async (req, res) => {
+  app.post("/api/conversations", isAuthenticated, async (req: any, res) => {
     try {
+      const userId = req.user.claims.sub;
       const conversationData = insertConversationSchema.parse({
-        userId: "demo-user", // Default user for demo
+        userId,
         title: req.body.title || "New Analysis",
         model: req.body.model || "gpt-4o",
         isActive: true
@@ -35,7 +51,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create session for the conversation
       const sessionData = insertSessionSchema.parse({
         conversationId: conversation.id,
-        userId: "demo-user"
+        userId
       });
       await storage.createSession(sessionData);
 
@@ -46,11 +62,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get conversation by ID
-  app.get("/api/conversations/:id", async (req, res) => {
+  app.get("/api/conversations/:id", isAuthenticated, async (req: any, res) => {
     try {
       const conversation = await storage.getConversation(req.params.id);
       if (!conversation) {
         return res.status(404).json({ error: "Conversation not found" });
+      }
+      // Verify user owns this conversation
+      if (conversation.userId !== req.user.claims.sub) {
+        return res.status(403).json({ error: "Access denied" });
       }
       res.json(conversation);
     } catch (error) {

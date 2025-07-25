@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import LogoutButton from "../auth/LogoutButton";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   Plus, 
   MessageSquare, 
   Brain,
   Sparkles,
   Zap,
-  X
+  X,
+  User
 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -22,6 +25,7 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
   const [location] = useLocation();
   const queryClient = useQueryClient();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { user } = useAuth();
 
   const createConversationMutation = useMutation({
     mutationFn: async () => {
@@ -120,15 +124,46 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
             </div>
           </div>
           
-          <Button
-            onClick={() => setIsCollapsed(true)}
-            variant="ghost"
-            size="sm"
-            className="w-8 h-8 zed-button rounded-xl p-0 text-muted-foreground hover:text-foreground"
-          >
-            <X size={16} />
-          </Button>
+          <div className="flex items-center space-x-2">
+            <LogoutButton />
+            <Button
+              onClick={() => setIsCollapsed(true)}
+              variant="ghost"
+              size="sm"
+              className="w-8 h-8 zed-button rounded-xl p-0 text-muted-foreground hover:text-foreground"
+            >
+              <X size={16} />
+            </Button>
+          </div>
         </div>
+
+        {/* User Info */}
+        {user && (
+          <div className="flex items-center space-x-3 p-3 rounded-xl zed-glass mb-4">
+            <div className="w-8 h-8 zed-avatar rounded-xl flex items-center justify-center">
+              {user.profileImageUrl ? (
+                <img 
+                  src={user.profileImageUrl} 
+                  alt="Profile" 
+                  className="w-full h-full rounded-xl object-cover"
+                />
+              ) : (
+                <User size={16} className="text-white" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">
+                {user.firstName || user.lastName ? 
+                  `${user.firstName || ''} ${user.lastName || ''}`.trim() : 
+                  user.email?.split('@')[0] || 'User'
+                }
+              </p>
+              <p className="text-xs text-muted-foreground truncate">
+                {user.email}
+              </p>
+            </div>
+          </div>
+        )}
         
         <Button 
           onClick={() => createConversationMutation.mutate()}

@@ -1,194 +1,166 @@
-import { type User, type InsertUser, type Conversation, type InsertConversation, type Message, type InsertMessage, type File, type InsertFile, type Session, type InsertSession } from "@shared/schema";
-import { randomUUID } from "crypto";
+import {
+  type User,
+  type UpsertUser,
+  type Conversation,
+  type InsertConversation,
+  type Message,
+  type InsertMessage,
+  type File,
+  type InsertFile,
+  type Session,
+  type InsertSession,
+} from "@shared/schema";
+import { db } from "./db";
+import { users, conversations, messages, files, chatSessions } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
-  // Users
+  // User operations - Replit Auth required
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  upsertUser(user: UpsertUser): Promise<User>;
 
-  // Conversations
+  // Conversation operations
   getConversation(id: string): Promise<Conversation | undefined>;
   getConversationsByUser(userId: string): Promise<Conversation[]>;
   createConversation(conversation: InsertConversation): Promise<Conversation>;
   updateConversation(id: string, updates: Partial<Conversation>): Promise<Conversation | undefined>;
   deleteConversation(id: string): Promise<boolean>;
 
-  // Messages
+  // Message operations
   getMessagesByConversation(conversationId: string): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
   deleteMessage(id: string): Promise<boolean>;
 
-  // Files
+  // File operations
   getFile(id: string): Promise<File | undefined>;
   getFilesByConversation(conversationId: string): Promise<File[]>;
   createFile(file: InsertFile): Promise<File>;
   updateFile(id: string, updates: Partial<File>): Promise<File | undefined>;
   deleteFile(id: string): Promise<boolean>;
 
-  // Sessions
+  // Session operations
   getSession(conversationId: string): Promise<Session | undefined>;
   createSession(session: InsertSession): Promise<Session>;
   updateSession(id: string, updates: Partial<Session>): Promise<Session | undefined>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User> = new Map();
-  private conversations: Map<string, Conversation> = new Map();
-  private messages: Map<string, Message> = new Map();
-  private files: Map<string, File> = new Map();
-  private sessions: Map<string, Session> = new Map();
-
-  // Users
+export class DatabaseStorage implements IStorage {
+  // User operations - Replit Auth required
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.username === username);
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { 
-      ...insertUser, 
-      id, 
-      createdAt: new Date()
-    };
-    this.users.set(id, user);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
 
-  // Conversations
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
+  // Conversation operations
   async getConversation(id: string): Promise<Conversation | undefined> {
-    return this.conversations.get(id);
-  }
-
-  async getConversationsByUser(userId: string): Promise<Conversation[]> {
-    return Array.from(this.conversations.values())
-      .filter(conv => conv.userId === userId)
-      .sort((a, b) => new Date(b.updatedAt!).getTime() - new Date(a.updatedAt!).getTime());
-  }
-
-  async createConversation(insertConversation: InsertConversation): Promise<Conversation> {
-    const id = randomUUID();
-    const now = new Date();
-    const conversation: Conversation = { 
-      ...insertConversation, 
-      id, 
-      createdAt: now,
-      updatedAt: now,
-      preview: insertConversation.preview || null,
-      model: insertConversation.model || "gpt-4o",
-      isActive: insertConversation.isActive || false
-    };
-    this.conversations.set(id, conversation);
+    const [conversation] = await db.select().from(conversations).where(eq(conversations.id, id));
     return conversation;
   }
 
+  async getConversationsByUser(userId: string): Promise<Conversation[]> {
+    return await db.select().from(conversations)
+      .where(eq(conversations.userId, userId))
+      .orderBy(conversations.updatedAt);
+  }
+
+  async createConversation(conversation: InsertConversation): Promise<Conversation> {
+    const [newConversation] = await db.insert(conversations).values(conversation).returning();
+    return newConversation;
+  }
+
   async updateConversation(id: string, updates: Partial<Conversation>): Promise<Conversation | undefined> {
-    const conversation = this.conversations.get(id);
-    if (!conversation) return undefined;
-    
-    const updated = { ...conversation, ...updates, updatedAt: new Date() };
-    this.conversations.set(id, updated);
+    const [updated] = await db.update(conversations)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(conversations.id, id))
+      .returning();
     return updated;
   }
 
   async deleteConversation(id: string): Promise<boolean> {
-    return this.conversations.delete(id);
+    const result = await db.delete(conversations).where(eq(conversations.id, id));
+    return result.rowCount > 0;
   }
 
-  // Messages
+  // Message operations
   async getMessagesByConversation(conversationId: string): Promise<Message[]> {
-    return Array.from(this.messages.values())
-      .filter(msg => msg.conversationId === conversationId)
-      .sort((a, b) => new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime());
+    return await db.select().from(messages)
+      .where(eq(messages.conversationId, conversationId))
+      .orderBy(messages.createdAt);
   }
 
-  async createMessage(insertMessage: InsertMessage): Promise<Message> {
-    const id = randomUUID();
-    const message: Message = { 
-      ...insertMessage, 
-      id, 
-      createdAt: new Date(),
-      metadata: insertMessage.metadata || null
-    };
-    this.messages.set(id, message);
-    return message;
+  async createMessage(message: InsertMessage): Promise<Message> {
+    const [newMessage] = await db.insert(messages).values(message).returning();
+    return newMessage;
   }
 
   async deleteMessage(id: string): Promise<boolean> {
-    return this.messages.delete(id);
+    const result = await db.delete(messages).where(eq(messages.id, id));
+    return result.rowCount > 0;
   }
 
-  // Files
+  // File operations
   async getFile(id: string): Promise<File | undefined> {
-    return this.files.get(id);
-  }
-
-  async getFilesByConversation(conversationId: string): Promise<File[]> {
-    return Array.from(this.files.values())
-      .filter(file => file.conversationId === conversationId)
-      .sort((a, b) => new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime());
-  }
-
-  async createFile(insertFile: InsertFile): Promise<File> {
-    const id = randomUUID();
-    const file: File = { 
-      ...insertFile, 
-      id, 
-      createdAt: new Date(),
-      status: insertFile.status || "processing",
-      extractedContent: insertFile.extractedContent || null,
-      analysis: insertFile.analysis || null
-    };
-    this.files.set(id, file);
+    const [file] = await db.select().from(files).where(eq(files.id, id));
     return file;
   }
 
+  async getFilesByConversation(conversationId: string): Promise<File[]> {
+    return await db.select().from(files)
+      .where(eq(files.conversationId, conversationId))
+      .orderBy(files.createdAt);
+  }
+
+  async createFile(file: InsertFile): Promise<File> {
+    const [newFile] = await db.insert(files).values(file).returning();
+    return newFile;
+  }
+
   async updateFile(id: string, updates: Partial<File>): Promise<File | undefined> {
-    const file = this.files.get(id);
-    if (!file) return undefined;
-    
-    const updated = { ...file, ...updates };
-    this.files.set(id, updated);
+    const [updated] = await db.update(files)
+      .set(updates)
+      .where(eq(files.id, id))
+      .returning();
     return updated;
   }
 
   async deleteFile(id: string): Promise<boolean> {
-    return this.files.delete(id);
+    const result = await db.delete(files).where(eq(files.id, id));
+    return result.rowCount > 0;
   }
 
-  // Sessions
+  // Session operations
   async getSession(conversationId: string): Promise<Session | undefined> {
-    return Array.from(this.sessions.values()).find(session => session.conversationId === conversationId);
-  }
-
-  async createSession(insertSession: InsertSession): Promise<Session> {
-    const id = randomUUID();
-    const now = new Date();
-    const session: Session = { 
-      ...insertSession, 
-      id, 
-      createdAt: now,
-      updatedAt: now,
-      duration: insertSession.duration || 0,
-      messagesUsed: insertSession.messagesUsed || 0,
-      memoryUsage: insertSession.memoryUsage || 0
-    };
-    this.sessions.set(id, session);
+    const [session] = await db.select().from(chatSessions).where(eq(chatSessions.conversationId, conversationId));
     return session;
   }
 
+  async createSession(session: InsertSession): Promise<Session> {
+    const [newSession] = await db.insert(chatSessions).values(session).returning();
+    return newSession;
+  }
+
   async updateSession(id: string, updates: Partial<Session>): Promise<Session | undefined> {
-    const session = this.sessions.get(id);
-    if (!session) return undefined;
-    
-    const updated = { ...session, ...updates, updatedAt: new Date() };
-    this.sessions.set(id, updated);
+    const [updated] = await db.update(chatSessions)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(chatSessions.id, id))
+      .returning();
     return updated;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
