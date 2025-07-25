@@ -87,15 +87,23 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-      {/* Animated background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -inset-10 opacity-50">
-          <div className="absolute top-1/3 left-1/4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-          <div className="absolute top-1/2 right-1/4 w-72 h-72 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"></div>
-          <div className="absolute bottom-1/3 left-1/3 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-4000"></div>
-        </div>
+    <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Subtle animated background elements matching chat interface */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-20 left-20 w-96 h-96 bg-purple-600/5 rounded-full blur-3xl zed-float" />
+        <div className="absolute bottom-20 right-20 w-80 h-80 bg-cyan-500/5 rounded-full blur-3xl zed-float" style={{ animationDelay: '4s' }} />
+        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl zed-float" style={{ animationDelay: '2s' }} />
       </div>
+      
+      {/* Grid Pattern Overlay */}
+      <div className="absolute inset-0 opacity-5 pointer-events-none" 
+           style={{
+             backgroundImage: `
+               linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+               linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+             `,
+             backgroundSize: '50px 50px'
+           }} />
 
       <div className="relative z-10 w-full max-w-md">
         {/* ZED Logo */}
@@ -109,13 +117,13 @@ export default function Login() {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
             ZED
           </h1>
-          <p className="text-slate-400 mt-2">Enhanced AI Assistant</p>
+          <p className="text-muted-foreground mt-2">Enhanced AI Assistant</p>
         </div>
 
-        <Card className="bg-black/40 border-purple-500/30 backdrop-blur-lg">
+        <Card className="zed-glass border-white/10">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center text-white">Sign In</CardTitle>
-            <CardDescription className="text-center text-slate-400">
+            <CardTitle className="text-2xl text-center text-foreground">Sign In</CardTitle>
+            <CardDescription className="text-center text-muted-foreground">
               Enter your credentials to access ZED
             </CardDescription>
           </CardHeader>
@@ -123,12 +131,12 @@ export default function Login() {
             {/* Quick User Selection */}
             {users.length > 0 && (
               <div className="space-y-3">
-                <p className="text-sm text-slate-400">Quick Login (Demo Users):</p>
+                <p className="text-sm text-muted-foreground">Quick Login (Demo Users):</p>
                 <div className="grid gap-2">
                   {users.map((user) => (
                     <div
                       key={user.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 border border-slate-700/50 hover:border-purple-500/50 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-lg zed-glass border-white/10 hover:border-purple-500/30 transition-colors"
                     >
                       <div className="flex items-center space-x-3">
                         <img
@@ -137,15 +145,15 @@ export default function Login() {
                           className="w-8 h-8 rounded-full"
                         />
                         <div>
-                          <p className="text-sm font-medium text-white">{user.username}</p>
-                          <p className="text-xs text-slate-400">{user.firstName} {user.lastName}</p>
+                          <p className="text-sm font-medium text-foreground">{user.username}</p>
+                          <p className="text-xs text-muted-foreground">{user.firstName} {user.lastName}</p>
                         </div>
                       </div>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => quickLogin(user.username, user.username + "123")}
-                        className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/20"
+                        className="zed-button"
                         disabled={loginMutation.isPending}
                       >
                         Login
@@ -154,9 +162,9 @@ export default function Login() {
                   ))}
                 </div>
                 <div className="flex items-center my-4">
-                  <div className="flex-1 border-t border-slate-700"></div>
-                  <span className="px-3 text-xs text-slate-500">OR</span>
-                  <div className="flex-1 border-t border-slate-700"></div>
+                  <div className="flex-1 border-t border-white/10"></div>
+                  <span className="px-3 text-xs text-muted-foreground">OR</span>
+                  <div className="flex-1 border-t border-white/10"></div>
                 </div>
               </div>
             )}
@@ -164,32 +172,32 @@ export default function Login() {
             {/* Manual Login Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300">Username</label>
+                <label className="text-sm font-medium text-foreground">Username</label>
                 <Input
                   type="text"
                   placeholder="Enter username"
                   value={credentials.username}
                   onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
-                  className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:border-purple-500"
+                  className="zed-input"
                   disabled={loginMutation.isPending}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300">Password</label>
+                <label className="text-sm font-medium text-foreground">Password</label>
                 <div className="relative">
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter password"
                     value={credentials.password}
                     onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-                    className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:border-purple-500 pr-10"
+                    className="zed-input pr-10"
                     disabled={loginMutation.isPending}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -198,7 +206,7 @@ export default function Login() {
 
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-white"
+                className="w-full zed-gradient hover:zed-gradient-hover text-white"
                 disabled={loginMutation.isPending}
               >
                 {loginMutation.isPending ? (
@@ -216,10 +224,10 @@ export default function Login() {
             </form>
 
             {/* Demo Info */}
-            <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-4">
+            <div className="zed-glass border-white/10 rounded-lg p-4">
               <div className="flex items-start space-x-3">
                 <Sparkles className="h-4 w-4 text-purple-400 mt-0.5" />
-                <div className="text-slate-300 text-sm">
+                <div className="text-foreground text-sm">
                   <strong>Demo Credentials:</strong><br />
                   admin/admin123, demo/demo123, test/test123
                 </div>
@@ -228,7 +236,7 @@ export default function Login() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-slate-500 text-sm mt-6">
+        <p className="text-center text-muted-foreground text-sm mt-6">
           Local authentication • No external dependencies
         </p>
       </div>
