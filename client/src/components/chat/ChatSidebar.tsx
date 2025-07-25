@@ -9,9 +9,10 @@ import {
   X, 
   Brain,
   Sparkles,
-  Zap
+  Zap,
+  ShoppingBag
 } from "lucide-react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
@@ -194,6 +195,19 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
             <Sparkles size={14} className="text-purple-200" />
           </div>
         </Button>
+
+        {/* Navigation */}
+        <div className="mt-4 space-y-2">
+          <Link href="/flipshop">
+            <Button
+              variant="ghost"
+              className="w-full justify-start space-x-3 h-12 text-left zed-button text-muted-foreground hover:text-foreground"
+            >
+              <ShoppingBag size={18} />
+              <span>Flip.Shop</span>
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Conversations List */}

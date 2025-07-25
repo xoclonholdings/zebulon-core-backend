@@ -5,6 +5,7 @@ import { upload, processFile, cleanupFile } from "./services/fileProcessor.js";
 import { generateChatResponse, streamChatResponse } from "./services/openai.js";
 import { setupLocalAuth, isAuthenticated } from "./localAuth.js";
 import { insertConversationSchema, insertMessageSchema, insertFileSchema, insertSessionSchema } from "@shared/schema";
+import { FlipShopService } from "./services/flipShop.js";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -352,18 +353,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Social Media Feed Endpoints - Disabled for optimization
-  app.get("/api/social/feeds", async (req, res) => {
-    res.json([]);
+  // Flip.Shop Integration API Endpoints
+  app.get("/api/flipshop/products", isAuthenticated, (req, res) => {
+    try {
+      const { search, category, priceMin, priceMax, rating, inStock, trending, brand } = req.query;
+      
+      const filters = {
+        category: category as string,
+        priceMin: priceMin ? parseFloat(priceMin as string) : undefined,
+        priceMax: priceMax ? parseFloat(priceMax as string) : undefined,
+        rating: rating ? parseFloat(rating as string) : undefined,
+        inStock: inStock === 'true' ? true : inStock === 'false' ? false : undefined,
+        trending: trending === 'true' ? true : trending === 'false' ? false : undefined,
+        brand: brand as string,
+      };
+
+      const products = FlipShopService.searchProducts(search as string, filters);
+      res.json(products);
+    } catch (error) {
+      console.error("FlipShop products error:", error);
+      res.status(500).json({ error: "Failed to fetch products" });
+    }
   });
 
-  app.get("/api/social/feeds/:platform", async (req, res) => {
-    res.json({
-      platform: req.params.platform,
-      posts: [],
-      lastUpdated: new Date(),
-      hasMore: false,
-    });
+  app.get("/api/flipshop/products/:id", isAuthenticated, (req, res) => {
+    try {
+      const product = FlipShopService.getProduct(req.params.id);
+      if (!product) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      res.json(product);
+    } catch (error) {
+      console.error("FlipShop product error:", error);
+      res.status(500).json({ error: "Failed to fetch product" });
+    }
+  });
+
+  app.get("/api/flipshop/categories", isAuthenticated, (req, res) => {
+    try {
+      const categories = FlipShopService.getCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("FlipShop categories error:", error);
+      res.status(500).json({ error: "Failed to fetch categories" });
+    }
+  });
+
+  app.get("/api/flipshop/brands", isAuthenticated, (req, res) => {
+    try {
+      const brands = FlipShopService.getBrands();
+      res.json(brands);
+    } catch (error) {
+      console.error("FlipShop brands error:", error);
+      res.status(500).json({ error: "Failed to fetch brands" });
+    }
+  });
+
+  app.get("/api/flipshop/trending", isAuthenticated, (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 6;
+      const products = FlipShopService.getTrendingProducts(limit);
+      res.json(products);
+    } catch (error) {
+      console.error("FlipShop trending error:", error);
+      res.status(500).json({ error: "Failed to fetch trending products" });
+    }
+  });
+
+  app.post("/api/flipshop/cart/add", isAuthenticated, (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { productId } = req.body;
+      
+      const result = FlipShopService.addToCart(productId, userId);
+      
+      if (result.success) {
+        res.json(result);
+      } else {
+        res.status(400).json(result);
+      }
+    } catch (error) {
+      console.error("FlipShop add to cart error:", error);
+      res.status(500).json({ error: "Failed to add to cart" });
+    }
+  });
+
+  app.post("/api/flipshop/wishlist/add", isAuthenticated, (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { productId } = req.body;
+      
+      const result = FlipShopService.addToWishlist(productId, userId);
+      
+      if (result.success) {
+        res.json(result);
+      } else {
+        res.status(400).json(result);
+      }
+    } catch (error) {
+      console.error("FlipShop add to wishlist error:", error);
+      res.status(500).json({ error: "Failed to add to wishlist" });
+    }
+  });
+
+  app.get("/api/flipshop/recommendations/:productId", isAuthenticated, (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 4;
+      const recommendations = FlipShopService.getRecommendations(req.params.productId, limit);
+      res.json(recommendations);
+    } catch (error) {
+      console.error("FlipShop recommendations error:", error);
+      res.status(500).json({ error: "Failed to fetch recommendations" });
+    }
   });
 
   const httpServer = createServer(app);
