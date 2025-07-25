@@ -8,25 +8,13 @@ import { apiRequest } from "@/lib/queryClient";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Eye, EyeOff, Sparkles, Brain, Zap } from "lucide-react";
 
-interface LocalUser {
-  id: string;
-  username: string;
-  firstName: string;
-  lastName: string;
-  profileImageUrl: string;
-}
-
 export default function Login() {
   const [credentials, setCredentials] = useState({ username: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<string>("");
+
   const { toast } = useToast();
 
-  // Get available users
-  const { data: users = [] } = useQuery<LocalUser[]>({
-    queryKey: ["/api/auth/users"],
-    retry: false,
-  });
+
 
   const loginMutation = useMutation({
     mutationFn: async (data: { username: string; password: string }) => {
@@ -73,18 +61,7 @@ export default function Login() {
     loginMutation.mutate(credentials);
   };
 
-  const handleUserSelect = (user: LocalUser) => {
-    setSelectedUser(user.username);
-    setCredentials({
-      username: user.username,
-      password: "", // User still needs to enter password
-    });
-  };
 
-  const quickLogin = (username: string, password: string) => {
-    setCredentials({ username, password });
-    loginMutation.mutate({ username, password });
-  };
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
@@ -128,48 +105,7 @@ export default function Login() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Quick User Selection */}
-            {users.length > 0 && (
-              <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">Quick Login (Demo Users):</p>
-                <div className="grid gap-2">
-                  {users.map((user) => (
-                    <div
-                      key={user.id}
-                      className="flex items-center justify-between p-3 rounded-lg zed-glass border-white/10 hover:border-purple-500/30 transition-colors"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <img
-                          src={user.profileImageUrl}
-                          alt={user.username}
-                          className="w-8 h-8 rounded-full"
-                        />
-                        <div>
-                          <p className="text-sm font-medium text-foreground">{user.username}</p>
-                          <p className="text-xs text-muted-foreground">{user.firstName} {user.lastName}</p>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => quickLogin(user.username, user.username + "123")}
-                        className="zed-button"
-                        disabled={loginMutation.isPending}
-                      >
-                        Login
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex items-center my-4">
-                  <div className="flex-1 border-t border-white/10"></div>
-                  <span className="px-3 text-xs text-muted-foreground">OR</span>
-                  <div className="flex-1 border-t border-white/10"></div>
-                </div>
-              </div>
-            )}
-
-            {/* Manual Login Form */}
+            {/* Login Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Username</label>
@@ -229,7 +165,7 @@ export default function Login() {
                 <Sparkles className="h-4 w-4 text-purple-400 mt-0.5" />
                 <div className="text-foreground text-sm">
                   <strong>Demo Credentials:</strong><br />
-                  admin/admin123, demo/demo123, test/test123
+                  admin/admin123 • demo/demo123 • test/test123
                 </div>
               </div>
             </div>
