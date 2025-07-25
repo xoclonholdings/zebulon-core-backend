@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "path";
 import multer from "multer";
+import * as yauzl from "yauzl";
+import * as mammoth from "mammoth";
 import { analyzeText, analyzeImage } from "./openai";
 
 // Configure multer for file uploads
@@ -24,13 +26,16 @@ export const upload = multer({
     fileSize: 32 * 1024 * 1024 * 1024, // 32GB limit
   },
   fileFilter: (req, file, cb) => {
-    // Allow common file types
+    // Allow common file types including zip and docx
     const allowedTypes = [
       'text/plain',
       'text/csv',
       'application/pdf',
       'application/vnd.ms-excel',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+      'application/zip',
+      'application/x-zip-compressed',
       'image/jpeg',
       'image/png',
       'image/gif',
@@ -63,6 +68,56 @@ export async function processTextFile(filePath: string): Promise<string> {
     return await fs.promises.readFile(filePath, 'utf-8');
   } catch (error) {
     throw new Error(`Failed to read text file: ${error}`);
+  }
+}
+
+// Process ZIP files and extract contents
+export async function processZipFile(filePath: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const extractedFiles: any[] = [];
+    
+    yauzl.open(filePath, { lazyEntries: true }, (err, zipfile) => {
+      if (err) return reject(err);
+      
+      zipfile.readEntry();
+      zipfile.on("entry", (entry) => {
+        if (/\/$/.test(entry.fileName)) {
+          // Directory entry, skip
+          zipfile.readEntry();
+        } else {
+          // File entry
+          zipfile.openReadStream(entry, (err, readStream) => {
+            if (err) return reject(err);
+            
+            const chunks: Buffer[] = [];
+            readStream.on('data', (chunk) => chunks.push(chunk));
+            readStream.on('end', () => {
+              const content = Buffer.concat(chunks).toString('utf-8');
+              extractedFiles.push({
+                fileName: entry.fileName,
+                content: content.slice(0, 10000), // Limit content size
+                size: entry.uncompressedSize
+              });
+              zipfile.readEntry();
+            });
+          });
+        }
+      });
+      
+      zipfile.on("end", () => {
+        resolve({ extractedFiles, totalFiles: extractedFiles.length });
+      });
+    });
+  });
+}
+
+// Process DOCX files 
+export async function processDocxFile(filePath: string): Promise<string> {
+  try {
+    const result = await mammoth.extractRawText({ path: filePath });
+    return result.value;
+  } catch (error) {
+    throw new Error(`Failed to process DOCX file: ${error}`);
   }
 }
 
@@ -169,6 +224,23 @@ export async function processFile(filePath: string, mimeType: string): Promise<P
         if (extractedContent && extractedContent.length > 100) {
           analysis = await analyzeText(extractedContent, "extract_themes");
         }
+        break;
+        
+      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        extractedContent = await processDocxFile(filePath);
+        analysis = await analyzeText(extractedContent, "extract_themes");
+        break;
+        
+      case 'application/zip':
+      case 'application/x-zip-compressed':
+        const zipData = await processZipFile(filePath);
+        extractedContent = JSON.stringify(zipData, null, 2);
+        analysis = {
+          type: "zip_archive",
+          summary: `ZIP archive containing ${zipData.totalFiles} files`,
+          files: zipData.extractedFiles.map((f: any) => f.fileName),
+          extractedFiles: zipData.extractedFiles
+        };
         break;
         
       default:

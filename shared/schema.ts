@@ -122,6 +122,68 @@ export type InsertFile = z.infer<typeof insertFileSchema>;
 export type Session = typeof chatSessions.$inferSelect;
 export type InsertSession = z.infer<typeof insertSessionSchema>;
 
+// Core Memory table - Persistent system configuration
+export const coreMemory = pgTable("core_memory", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  key: varchar("key").notNull().unique(),
+  value: text("value").notNull(),
+  description: text("description"),
+  adminOnly: boolean("admin_only").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Project Memory table - Saved context and datasets
+export const projectMemory = pgTable("project_memory", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  content: text("content").notNull(),
+  type: text("type").notNull().default("context"), // "context" | "dataset" | "rules"
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Scratchpad Memory table - Temporary working memory (auto-reset daily)
+export const scratchpadMemory = pgTable("scratchpad_memory", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  conversationId: varchar("conversation_id").references(() => conversations.id),
+  content: text("content").notNull(),
+  tags: text("tags").array(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Memory system types
+export const insertCoreMemorySchema = createInsertSchema(coreMemory).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertProjectMemorySchema = createInsertSchema(projectMemory).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertScratchpadMemorySchema = createInsertSchema(scratchpadMemory).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type CoreMemory = typeof coreMemory.$inferSelect;
+export type InsertCoreMemory = z.infer<typeof insertCoreMemorySchema>;
+
+export type ProjectMemory = typeof projectMemory.$inferSelect;
+export type InsertProjectMemory = z.infer<typeof insertProjectMemorySchema>;
+
+export type ScratchpadMemory = typeof scratchpadMemory.$inferSelect;
+export type InsertScratchpadMemory = z.infer<typeof insertScratchpadMemorySchema>;
+
 // Enhanced storage tables for scalability
 export const fileStorage = pgTable("file_storage", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

@@ -9,6 +9,12 @@ import {
   type InsertFile,
   type Session,
   type InsertSession,
+  type CoreMemory,
+  type InsertCoreMemory,
+  type ProjectMemory,
+  type InsertProjectMemory,
+  type ScratchpadMemory,
+  type InsertScratchpadMemory,
 } from "@shared/schema";
 import { db } from "./db";
 import { 
@@ -17,6 +23,9 @@ import {
   messages, 
   files, 
   chatSessions,
+  coreMemory,
+  projectMemory,
+  scratchpadMemory,
   fileStorage,
   memoryIndex,
   knowledgeBase,
@@ -66,6 +75,15 @@ class MemoryCache {
     this.cache.delete(key);
   }
 
+  clearPattern(pattern: string): void {
+    const regex = new RegExp(pattern.replace('*', '.*'));
+    Array.from(this.cache.keys()).forEach(key => {
+      if (regex.test(key)) {
+        this.cache.delete(key);
+      }
+    });
+  }
+
   clear(): void {
     this.cache.clear();
   }
@@ -112,6 +130,20 @@ export interface IStorage {
   getSession(conversationId: string): Promise<Session | undefined>;
   createSession(session: InsertSession): Promise<Session>;
   updateSession(id: string, updates: Partial<Session>): Promise<Session | undefined>;
+
+  // Memory system operations
+  getCoreMemoryByKey(key: string): Promise<CoreMemory | null>;
+  upsertCoreMemory(data: InsertCoreMemory): Promise<CoreMemory>;
+  getAllCoreMemory(): Promise<CoreMemory[]>;
+  
+  getProjectMemoryByUser(userId: string): Promise<ProjectMemory[]>;
+  createProjectMemory(data: InsertProjectMemory): Promise<ProjectMemory>;
+  updateProjectMemory(id: string, updates: Partial<InsertProjectMemory>): Promise<ProjectMemory>;
+  deleteProjectMemory(id: string): Promise<boolean>;
+  
+  getScratchpadMemoryByUser(userId: string): Promise<ScratchpadMemory[]>;
+  createScratchpadMemory(data: InsertScratchpadMemory): Promise<ScratchpadMemory>;
+  cleanupExpiredScratchpadMemory(): Promise<void>;
 
   // Enhanced operations
   searchConversations(userId: string, query: string): Promise<Conversation[]>;
@@ -447,6 +479,134 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
+  // Memory system operations
+  async getCoreMemoryByKey(key: string): Promise<CoreMemory | null> {
+    const cacheKey = this.generateCacheKey('core_memory', key);
+    const cached = memoryCache.get(cacheKey);
+    if (cached) return cached;
+
+    const [memory] = await db.select().from(coreMemory).where(eq(coreMemory.key, key));
+    if (memory) {
+      memoryCache.set(cacheKey, memory, 1800000); // Cache for 30 minutes
+    }
+    return memory || null;
+  }
+
+  async upsertCoreMemory(data: InsertCoreMemory): Promise<CoreMemory> {
+    const [memory] = await db
+      .insert(coreMemory)
+      .values(data)
+      .onConflictDoUpdate({
+        target: coreMemory.key,
+        set: {
+          ...data,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    
+    // Clear cache
+    const cacheKey = this.generateCacheKey('core_memory', data.key);
+    memoryCache.delete(cacheKey);
+    
+    return memory;
+  }
+
+  async getAllCoreMemory(): Promise<CoreMemory[]> {
+    const cacheKey = this.generateCacheKey('all_core_memory');
+    const cached = memoryCache.get(cacheKey);
+    if (cached) return cached;
+
+    const memories = await db.select().from(coreMemory).orderBy(asc(coreMemory.key));
+    memoryCache.set(cacheKey, memories, 600000); // Cache for 10 minutes
+    return memories;
+  }
+
+  async getProjectMemoryByUser(userId: string): Promise<ProjectMemory[]> {
+    const cacheKey = this.generateCacheKey('project_memory', userId);
+    const cached = memoryCache.get(cacheKey);
+    if (cached) return cached;
+
+    const memories = await db.select().from(projectMemory)
+      .where(and(eq(projectMemory.userId, userId), eq(projectMemory.isActive, true)))
+      .orderBy(desc(projectMemory.updatedAt));
+    
+    memoryCache.set(cacheKey, memories, 300000); // Cache for 5 minutes
+    return memories;
+  }
+
+  async createProjectMemory(data: InsertProjectMemory): Promise<ProjectMemory> {
+    const [memory] = await db.insert(projectMemory).values(data).returning();
+    
+    // Clear user cache
+    const cacheKey = this.generateCacheKey('project_memory', data.userId);
+    memoryCache.delete(cacheKey);
+    
+    return memory;
+  }
+
+  async updateProjectMemory(id: string, updates: Partial<InsertProjectMemory>): Promise<ProjectMemory> {
+    const [updated] = await db.update(projectMemory)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(projectMemory.id, id))
+      .returning();
+    
+    if (updated) {
+      const cacheKey = this.generateCacheKey('project_memory', updated.userId);
+      memoryCache.delete(cacheKey);
+    }
+    
+    return updated;
+  }
+
+  async deleteProjectMemory(id: string): Promise<boolean> {
+    const memory = await db.select().from(projectMemory).where(eq(projectMemory.id, id));
+    const result = await db.delete(projectMemory).where(eq(projectMemory.id, id));
+    const success = (result.rowCount ?? 0) > 0;
+    
+    if (success && memory.length > 0) {
+      const cacheKey = this.generateCacheKey('project_memory', memory[0].userId);
+      memoryCache.delete(cacheKey);
+    }
+    
+    return success;
+  }
+
+  async getScratchpadMemoryByUser(userId: string): Promise<ScratchpadMemory[]> {
+    const cacheKey = this.generateCacheKey('scratchpad_memory', userId);
+    const cached = memoryCache.get(cacheKey);
+    if (cached) return cached;
+
+    const now = new Date();
+    const memories = await db.select().from(scratchpadMemory)
+      .where(and(
+        eq(scratchpadMemory.userId, userId),
+        sql`${scratchpadMemory.expiresAt} > ${now}`
+      ))
+      .orderBy(desc(scratchpadMemory.createdAt));
+    
+    memoryCache.set(cacheKey, memories, 60000); // Cache for 1 minute (short cache for scratchpad)
+    return memories;
+  }
+
+  async createScratchpadMemory(data: InsertScratchpadMemory): Promise<ScratchpadMemory> {
+    const [memory] = await db.insert(scratchpadMemory).values(data).returning();
+    
+    // Clear user cache
+    const cacheKey = this.generateCacheKey('scratchpad_memory', data.userId);
+    memoryCache.delete(cacheKey);
+    
+    return memory;
+  }
+
+  async cleanupExpiredScratchpadMemory(): Promise<void> {
+    const now = new Date();
+    await db.delete(scratchpadMemory).where(sql`${scratchpadMemory.expiresAt} <= ${now}`);
+    
+    // Clear all scratchpad caches since we can't know which users were affected
+    memoryCache.clearPattern('scratchpad_memory:*');
+  }
+
   // Enhanced operations
   async searchConversations(userId: string, query: string): Promise<Conversation[]> {
     const searchQuery = `%${query.toLowerCase()}%`;
@@ -488,6 +648,9 @@ export class DatabaseStorage implements IStorage {
 
   async cleanupExpiredData(): Promise<void> {
     try {
+      // Clean expired scratchpad memory first
+      await this.cleanupExpiredScratchpadMemory();
+      
       // Clean expired cache entries
       await db.delete(cacheStorage)
         .where(sql`expiration IS NOT NULL AND expiration < NOW()`);

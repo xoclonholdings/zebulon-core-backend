@@ -4,9 +4,10 @@ import { storage } from "./storage";
 import { upload, processFile, cleanupFile } from "./services/fileProcessor";
 import { generateChatResponse, streamChatResponse } from "./services/openai";
 import { setupLocalAuth, isAuthenticated } from "./localAuth";
-import { insertConversationSchema, insertMessageSchema, insertFileSchema, insertSessionSchema } from "@shared/schema";
+import { insertConversationSchema, insertMessageSchema, insertFileSchema, insertSessionSchema, insertCoreMemorySchema, insertProjectMemorySchema, insertScratchpadMemorySchema } from "@shared/schema";
 import { FlipShopService } from "./services/flipShop";
 import { optimizationService } from "./services/optimizationService";
+import { MemoryService } from "./services/memoryService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -326,6 +327,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(session);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch session" });
+    }
+  });
+
+  // Memory API routes
+  
+  // Core Memory routes (admin only)
+  app.get("/api/memory/core", isAuthenticated, async (req: any, res) => {
+    try {
+      const memories = await MemoryService.getAllCoreMemory();
+      res.json(memories);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch core memory" });
+    }
+  });
+
+  app.post("/api/memory/core", isAuthenticated, async (req: any, res) => {
+    try {
+      const memoryData = insertCoreMemorySchema.parse(req.body);
+      const memory = await MemoryService.setCoreMemory(memoryData);
+      res.json(memory);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to set core memory" });
+    }
+  });
+
+  // Project Memory routes
+  app.get("/api/memory/project", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const memories = await MemoryService.getProjectMemory(userId);
+      res.json(memories);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch project memory" });
+    }
+  });
+
+  app.post("/api/memory/project", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const memoryData = insertProjectMemorySchema.parse({
+        ...req.body,
+        userId
+      });
+      const memory = await MemoryService.createProjectMemory(memoryData);
+      res.json(memory);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create project memory" });
+    }
+  });
+
+  app.put("/api/memory/project/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const memory = await MemoryService.updateProjectMemory(req.params.id, req.body);
+      res.json(memory);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update project memory" });
+    }
+  });
+
+  app.delete("/api/memory/project/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const success = await MemoryService.deleteProjectMemory(req.params.id);
+      res.json({ success });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete project memory" });
+    }
+  });
+
+  // Scratchpad Memory routes
+  app.get("/api/memory/scratchpad", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const memories = await MemoryService.getScratchpadMemory(userId);
+      res.json(memories);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch scratchpad memory" });
+    }
+  });
+
+  app.post("/api/memory/scratchpad", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const memoryData = insertScratchpadMemorySchema.parse({
+        ...req.body,
+        userId
+      });
+      const memory = await MemoryService.createScratchpadMemory(memoryData);
+      res.json(memory);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create scratchpad memory" });
     }
   });
 
