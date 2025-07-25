@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Eye, EyeOff, Sparkles, Brain, Zap } from "lucide-react";
+import { Eye, EyeOff, Sparkles, Zap } from "lucide-react";
+import zLogoPath from "@assets/IMG_2227_1753477194826.png";
 
 export default function Login() {
   const [credentials, setCredentials] = useState({ username: "", password: "" });
@@ -87,12 +88,19 @@ export default function Login() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <div className="relative zed-glow">
-              <Brain className="w-12 h-12 text-purple-400 animate-pulse" />
-              <Zap className="w-6 h-6 text-cyan-400 absolute -top-1 -right-1 animate-bounce" />
+              <img 
+                src={zLogoPath} 
+                alt="ZED Logo" 
+                className="w-16 h-16 animate-pulse"
+              />
             </div>
           </div>
           <div className="flex items-center justify-center space-x-3">
-            <Brain className="text-purple-400" size={32} />
+            <img 
+              src={zLogoPath} 
+              alt="Z" 
+              className="w-8 h-8"
+            />
             <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
               ZED
             </h1>

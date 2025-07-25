@@ -3,13 +3,13 @@ import { Card } from "@/components/ui/card";
 import { 
   Sparkles, 
   Zap, 
-  Brain, 
   Shield, 
   Users, 
   MessageSquare,
   FileText,
   Rss
 } from "lucide-react";
+import zLogoPath from "@assets/IMG_2227_1753477194826.png";
 
 export default function Landing() {
   return (
@@ -74,7 +74,7 @@ export default function Landing() {
                 size="lg"
                 className="zed-button rounded-xl px-8 py-4 text-lg"
               >
-                <Brain size={20} className="mr-2" />
+                <img src={zLogoPath} alt="Z" className="w-5 h-5 mr-2" />
                 Get Started
               </Button>
             </div>

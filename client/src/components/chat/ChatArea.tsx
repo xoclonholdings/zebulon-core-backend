@@ -10,11 +10,11 @@ import {
   Mic,
   Sparkles,
   Zap,
-  Brain,
   Rss,
   MessageSquare,
   Settings
 } from "lucide-react";
+import zLogoPath from "@assets/IMG_2227_1753477194826.png";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import FileUpload from "./FileUpload";
@@ -138,12 +138,12 @@ export default function ChatArea({ conversation, messages, files, conversationId
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 zed-avatar rounded-2xl flex items-center justify-center relative">
             <div className="relative z-10">
-              <Brain className="text-white" size={20} />
+              <img src={zLogoPath} alt="Z" className="w-5 h-5" />
             </div>
           </div>
           <div>
             <h1 className="text-xl font-bold flex items-center space-x-2 bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-              <Brain className="text-purple-400" size={20} />
+              <img src={zLogoPath} alt="Z" className="w-5 h-5" />
               <span>ZED</span>
             </h1>
             <p className="text-sm text-muted-foreground">Enhanced AI Assistant</p>
@@ -172,20 +172,20 @@ export default function ChatArea({ conversation, messages, files, conversationId
           <div className="flex items-start space-x-4 max-w-4xl mx-auto">
             <div className="w-12 h-12 zed-avatar rounded-2xl flex items-center justify-center flex-shrink-0 relative">
               <div className="relative z-10">
-                <Brain className="text-white" size={20} />
+                <img src={zLogoPath} alt="Z" className="w-5 h-5" />
               </div>
             </div>
             <Card className="flex-1 p-6 zed-message zed-morph-border">
               <div className="flex items-center space-x-2 mb-4">
                 <div className="flex items-center space-x-2">
-                  <Brain className="text-purple-400" size={16} />
+                  <img src={zLogoPath} alt="Z" className="w-4 h-4" />
                   <span className="text-lg font-semibold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">ZED</span>
                 </div>
                 <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-300">AI Assistant</Badge>
               </div>
               <div className="prose prose-sm max-w-none">
                 <p className="text-lg leading-relaxed">
-                  Hello! I'm <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent font-semibold inline-flex items-center gap-1"><Brain className="text-purple-400" size={16} />ZED</span>, your enhanced AI assistant. I combine advanced AI capabilities with powerful document processing to help you with any task.
+                  Hello! I'm <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent font-semibold inline-flex items-center gap-1"><img src={zLogoPath} alt="Z" className="w-4 h-4" />ZED</span>, your enhanced AI assistant. I combine advanced AI capabilities with powerful document processing to help you with any task.
                 </p>
                 <p className="text-sm text-muted-foreground mt-4 flex items-center">
                   <Zap size={16} className="mr-2 text-cyan-400" />
@@ -213,7 +213,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
             <Card className="flex-1 p-6 zed-message zed-glow">
               <div className="flex items-center space-x-2 mb-4">
                 <div className="flex items-center space-x-2">
-                  <Brain className="text-purple-400" size={16} />
+                  <img src={zLogoPath} alt="Z" className="w-4 h-4" />
                   <span className="text-lg font-semibold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">ZED</span>
                 </div>  
                 <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-300">
@@ -291,7 +291,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
                     onClick={() => setShowModeSelector(!showModeSelector)}
                     className="zed-button text-muted-foreground hover:text-cyan-400 h-auto px-3 py-2 rounded-xl flex items-center space-x-1"
                   >
-                    {currentMode === "chat" ? <MessageSquare size={14} /> : <Brain size={14} />}
+                    {currentMode === "chat" ? <MessageSquare size={14} /> : <img src={zLogoPath} alt="Z" className="w-3.5 h-3.5" />}
                     <span className="text-xs capitalize">{currentMode}</span>
                     <Settings size={10} />
                   </Button>

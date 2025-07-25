@@ -4,9 +4,9 @@ import {
   MessageSquare, 
   ShoppingBag,
   Menu,
-  X,
-  Brain
+  X
 } from "lucide-react";
+import zLogoPath from "@assets/IMG_2227_1753477194826.png";
 import { Link, useLocation } from "wouter";
 
 export default function Navigation() {
@@ -50,7 +50,7 @@ export default function Navigation() {
           {/* Logo */}
           <div className="flex items-center space-x-3 mb-8">
             <div className="w-10 h-10 zed-avatar rounded-2xl flex items-center justify-center">
-              <Brain className="text-white" size={20} />
+              <img src={zLogoPath} alt="Z" className="w-5 h-5" />
             </div>
             <div>
               <h2 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">

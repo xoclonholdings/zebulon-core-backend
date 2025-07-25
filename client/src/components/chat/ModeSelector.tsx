@@ -4,12 +4,12 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
   MessageSquare, 
-  Brain, 
   Zap, 
   Sparkles,
   Info,
   Bot
 } from "lucide-react";
+import zLogoPath from "@assets/IMG_2227_1753477194826.png";
 import type { ConversationMode } from "@shared/schema";
 
 interface ModeSelectorProps {
@@ -37,7 +37,7 @@ export default function ModeSelector({ selectedMode, onModeChange, disabled }: M
     {
       id: "agent" as ConversationMode,
       name: "Agent Mode", 
-      icon: Brain,
+      icon: "Z",
       description: "Autonomous AI agent that works independently",
       features: [
         "Autonomous task execution",
@@ -64,7 +64,6 @@ export default function ModeSelector({ selectedMode, onModeChange, disabled }: M
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {modes.map((mode) => {
-          const Icon = mode.icon;
           const isSelected = selectedMode === mode.id;
           
           return (
@@ -84,7 +83,11 @@ export default function ModeSelector({ selectedMode, onModeChange, disabled }: M
                     <div className={`w-12 h-12 rounded-2xl bg-gradient-to-r ${mode.color} flex items-center justify-center ${
                       isSelected ? 'zed-pulse' : ''
                     }`}>
-                      <Icon className="text-white" size={20} />
+                      {mode.id === "chat" ? (
+                        <MessageSquare className="text-white" size={20} />
+                      ) : (
+                        <img src={zLogoPath} alt="Z" className="w-5 h-5" />
+                      )}
                     </div>
                     <div>
                       <h4 className="font-semibold text-foreground">{mode.name}</h4>

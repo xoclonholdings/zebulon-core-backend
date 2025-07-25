@@ -11,7 +11,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, User, Lock, Save, Eye, EyeOff, Brain } from "lucide-react";
+import { Settings, User, Lock, Save, Eye, EyeOff } from "lucide-react";
+import zLogoPath from "@assets/IMG_2227_1753477194826.png";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -119,7 +120,7 @@ export default function SettingsModal() {
       <DialogContent className="zed-glass border-white/10 max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
-            <Brain className="h-5 w-5 text-purple-400" />
+            <img src={zLogoPath} alt="Z" className="h-5 w-5" />
             <span>ZED Settings</span>
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
@@ -151,7 +152,7 @@ export default function SettingsModal() {
                 Update Login Credentials
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground">
-                Change your username and password for <span className="inline-flex items-center gap-1"><Brain className="h-3 w-3 text-purple-400" />ZED</span>
+                Change your username and password for <span className="inline-flex items-center gap-1"><img src={zLogoPath} alt="Z" className="h-3 w-3" />ZED</span>
               </CardDescription>
             </CardHeader>
             <CardContent>

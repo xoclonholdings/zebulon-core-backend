@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User, Brain, FileText, Image, BarChart, Sparkles } from "lucide-react";
+import { User, FileText, Image, BarChart, Sparkles } from "lucide-react";
+import zLogoPath from "@assets/IMG_2227_1753477194826.png";
 import type { Message } from "@shared/schema";
 
 interface ChatMessageProps {
@@ -55,7 +56,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
     <div className="flex items-start space-x-4 max-w-4xl mx-auto">
       <div className="w-12 h-12 zed-avatar rounded-2xl flex items-center justify-center flex-shrink-0 relative">
         <div className="relative z-10">
-          <Brain className="text-white" size={20} />
+          <img src={zLogoPath} alt="Z" className="w-5 h-5" />
         </div>
       </div>
       <div className="flex-1">

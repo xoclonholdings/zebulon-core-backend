@@ -7,11 +7,11 @@ import {
   Trash2, 
   User, 
   X, 
-  Brain,
   Sparkles,
   Zap,
   ShoppingBag
 } from "lucide-react";
+import zLogoPath from "@assets/IMG_2227_1753477194826.png";
 import { useLocation, Link } from "wouter";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -132,12 +132,12 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 zed-avatar rounded-2xl flex items-center justify-center relative zed-glow">
               <div className="relative z-10">
-                <Brain className="text-white" size={20} />
+                <img src={zLogoPath} alt="Z" className="w-5 h-5" />
               </div>
             </div>
             <div>
               <h2 className="text-xl font-bold flex items-center space-x-2 bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
-                <Brain className="text-purple-400" size={20} />
+                <img src={zLogoPath} alt="Z" className="w-5 h-5" />
                 <span>ZED</span>
               </h2>
               <p className="text-xs text-muted-foreground">Enhanced AI Assistant</p>
