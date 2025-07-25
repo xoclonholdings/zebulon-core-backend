@@ -2,34 +2,16 @@ import { Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { storage } from "./storage";
 
-// Configurable users - can be easily modified
-const LOCAL_USERS = [
+// Default credentials - changeable through settings
+let LOCAL_USERS = [
   {
     id: "user_001",
     username: "admin",
-    password: "admin123", // In production, use hashed passwords
+    password: "zed2025", // Changed to zed2025 as requested
     email: "admin@zed.local",
     firstName: "ZED",
     lastName: "Admin",
     profileImageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=admin"
-  },
-  {
-    id: "user_002", 
-    username: "demo",
-    password: "demo123",
-    email: "demo@zed.local",
-    firstName: "Demo",
-    lastName: "User",
-    profileImageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=demo"
-  },
-  {
-    id: "user_003",
-    username: "test",
-    password: "test123", 
-    email: "test@zed.local",
-    firstName: "Test",
-    lastName: "User",
-    profileImageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=test"
   }
 ];
 
@@ -124,16 +106,60 @@ export async function setupLocalAuth(app: any) {
     });
   });
 
-  // Get available users (for login form)
-  app.get("/api/auth/users", (req: Request, res: Response) => {
-    const publicUsers = LOCAL_USERS.map(user => ({
-      id: user.id,
-      username: user.username,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      profileImageUrl: user.profileImageUrl
-    }));
-    res.json(publicUsers);
+  // Update credentials endpoint (protected)
+  app.post("/api/auth/update-credentials", isAuthenticated, (req: Request, res: Response) => {
+    try {
+      const { newUsername, newPassword } = req.body;
+      const session = req.session as any;
+      
+      if (!newUsername || !newPassword) {
+        return res.status(400).json({ error: "Username and password required" });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ error: "Password must be at least 6 characters" });
+      }
+
+      // Find and update the user
+      const userIndex = LOCAL_USERS.findIndex(u => u.id === session.userId);
+      if (userIndex !== -1) {
+        LOCAL_USERS[userIndex].username = newUsername;
+        LOCAL_USERS[userIndex].password = newPassword;
+        
+        // Update session
+        session.user.username = newUsername;
+        
+        res.json({ 
+          success: true, 
+          message: "Credentials updated successfully",
+          user: {
+            username: newUsername,
+            firstName: LOCAL_USERS[userIndex].firstName,
+            lastName: LOCAL_USERS[userIndex].lastName
+          }
+        });
+      } else {
+        res.status(404).json({ error: "User not found" });
+      }
+    } catch (error) {
+      console.error("Update credentials error:", error);
+      res.status(500).json({ error: "Failed to update credentials" });
+    }
+  });
+  
+  // Get current credentials (protected)
+  app.get("/api/auth/current-credentials", isAuthenticated, (req: Request, res: Response) => {
+    const session = req.session as any;
+    const user = LOCAL_USERS.find(u => u.id === session.userId);
+    
+    if (user) {
+      res.json({
+        username: user.username,
+        // Don't send password for security
+      });
+    } else {
+      res.status(404).json({ error: "User not found" });
+    }
   });
 }
 

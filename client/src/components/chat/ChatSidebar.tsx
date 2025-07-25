@@ -19,6 +19,7 @@ import { apiRequest } from "@/lib/queryClient";
 import type { Conversation } from "@shared/schema";
 
 import LogoutButton from "@/components/LogoutButton";
+import SettingsModal from "@/components/settings/SettingsModal";
 
 interface ChatSidebarProps {
   conversations: Conversation[];
@@ -207,6 +208,8 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
               <span>Flip.Shop</span>
             </Button>
           </Link>
+          
+          <SettingsModal />
         </div>
       </div>
 

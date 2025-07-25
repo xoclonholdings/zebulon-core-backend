@@ -164,8 +164,8 @@ export default function Login() {
               <div className="flex items-start space-x-3">
                 <Sparkles className="h-4 w-4 text-purple-400 mt-0.5" />
                 <div className="text-foreground text-sm">
-                  <strong>Demo Credentials:</strong><br />
-                  admin/admin123 • demo/demo123 • test/test123
+                  <strong>Default Login:</strong><br />
+                  admin / zed2025
                 </div>
               </div>
             </div>
