@@ -1,43 +1,50 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import LogoutButton from "../auth/LogoutButton";
-import SatelliteConnection from "../satellite/SatelliteConnection";
-import PhoneLink from "../phone/PhoneLink";
-import { useAuth } from "@/hooks/useAuth";
+
 import { 
-  Plus, 
   MessageSquare, 
+  Plus, 
+  Trash2, 
+  User, 
+  X, 
   Brain,
   Sparkles,
-  Zap,
-  X,
-  User
+  Zap
 } from "lucide-react";
+import { useLocation } from "wouter";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
-import { Link, useLocation } from "wouter";
 import type { Conversation } from "@shared/schema";
+
+import LogoutButton from "@/components/LogoutButton";
 
 interface ChatSidebarProps {
   conversations: Conversation[];
+}
+
+interface LocalUser {
+  id: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  profileImageUrl?: string;
 }
 
 export default function ChatSidebar({ conversations }: ChatSidebarProps) {
   const [location] = useLocation();
   const queryClient = useQueryClient();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { user } = useAuth();
+  const { user } = useAuth() as { user?: LocalUser };
 
   const createConversationMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("/api/conversations", {
-        method: "POST",
-        body: JSON.stringify({ title: "New Conversation" }),
-        headers: { "Content-Type": "application/json" },
+      return await apiRequest("/api/conversations", "POST", { 
+        title: "New Conversation",
+        mode: "chat"
       });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
       window.history.pushState({}, '', `/chat/${data.id}`);
     },
@@ -45,16 +52,17 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
 
   const deleteConversationMutation = useMutation({
     mutationFn: async (id: string) => {
-      return apiRequest(`/api/conversations/${id}`, {
-        method: "DELETE",
-      });
+      return await apiRequest(`/api/conversations/${id}`, "DELETE");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
     },
   });
 
-  const formatDate = (date: Date) => {
+  const formatDate = (dateInput: string | Date | null): string => {
+    if (!dateInput) return "";
+    
+    const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
     const now = new Date();
     const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
     
@@ -98,10 +106,11 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
           <Plus size={20} />
         </Button>
 
-        {/* Collapsed Connectivity */}
-        <div className="w-full space-y-2">
-          <SatelliteConnection isCollapsed={true} />
-          <PhoneLink isCollapsed={true} />
+        {/* Collapsed Status */}
+        <div className="w-full">
+          <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+          </div>
         </div>
       </div>
     );
@@ -172,92 +181,104 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
             </div>
           </div>
         )}
-        
-        <Button 
+
+        {/* New Conversation Button */}
+        <Button
           onClick={() => createConversationMutation.mutate()}
-          className="w-full zed-gradient hover:shadow-lg hover:shadow-purple-500/25 zed-button rounded-xl h-12"
           disabled={createConversationMutation.isPending}
+          className="w-full zed-gradient rounded-xl p-4 text-white font-medium zed-button"
         >
-          <Plus size={18} className="mr-2" />
-          <span className="font-medium">New Chat</span>
-          <Sparkles size={14} className="ml-2 opacity-80" />
+          <div className="flex items-center justify-center space-x-2">
+            <Plus size={18} />
+            <span>New Conversation</span>
+            <Sparkles size={14} className="text-purple-200" />
+          </div>
         </Button>
       </div>
 
       {/* Conversations List */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-2 relative z-10">
-        {conversations.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 zed-avatar rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <MessageSquare size={24} className="text-white" />
+      <div className="flex-1 px-4 overflow-y-auto">
+        <div className="space-y-2 py-4">
+          {conversations.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <MessageSquare size={48} className="mx-auto mb-4 opacity-50" />
+              <p className="text-sm">No conversations yet</p>
+              <p className="text-xs">Start a new chat to begin</p>
             </div>
-            <p className="text-sm text-muted-foreground mb-2">No conversations yet</p>
-            <p className="text-xs text-muted-foreground/60">Start a new chat to begin</p>
-          </div>
-        ) : (
-          conversations.map((conversation) => {
-            const isActive = location.includes(conversation.id);
-            return (
-              <Link key={conversation.id} href={`/chat/${conversation.id}`}>
-                <div className={`group relative p-4 rounded-2xl cursor-pointer transition-all duration-300 ${
-                  isActive 
-                    ? 'zed-glass border-purple-500/30 zed-glow' 
-                    : 'hover:bg-white/5 border border-transparent hover:border-white/10'
-                }`}>
+          ) : (
+            conversations.map((conversation) => {
+              const isActive = location === `/chat/${conversation.id}` || location === `/chat/${conversation.id}/`;
+              const date = conversation.updatedAt || conversation.createdAt;
+              
+              return (
+                <div
+                  key={conversation.id}
+                  className={`
+                    group relative p-3 rounded-xl cursor-pointer transition-all zed-button
+                    ${isActive 
+                      ? 'zed-glass border-purple-500/50 shadow-lg shadow-purple-500/20' 
+                      : 'hover:bg-white/5'
+                    }
+                  `}
+                  onClick={() => window.history.pushState({}, '', `/chat/${conversation.id}`)}
+                >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <div className={`w-2 h-2 rounded-full ${
-                          isActive ? 'bg-purple-400' : 'bg-muted-foreground/40'
-                        }`} />
-                        <h3 className={`text-sm font-medium truncate ${
-                          isActive ? 'text-foreground' : 'text-muted-foreground'
-                        }`}>
-                          {conversation.title}
-                        </h3>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="outline" className={`text-xs px-2 py-0.5 ${
-                          isActive 
-                            ? 'border-purple-500/30 text-purple-300' 
-                            : 'border-white/10 text-muted-foreground/60'
-                        }`}>
-                          {formatDate(new Date(conversation.updatedAt))}
-                        </Badge>
+                      <h3 className="text-sm font-medium text-foreground truncate mb-1">
+                        {conversation.title || 'New Conversation'}
+                      </h3>
+                      {conversation.preview && (
+                        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+                          {conversation.preview}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">
+                          {formatDate(date)}
+                        </span>
+                        {conversation.mode && (
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            conversation.mode === 'agent' 
+                              ? 'bg-purple-500/20 text-purple-400'
+                              : 'bg-cyan-500/20 text-cyan-400'
+                          }`}>
+                            {conversation.mode}
+                          </span>
+                        )}
                       </div>
                     </div>
                     
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 p-0 hover:bg-red-500/20 hover:text-red-400 rounded-lg"
                       onClick={(e) => handleDeleteConversation(e, conversation.id)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300 hover:bg-red-500/20 h-auto p-1 ml-2 rounded-lg"
                     >
-                      <X size={12} />
+                      <Trash2 size={14} />
                     </Button>
                   </div>
                 </div>
-              </Link>
-            );
-          })
-        )}
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* Status */}
+      <div className="p-4 border-t border-white/10">
+        <div className="flex items-center justify-center space-x-2">
+          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+          <span className="text-xs text-muted-foreground">System Online</span>
+        </div>
       </div>
 
       {/* Footer */}
       <div className="p-4 border-t border-white/10 relative z-10">
-        <div className="flex items-center space-x-3 p-3 rounded-2xl zed-glass">
-          <div className="w-8 h-8 zed-avatar rounded-xl flex items-center justify-center relative">
-            <div className="relative z-10">
-              <Zap className="text-white" size={14} />
-            </div>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground">Demo User</p>
-            <p className="text-xs text-muted-foreground">Enhanced Assistant</p>
-          </div>
-          <Badge variant="outline" className="border-purple-500/30 text-purple-300 text-xs">
-            Active
-          </Badge>
+        <div className="flex items-center justify-center space-x-2 text-xs text-muted-foreground">
+          <Zap size={12} className="text-purple-400" />
+          <span>Powered by OpenAI</span>
+          <div className="w-1 h-1 bg-purple-400 rounded-full"></div>
+          <span>Local Auth</span>
         </div>
       </div>
     </div>
