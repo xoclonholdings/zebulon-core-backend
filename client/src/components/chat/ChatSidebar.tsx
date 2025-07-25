@@ -182,7 +182,7 @@ export default function ChatSidebar({ conversations, currentConversationId }: Ch
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-gray-900">Demo User</p>
-            <p className="text-xs text-gray-500">Free Plan</p>
+            <p className="text-xs text-gray-500">ZED Assistant</p>
           </div>
           <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600">
             <Settings size={16} />

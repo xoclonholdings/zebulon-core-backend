@@ -56,11 +56,9 @@ export default function SessionPanel({ conversation, files, session }: SessionPa
     }
   };
 
-  // Mock usage data for demo
-  const messagesUsed = session?.messagesUsed || 47;
-  const messagesLimit = 250;
-  const storageUsed = 12.3; // GB
-  const storageLimit = 32; // GB
+  // Session statistics
+  const messagesUsed = session?.messagesUsed || 0;
+  const storageUsed = 0; // GB - calculated from uploaded files
 
   return (
     <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
@@ -182,9 +180,9 @@ export default function SessionPanel({ conversation, files, session }: SessionPa
         </div>
       </div>
 
-      {/* Usage Stats */}
+      {/* Session Statistics */}
       <div className="flex-1 p-4">
-        <h4 className="text-sm font-semibold text-gray-900 mb-3">Usage This Month</h4>
+        <h4 className="text-sm font-semibold text-gray-900 mb-3">Session Statistics</h4>
         <div className="space-y-4">
           <div>
             <div className="flex justify-between text-sm mb-1">
@@ -193,39 +191,33 @@ export default function SessionPanel({ conversation, files, session }: SessionPa
                 <span className="text-gray-600">Messages</span>
               </div>
               <span className="text-gray-900 font-medium">
-                {messagesUsed}/{messagesLimit}
+                {messagesUsed}
               </span>
             </div>
-            <Progress 
-              value={(messagesUsed / messagesLimit) * 100} 
-              className="h-2"
-            />
           </div>
 
           <div>
             <div className="flex justify-between text-sm mb-1">
               <div className="flex items-center space-x-1">
                 <HardDrive size={14} className="text-gray-500" />
-                <span className="text-gray-600">Storage</span>
+                <span className="text-gray-600">Files Processed</span>
               </div>
               <span className="text-gray-900 font-medium">
-                {storageUsed}/{storageLimit} GB
+                {files.length} files
               </span>
             </div>
-            <Progress 
-              value={(storageUsed / storageLimit) * 100} 
-              className="h-2"
-            />
           </div>
 
-          <div className="pt-2 border-t border-gray-200">
-            <Button 
-              variant="ghost" 
-              className="text-sm text-primary hover:text-primary/80 font-medium p-0"
-            >
-              <ExternalLink size={14} className="mr-1" />
-              Upgrade to Team Plan
-            </Button>
+          <div>
+            <div className="flex justify-between text-sm mb-1">
+              <div className="flex items-center space-x-1">
+                <Clock size={14} className="text-gray-500" />
+                <span className="text-gray-600">Session Duration</span>
+              </div>
+              <span className="text-gray-900 font-medium">
+                {session?.duration ? formatDuration(session.duration) : "0m"}
+              </span>
+            </div>
           </div>
         </div>
       </div>
