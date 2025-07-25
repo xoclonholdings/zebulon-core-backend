@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import LogoutButton from "../auth/LogoutButton";
 import SatelliteConnection from "../satellite/SatelliteConnection";
+import PhoneLink from "../phone/PhoneLink";
 import { useAuth } from "@/hooks/useAuth";
 import { 
   Plus, 
@@ -97,9 +98,10 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
           <Plus size={20} />
         </Button>
 
-        {/* Collapsed Satellite Connection */}
-        <div className="w-full">
+        {/* Collapsed Connectivity */}
+        <div className="w-full space-y-2">
           <SatelliteConnection isCollapsed={true} />
+          <PhoneLink isCollapsed={true} />
         </div>
       </div>
     );

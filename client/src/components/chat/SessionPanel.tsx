@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import SatelliteConnection from "../satellite/SatelliteConnection";
+import PhoneLink from "../phone/PhoneLink";
 import { 
   X, 
   FileText, 
@@ -12,7 +13,8 @@ import {
   Clock,
   HardDrive,
   MessageSquare,
-  File
+  File,
+  Zap
 } from "lucide-react";
 import type { Conversation, File as FileType, Session } from "@shared/schema";
 
@@ -78,9 +80,10 @@ export default function SessionPanel({ conversation, files, session }: SessionPa
         </div>
       </div>
 
-      {/* Satellite Connection */}
-      <div className="p-4 border-b border-white/10 relative z-10">
+      {/* Connectivity Panel */}
+      <div className="p-4 border-b border-white/10 relative z-10 space-y-4">
         <SatelliteConnection />
+        <PhoneLink />
       </div>
 
       {/* Session Stats */}

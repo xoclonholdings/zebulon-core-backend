@@ -117,5 +117,6 @@
 - ✅ **Enhanced security** - All API endpoints now require authentication to protect user data
 - ✅ **Added user profile display** in sidebar with logout button and personalized experience
 - ✅ **Added satellite connection feature** with real-time connectivity status, signal strength monitoring, and cyberpunk-themed interface
+- ✅ **Added phone linking capabilities** with QR code pairing, Bluetooth connectivity, manual pairing options, and device management
 
 The application uses a monorepo structure with shared TypeScript types and schemas between frontend and backend, ensuring type safety across the entire stack.
