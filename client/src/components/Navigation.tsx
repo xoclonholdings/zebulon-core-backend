@@ -49,12 +49,10 @@ export default function Navigation() {
         <div className="p-6">
           {/* Logo */}
           <div className="flex items-center space-x-3 mb-8">
-            <div className="text-center">
-              <div className="mb-1">
-                <img src={zLogoPath} alt="Z" className="w-6 h-6 mx-auto opacity-70" />
-              </div>
-              <h2 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                ZED
+            <div>
+              <h2 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent flex items-center space-x-2">
+                <img src={zLogoPath} alt="Z" className="w-5 h-5" />
+                <span>ZED</span>
               </h2>
               <p className="text-xs text-muted-foreground">AI Assistant</p>
             </div>
