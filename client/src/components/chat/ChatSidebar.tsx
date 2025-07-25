@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import LogoutButton from "../auth/LogoutButton";
+import SatelliteConnection from "../satellite/SatelliteConnection";
 import { useAuth } from "@/hooks/useAuth";
 import { 
   Plus, 
@@ -95,6 +96,11 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
         >
           <Plus size={20} />
         </Button>
+
+        {/* Collapsed Satellite Connection */}
+        <div className="w-full">
+          <SatelliteConnection isCollapsed={true} />
+        </div>
       </div>
     );
   }

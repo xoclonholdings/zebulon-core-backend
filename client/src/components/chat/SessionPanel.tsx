@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import SatelliteConnection from "../satellite/SatelliteConnection";
 import { 
   X, 
   FileText, 
@@ -61,78 +62,120 @@ export default function SessionPanel({ conversation, files, session }: SessionPa
   const storageUsed = 0; // GB - calculated from uploaded files
 
   return (
-    <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
+    <div className="w-96 zed-sidebar flex flex-col h-full relative">
+      {/* Floating Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-10 right-4 w-20 h-20 bg-cyan-600/5 rounded-full blur-2xl zed-float" />
+        <div className="absolute bottom-20 left-4 w-16 h-16 bg-purple-500/5 rounded-full blur-xl zed-float" style={{ animationDelay: '2s' }} />
+      </div>
+
       {/* Panel Header */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="p-6 border-b border-white/10 relative z-10">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-900">Session Details</h3>
+          <h3 className="text-lg font-semibold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+            Session Control
+          </h3>
         </div>
       </div>
 
+      {/* Satellite Connection */}
+      <div className="p-4 border-b border-white/10 relative z-10">
+        <SatelliteConnection />
+      </div>
+
       {/* Session Stats */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Model</span>
-            <span className="text-sm font-medium text-gray-900">
-              {conversation?.model || "GPT-4 Turbo"}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Session time</span>
-            <span className="text-sm font-medium text-gray-900">
-              {session?.duration ? formatDuration(session.duration) : "0m"}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Files processed</span>
-            <span className="text-sm font-medium text-gray-900">
-              {files.length} files
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Memory usage</span>
-            <span className="text-sm font-medium text-gray-900">
-              {session?.memoryUsage ? `${session.memoryUsage} MB` : "0 MB"}
-            </span>
-          </div>
+      <div className="p-4 border-b border-white/10 relative z-10">
+        <h4 className="text-sm font-semibold text-foreground mb-4 flex items-center">
+          <MessageSquare size={16} className="mr-2 text-purple-400" />
+          Session Analytics
+        </h4>
+        <div className="space-y-4">
+          <Card className="zed-glass p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-muted-foreground">AI Model</span>
+              <Badge className="bg-purple-600/20 text-purple-400 border-purple-400/30">
+                {conversation?.model || "GPT-4o"}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-muted-foreground flex items-center">
+                <Clock size={12} className="mr-1" />
+                Session Time
+              </span>
+              <span className="text-sm font-medium text-foreground">
+                {session?.duration ? formatDuration(session.duration) : "0m"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-muted-foreground flex items-center">
+                <FileText size={12} className="mr-1" />
+                Files Processed
+              </span>
+              <span className="text-sm font-medium text-foreground">
+                {files.length} files
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground flex items-center">
+                <HardDrive size={12} className="mr-1" />
+                Memory Usage
+              </span>
+              <span className="text-sm font-medium text-foreground">
+                {session?.memoryUsage ? `${session.memoryUsage} MB` : "0 MB"}
+              </span>
+            </div>
+          </Card>
         </div>
       </div>
 
       {/* Files in Session */}
-      <div className="p-4 border-b border-gray-200">
-        <h4 className="text-sm font-semibold text-gray-900 mb-3">Files in Session</h4>
+      <div className="flex-1 p-4 overflow-y-auto relative z-10">
+        <h4 className="text-sm font-semibold text-foreground mb-4 flex items-center">
+          <File size={16} className="mr-2 text-cyan-400" />
+          Data Storage
+        </h4>
         {files.length === 0 ? (
-          <div className="text-center py-4 text-gray-500">
-            <File className="mx-auto mb-2" size={24} />
-            <p className="text-sm">No files uploaded</p>
+          <div className="text-center py-8">
+            <div className="w-16 h-16 zed-avatar rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <File size={24} className="text-white" />
+            </div>
+            <p className="text-sm text-muted-foreground mb-2">No files uploaded</p>
+            <p className="text-xs text-muted-foreground/60">Drag & drop files to analyze</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {files.map((file) => (
-              <Card key={file.id} className="bg-gray-50 border border-gray-100 p-3">
-                <div className="flex items-center space-x-2 mb-1">
-                  <span className="text-sm">{getFileIcon(file.mimeType)}</span>
-                  <span className="text-sm font-medium text-gray-900 truncate flex-1">
-                    {file.originalName}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                  <span>{formatFileSize(file.size)}</span>
-                  <Badge 
-                    variant="secondary" 
-                    className={`text-xs ${getStatusColor(file.status)}`}
-                  >
-                    {file.status}
-                  </Badge>
+              <Card key={file.id} className="zed-message p-3 hover:zed-glow transition-all duration-300">
+                <div className="flex items-center space-x-3 mb-2">
+                  <div className="w-8 h-8 zed-avatar rounded-xl flex items-center justify-center">
+                    <span className="text-sm">{getFileIcon(file.mimeType)}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {file.originalName}
+                    </p>
+                    <div className="flex items-center justify-between text-xs mt-1">
+                      <span className="text-muted-foreground">{formatFileSize(file.size)}</span>
+                      <Badge 
+                        className={`text-xs ${
+                          file.status === 'completed' ? 'bg-green-600/20 text-green-400 border-green-400/30' :
+                          file.status === 'processing' ? 'bg-yellow-600/20 text-yellow-400 border-yellow-400/30' :
+                          'bg-red-600/20 text-red-400 border-red-400/30'
+                        }`}
+                      >
+                        {file.status}
+                      </Badge>
+                    </div>
+                  </div>
                 </div>
                 {file.status === "completed" && (
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="text-xs text-primary hover:text-primary/80 h-auto p-0"
+                    className="w-full zed-button rounded-xl text-xs h-8"
                   >
-                    View Details
+                    <ExternalLink size={12} className="mr-1" />
+                    View Analysis
                   </Button>
                 )}
               </Card>
@@ -142,83 +185,44 @@ export default function SessionPanel({ conversation, files, session }: SessionPa
       </div>
 
       {/* Quick Actions */}
-      <div className="p-4 border-b border-gray-200">
-        <h4 className="text-sm font-semibold text-gray-900 mb-3">Quick Actions</h4>
-        <div className="space-y-2">
+      <div className="p-4 border-t border-white/10 relative z-10">
+        <h4 className="text-sm font-semibold text-foreground mb-4 flex items-center">
+          <Zap size={16} className="mr-2 text-yellow-400" />
+          Quick Actions
+        </h4>
+        <div className="space-y-3">
           <Button 
             variant="ghost" 
-            className="w-full justify-start bg-gray-50 hover:bg-gray-100"
+            className="w-full zed-button rounded-xl justify-start hover:zed-glow transition-all duration-300"
           >
-            <FileText className="mr-2" size={16} />
+            <FileText size={16} className="mr-3 text-cyan-400" />
             <div className="text-left">
-              <div className="text-sm font-medium">Generate Report</div>
-              <div className="text-xs text-gray-500">Create comprehensive analysis report</div>
+              <div className="text-sm font-medium text-foreground">Generate Report</div>
+              <div className="text-xs text-muted-foreground">Export analysis results</div>
             </div>
           </Button>
 
           <Button 
             variant="ghost" 
-            className="w-full justify-start bg-gray-50 hover:bg-gray-100"
+            className="w-full zed-button rounded-xl justify-start hover:zed-glow transition-all duration-300"
           >
-            <Code className="mr-2" size={16} />
+            <Code size={16} className="mr-3 text-purple-400" />
             <div className="text-left">
-              <div className="text-sm font-medium">Export Code</div>
-              <div className="text-xs text-gray-500">Download generated Python/R code</div>
+              <div className="text-sm font-medium text-foreground">Export Code</div>
+              <div className="text-xs text-muted-foreground">Download generated scripts</div>
             </div>
           </Button>
 
           <Button 
             variant="ghost" 
-            className="w-full justify-start bg-gray-50 hover:bg-gray-100"
+            className="w-full zed-button rounded-xl justify-start hover:zed-glow transition-all duration-300"
           >
-            <Share2 className="mr-2" size={16} />
+            <Share2 size={16} className="mr-3 text-pink-400" />
             <div className="text-left">
-              <div className="text-sm font-medium">Share Session</div>
-              <div className="text-xs text-gray-500">Collaborate with team members</div>
+              <div className="text-sm font-medium text-foreground">Share Session</div>
+              <div className="text-xs text-muted-foreground">Team collaboration</div>
             </div>
           </Button>
-        </div>
-      </div>
-
-      {/* Session Statistics */}
-      <div className="flex-1 p-4">
-        <h4 className="text-sm font-semibold text-gray-900 mb-3">Session Statistics</h4>
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between text-sm mb-1">
-              <div className="flex items-center space-x-1">
-                <MessageSquare size={14} className="text-gray-500" />
-                <span className="text-gray-600">Messages</span>
-              </div>
-              <span className="text-gray-900 font-medium">
-                {messagesUsed}
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <div className="flex justify-between text-sm mb-1">
-              <div className="flex items-center space-x-1">
-                <HardDrive size={14} className="text-gray-500" />
-                <span className="text-gray-600">Files Processed</span>
-              </div>
-              <span className="text-gray-900 font-medium">
-                {files.length} files
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <div className="flex justify-between text-sm mb-1">
-              <div className="flex items-center space-x-1">
-                <Clock size={14} className="text-gray-500" />
-                <span className="text-gray-600">Session Duration</span>
-              </div>
-              <span className="text-gray-900 font-medium">
-                {session?.duration ? formatDuration(session.duration) : "0m"}
-              </span>
-            </div>
-          </div>
         </div>
       </div>
     </div>
