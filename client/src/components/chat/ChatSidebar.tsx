@@ -119,27 +119,28 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
   }
 
   return (
-    <div className="w-80 flex flex-col h-full relative zed-glass border-r border-white/10 backdrop-blur-xl">
-      {/* Floating Background Elements */}
+    <div className="w-80 flex flex-col h-full relative zed-glass border-r border-purple-500/30 backdrop-blur-xl">
+      {/* Cyberpunk Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-4 w-20 h-20 bg-purple-600/5 rounded-full blur-2xl zed-float" />
-        <div className="absolute bottom-20 right-4 w-16 h-16 bg-cyan-500/5 rounded-full blur-xl zed-float" style={{ animationDelay: '3s' }} />
+        <div className="absolute top-10 left-4 w-20 h-20 bg-purple-600/10 rounded-full blur-2xl zed-float" />
+        <div className="absolute bottom-20 right-4 w-16 h-16 bg-cyan-500/10 rounded-full blur-xl zed-float" style={{ animationDelay: '3s' }} />
       </div>
 
       {/* Header */}
       <div className="p-6 border-b border-white/10 relative z-10">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 zed-avatar rounded-2xl flex items-center justify-center relative">
+            <div className="w-10 h-10 zed-avatar rounded-2xl flex items-center justify-center relative zed-glow">
               <div className="relative z-10">
                 <Brain className="text-white" size={20} />
               </div>
             </div>
             <div>
-              <h2 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                ZED
+              <h2 className="text-xl font-bold flex items-center space-x-2 bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
+                <Brain className="text-purple-400" size={20} />
+                <span>ZED</span>
               </h2>
-              <p className="text-xs text-muted-foreground">AI Assistant</p>
+              <p className="text-xs text-muted-foreground">Enhanced AI Assistant</p>
             </div>
           </div>
           
@@ -188,12 +189,12 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
         <Button
           onClick={() => createConversationMutation.mutate()}
           disabled={createConversationMutation.isPending}
-          className="w-full zed-gradient rounded-xl p-4 text-white font-medium zed-button"
+          className="w-full zed-gradient hover:zed-gradient-hover rounded-xl p-4 text-white font-medium transition-all duration-300"
         >
           <div className="flex items-center justify-center space-x-2">
             <Plus size={18} />
             <span>New Conversation</span>
-            <Sparkles size={14} className="text-purple-200" />
+            <Sparkles size={14} className="text-cyan-300" />
           </div>
         </Button>
 

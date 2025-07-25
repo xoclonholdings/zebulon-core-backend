@@ -86,14 +86,17 @@ export default function Login() {
         {/* ZED Logo */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <div className="relative">
+            <div className="relative zed-glow">
               <Brain className="w-12 h-12 text-purple-400 animate-pulse" />
               <Zap className="w-6 h-6 text-cyan-400 absolute -top-1 -right-1 animate-bounce" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
-            ZED
-          </h1>
+          <div className="flex items-center justify-center space-x-3">
+            <Brain className="text-purple-400" size={32} />
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
+              ZED
+            </h1>
+          </div>
           <p className="text-muted-foreground mt-2">Enhanced AI Assistant</p>
         </div>
 

@@ -39,9 +39,9 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased bg-black text-foreground;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: radial-gradient(ellipse at top, hsl(245, 20%, 10%) 0%, hsl(245, 15%, 6%) 70%);
+    background: #000000;
     min-height: 100vh;
     overflow-x: hidden;
   }
@@ -66,17 +66,24 @@
 }
 
 @layer components {
-  /* ZED Signature Gradient */
+  /* ZED Cyberpunk Gradient */
   .zed-gradient {
-    background: var(--zed-gradient);
+    background: linear-gradient(135deg, #8B00FF 0%, #00BFFF 50%, #FF1493 100%);
+    border: 1px solid rgba(139, 0, 255, 0.3);
+    box-shadow: 0 0 20px rgba(139, 0, 255, 0.5), inset 0 0 20px rgba(0, 191, 255, 0.2);
+  }
+  
+  .zed-gradient-hover {
+    background: linear-gradient(135deg, #9A00FF 0%, #1EC5FF 50%, #FF69B4 100%);
+    box-shadow: 0 0 30px rgba(139, 0, 255, 0.7), inset 0 0 30px rgba(0, 191, 255, 0.3);
   }
 
-  /* Enhanced Glass Effect */
+  /* Cyberpunk Glass Effect */
   .zed-glass {
-    backdrop-filter: blur(20px) saturate(180%);
-    background: var(--zed-glass);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px) saturate(120%);
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(139, 0, 255, 0.2);
+    box-shadow: 0 0 15px rgba(139, 0, 255, 0.3), inset 0 0 15px rgba(0, 0, 0, 0.5);
   }
 
   /* Floating Animation */
@@ -98,8 +105,41 @@
   }
 
   @keyframes zed-pulse-glow {
-    from { box-shadow: 0 0 30px rgba(138, 43, 226, 0.2); }
-    to { box-shadow: 0 0 50px rgba(138, 43, 226, 0.4), 0 0 80px rgba(0, 191, 255, 0.2); }
+    from { box-shadow: 0 0 20px rgba(139, 0, 255, 0.3); }
+    to { box-shadow: 0 0 40px rgba(139, 0, 255, 0.6), 0 0 60px rgba(0, 191, 255, 0.3); }
+  }
+  
+  /* Cyberpunk Button Styles */
+  .zed-button {
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(139, 0, 255, 0.3);
+    color: #FFFFFF;
+    transition: all 0.3s ease;
+  }
+  
+  .zed-button:hover {
+    background: rgba(139, 0, 255, 0.1);
+    border-color: rgba(139, 0, 255, 0.6);
+    box-shadow: 0 0 15px rgba(139, 0, 255, 0.4);
+    color: #FFFFFF;
+  }
+  
+  /* Cyberpunk Input Styles */
+  .zed-input {
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid rgba(139, 0, 255, 0.3);
+    color: #FFFFFF;
+  }
+  
+  .zed-input:focus {
+    border-color: rgba(139, 0, 255, 0.8);
+    box-shadow: 0 0 10px rgba(139, 0, 255, 0.5);
+  }
+  
+  /* Cyberpunk Avatar */
+  .zed-avatar {
+    background: linear-gradient(135deg, #8B00FF 0%, #00BFFF 100%);
+    box-shadow: 0 0 10px rgba(139, 0, 255, 0.5);
   }
 
   /* Shimmer Effect */

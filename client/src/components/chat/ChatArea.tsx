@@ -142,8 +142,9 @@ export default function ChatArea({ conversation, messages, files, conversationId
             </div>
           </div>
           <div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-              ZED
+            <h1 className="text-xl font-bold flex items-center space-x-2 bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+              <Brain className="text-purple-400" size={20} />
+              <span>ZED</span>
             </h1>
             <p className="text-sm text-muted-foreground">Enhanced AI Assistant</p>
           </div>
@@ -176,12 +177,15 @@ export default function ChatArea({ conversation, messages, files, conversationId
             </div>
             <Card className="flex-1 p-6 zed-message zed-morph-border">
               <div className="flex items-center space-x-2 mb-4">
-                <span className="text-lg font-semibold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">ZED</span>
+                <div className="flex items-center space-x-2">
+                  <Brain className="text-purple-400" size={16} />
+                  <span className="text-lg font-semibold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">ZED</span>
+                </div>
                 <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-300">AI Assistant</Badge>
               </div>
               <div className="prose prose-sm max-w-none">
                 <p className="text-lg leading-relaxed">
-                  Hello! I'm <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent font-semibold">ZED</span>, your enhanced AI assistant. I combine advanced AI capabilities with powerful document processing to help you with any task.
+                  Hello! I'm <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent font-semibold inline-flex items-center gap-1"><Brain className="text-purple-400" size={16} />ZED</span>, your enhanced AI assistant. I combine advanced AI capabilities with powerful document processing to help you with any task.
                 </p>
                 <p className="text-sm text-muted-foreground mt-4 flex items-center">
                   <Zap size={16} className="mr-2 text-cyan-400" />
@@ -208,7 +212,10 @@ export default function ChatArea({ conversation, messages, files, conversationId
             </div>
             <Card className="flex-1 p-6 zed-message zed-glow">
               <div className="flex items-center space-x-2 mb-4">
-                <span className="text-lg font-semibold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">ZED</span>
+                <div className="flex items-center space-x-2">
+                  <Brain className="text-purple-400" size={16} />
+                  <span className="text-lg font-semibold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">ZED</span>
+                </div>  
                 <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-300">
                   <div className="flex items-center space-x-1">
                     <div className="w-2 h-2 bg-purple-400 rounded-full zed-typing" />
