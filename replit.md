@@ -159,5 +159,6 @@
   - **Logo Update**: Replaced all Brain logo references with new Z logo throughout entire application (login, sidebar, chat, settings, landing page)
   - **Transparent Logo Implementation**: Updated Z logo to be transparent without background styling, sized to match text, and removed redundant logo instances
   - **Final Logo Layout**: Overhead transparent logo on login page only, inline logos with ZED text throughout main interface for consistent branding
+  - **Cyberpunk Color Theme**: Restored full purple-cyan-pink gradient for all ZED titles across the application maintaining consistent brand identity
 
 The application uses a monorepo structure with shared TypeScript types and schemas between frontend and backend, ensuring type safety across the entire stack.
