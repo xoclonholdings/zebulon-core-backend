@@ -11,11 +11,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, User, Lock, Save, Eye, EyeOff } from "lucide-react";
+
+import { Settings, User, Lock, Save, Eye, EyeOff, Users } from "lucide-react";
 import zLogoPath from "@assets/IMG_2227_1753477194826.png";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
+import UserManagement from "@/components/UserManagement";
 
 interface CredentialsForm {
   newUsername: string;
@@ -35,6 +38,7 @@ export default function SettingsModal() {
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth() as { user?: any };
 
   // Get current credentials
   const { data: currentUser } = useQuery({
@@ -117,7 +121,7 @@ export default function SettingsModal() {
           Settings
         </Button>
       </DialogTrigger>
-      <DialogContent className="zed-glass border-white/10 max-w-md">
+      <DialogContent className="zed-glass border-white/10 max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <img src={zLogoPath} alt="Z" className="h-4 w-4" />
@@ -129,111 +133,57 @@ export default function SettingsModal() {
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Current User Info */}
-          <Card className="zed-glass border-white/10">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2 text-foreground">
-                <User className="h-4 w-4" />
-                Current Account
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-sm text-muted-foreground">
-                <div>Username: <span className="text-foreground font-medium">{(currentUser as any)?.username || "admin"}</span></div>
+          {/* Check if user is admin for additional options */}
+          {user?.username === 'Admin' ? (
+            <div className="space-y-6">
+              {/* Admin Panel Header */}
+              <div className="flex items-center space-x-3 pb-4 border-b border-white/10">
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center">
+                    <Users className="h-4 w-4 text-white" />
+                  </div>
+                  <span className="text-lg font-semibold text-white">Admin Panel</span>
+                </div>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Update Credentials */}
-          <Card className="zed-glass border-white/10">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2 text-foreground">
-                <Lock className="h-4 w-4" />
-                Update Login Credentials
-              </CardTitle>
-              <CardDescription className="text-xs text-muted-foreground">
-                Change your username and password for <span className="inline-flex items-center gap-1"><img src={zLogoPath} alt="Z" className="h-3 w-3" />ZED</span>
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="newUsername" className="text-sm text-foreground">New Username</Label>
-                  <Input
-                    id="newUsername"
-                    type="text"
-                    placeholder="Enter new username"
-                    value={form.newUsername}
-                    onChange={(e) => handleFormChange("newUsername", e.target.value)}
-                    className="zed-input"
-                    disabled={updateCredentialsMutation.isPending}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="newPassword" className="text-sm text-foreground">New Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="newPassword"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter new password (min 6 chars)"
-                      value={form.newPassword}
-                      onChange={(e) => handleFormChange("newPassword", e.target.value)}
-                      className="zed-input pr-10"
-                      disabled={updateCredentialsMutation.isPending}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
+              {/* User Management Section */}
+              <UserManagement />
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Current User Info */}
+              <Card className="zed-glass border-white/10">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2 text-foreground">
+                    <User className="h-4 w-4" />
+                    Current Account
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm text-muted-foreground">
+                    <div>Username: <span className="text-foreground font-medium">{user?.username || "user"}</span></div>
                   </div>
-                </div>
+                </CardContent>
+              </Card>
 
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-sm text-foreground">Confirm Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirm new password"
-                      value={form.confirmPassword}
-                      onChange={(e) => handleFormChange("confirmPassword", e.target.value)}
-                      className="zed-input pr-10"
-                      disabled={updateCredentialsMutation.isPending}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
+              {/* Limited Options for Non-Admin Users */}
+              <Card className="zed-glass border-white/10">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2 text-foreground">
+                    <Settings className="h-4 w-4" />
+                    Account Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm text-muted-foreground space-y-2">
+                    <p>• Session expires in 45 minutes of inactivity</p>
+                    <p>• Enhanced security with device verification</p>
+                    <p>• Contact admin for account modifications</p>
                   </div>
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full zed-gradient hover:zed-gradient-hover text-white"
-                  disabled={updateCredentialsMutation.isPending}
-                >
-                  {updateCredentialsMutation.isPending ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      <span>Updating...</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center space-x-2">
-                      <Save size={16} />
-                      <span>Update Credentials</span>
-                    </div>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

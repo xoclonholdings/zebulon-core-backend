@@ -8,7 +8,7 @@ import NotFound from "@/pages/not-found";
 import Chat from "@/pages/chat";
 import Landing from "@/pages/landing";
 import Login from "@/pages/login";
-import FlipShopPage from "@/pages/flipshop";
+
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -23,7 +23,6 @@ function Router() {
         <>
           <Route path="/" component={Chat} />
           <Route path="/chat/:id?" component={Chat} />
-          <Route path="/flipshop" component={FlipShopPage} />
         </>
       )}
       <Route component={NotFound} />

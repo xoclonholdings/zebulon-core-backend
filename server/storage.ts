@@ -102,7 +102,12 @@ const memoryCache = new MemoryCache();
 export interface IStorage {
   // User operations - Replit Auth required
   getUser(id: string): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  createUser(userData: any): Promise<User>;
+  getAllUsers(): Promise<User[]>;
+  updateUser(id: string, userData: Partial<any>): Promise<User>;
+  deleteUser(id: string): Promise<boolean>;
 
   // Conversation operations
   getConversation(id: string): Promise<Conversation | undefined>;
@@ -204,6 +209,78 @@ export class DatabaseStorage implements IStorage {
     memoryCache.delete(cacheKey);
     
     return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const cacheKey = this.generateCacheKey('user_by_username', username);
+    const cached = memoryCache.get(cacheKey);
+    if (cached) return cached;
+
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    if (user) {
+      memoryCache.set(cacheKey, user, 600000); // Cache for 10 minutes
+    }
+    return user;
+  }
+
+  async createUser(userData: any): Promise<User> {
+    const [user] = await db.insert(users).values(userData).returning();
+    
+    // Clear relevant caches
+    const usernameCacheKey = this.generateCacheKey('user_by_username', userData.username);
+    const allUsersCacheKey = this.generateCacheKey('all_users');
+    memoryCache.delete(usernameCacheKey);
+    memoryCache.delete(allUsersCacheKey);
+    
+    return user;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    const cacheKey = this.generateCacheKey('all_users');
+    const cached = memoryCache.get(cacheKey);
+    if (cached) return cached;
+
+    const allUsers = await db.select().from(users).orderBy(asc(users.username));
+    memoryCache.set(cacheKey, allUsers, 300000); // Cache for 5 minutes
+    return allUsers;
+  }
+
+  async updateUser(id: string, userData: Partial<any>): Promise<User> {
+    const [user] = await db.update(users)
+      .set({ ...userData, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    
+    // Clear relevant caches
+    const userCacheKey = this.generateCacheKey('user', id);
+    const allUsersCacheKey = this.generateCacheKey('all_users');
+    memoryCache.delete(userCacheKey);
+    memoryCache.delete(allUsersCacheKey);
+    
+    if (userData.username) {
+      const usernameCacheKey = this.generateCacheKey('user_by_username', userData.username);
+      memoryCache.delete(usernameCacheKey);
+    }
+    
+    return user;
+  }
+
+  async deleteUser(id: string): Promise<boolean> {
+    const user = await this.getUser(id);
+    const result = await db.delete(users).where(eq(users.id, id));
+    const success = (result.rowCount ?? 0) > 0;
+    
+    if (success && user) {
+      // Clear all related caches
+      const userCacheKey = this.generateCacheKey('user', id);
+      const usernameCacheKey = this.generateCacheKey('user_by_username', user.username);
+      const allUsersCacheKey = this.generateCacheKey('all_users');
+      memoryCache.delete(userCacheKey);
+      memoryCache.delete(usernameCacheKey);
+      memoryCache.delete(allUsersCacheKey);
+    }
+    
+    return success;
   }
 
   // Conversation operations with caching

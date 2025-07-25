@@ -5,7 +5,7 @@ import { upload, processFile, cleanupFile } from "./services/fileProcessor";
 import { generateChatResponse, streamChatResponse } from "./services/openai";
 import { setupLocalAuth, isAuthenticated } from "./localAuth";
 import { insertConversationSchema, insertMessageSchema, insertFileSchema, insertSessionSchema, insertCoreMemorySchema, insertProjectMemorySchema, insertScratchpadMemorySchema } from "@shared/schema";
-import { FlipShopService } from "./services/flipShop";
+
 import { optimizationService } from "./services/optimizationService";
 import { MemoryService } from "./services/memoryService";
 
@@ -453,117 +453,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Flip.Shop Integration API Endpoints
-  app.get("/api/flipshop/products", isAuthenticated, (req, res) => {
+  // User Management API Endpoints (Admin only)
+  app.get("/api/admin/users", isAuthenticated, async (req: any, res) => {
     try {
-      const { search, category, priceMin, priceMax, rating, inStock, trending, brand } = req.query;
+      // Only allow Admin user to manage users
+      const sessionUser = (req.session as any)?.user;
+      const username = sessionUser?.username;
       
-      const filters = {
-        category: category as string,
-        priceMin: priceMin ? parseFloat(priceMin as string) : undefined,
-        priceMax: priceMax ? parseFloat(priceMax as string) : undefined,
-        rating: rating ? parseFloat(rating as string) : undefined,
-        inStock: inStock === 'true' ? true : inStock === 'false' ? false : undefined,
-        trending: trending === 'true' ? true : trending === 'false' ? false : undefined,
-        brand: brand as string,
+      if (username !== 'Admin') {
+        return res.status(403).json({ error: "Only Admin user can manage users" });
+      }
+      
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Get users error:", error);
+      res.status(500).json({ error: "Failed to fetch users" });
+    }
+  });
+
+  app.post("/api/admin/users", isAuthenticated, async (req: any, res) => {
+    try {
+      // Only allow Admin user to create users
+      const sessionUser = (req.session as any)?.user;
+      const username = sessionUser?.username;
+      
+      if (username !== 'Admin') {
+        return res.status(403).json({ error: "Only Admin user can create users" });
+      }
+      
+      const { username: newUsername, password, email, firstName, lastName } = req.body;
+      
+      if (!newUsername || !password) {
+        return res.status(400).json({ error: "Username and password are required" });
+      }
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByUsername(newUsername);
+      if (existingUser) {
+        return res.status(409).json({ error: "User already exists" });
+      }
+      
+      const userData = {
+        id: `user_${Date.now()}`,
+        username: newUsername,
+        password,
+        email: email || `${newUsername}@zed.local`,
+        firstName: firstName || newUsername,
+        lastName: lastName || "User",
+        profileImageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=" + newUsername
       };
-
-      const products = FlipShopService.searchProducts(search as string, filters);
-      res.json(products);
+      
+      const user = await storage.createUser(userData);
+      res.json({ success: true, user: { ...user, password: undefined } });
     } catch (error) {
-      console.error("FlipShop products error:", error);
-      res.status(500).json({ error: "Failed to fetch products" });
+      console.error("Create user error:", error);
+      res.status(500).json({ error: "Failed to create user" });
     }
   });
 
-  app.get("/api/flipshop/products/:id", isAuthenticated, (req, res) => {
+  app.put("/api/admin/users/:id", isAuthenticated, async (req: any, res) => {
     try {
-      const product = FlipShopService.getProduct(req.params.id);
-      if (!product) {
-        return res.status(404).json({ error: "Product not found" });
+      // Only allow Admin user to update users
+      const sessionUser = (req.session as any)?.user;
+      const username = sessionUser?.username;
+      
+      if (username !== 'Admin') {
+        return res.status(403).json({ error: "Only Admin user can update users" });
       }
-      res.json(product);
-    } catch (error) {
-      console.error("FlipShop product error:", error);
-      res.status(500).json({ error: "Failed to fetch product" });
-    }
-  });
-
-  app.get("/api/flipshop/categories", isAuthenticated, (req, res) => {
-    try {
-      const categories = FlipShopService.getCategories();
-      res.json(categories);
-    } catch (error) {
-      console.error("FlipShop categories error:", error);
-      res.status(500).json({ error: "Failed to fetch categories" });
-    }
-  });
-
-  app.get("/api/flipshop/brands", isAuthenticated, (req, res) => {
-    try {
-      const brands = FlipShopService.getBrands();
-      res.json(brands);
-    } catch (error) {
-      console.error("FlipShop brands error:", error);
-      res.status(500).json({ error: "Failed to fetch brands" });
-    }
-  });
-
-  app.get("/api/flipshop/trending", isAuthenticated, (req, res) => {
-    try {
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 6;
-      const products = FlipShopService.getTrendingProducts(limit);
-      res.json(products);
-    } catch (error) {
-      console.error("FlipShop trending error:", error);
-      res.status(500).json({ error: "Failed to fetch trending products" });
-    }
-  });
-
-  app.post("/api/flipshop/cart/add", isAuthenticated, (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { productId } = req.body;
       
-      const result = FlipShopService.addToCart(productId, userId);
+      const { username: newUsername, password, email, firstName, lastName, isActive } = req.body;
+      const userId = req.params.id;
       
-      if (result.success) {
-        res.json(result);
-      } else {
-        res.status(400).json(result);
+      const user = await storage.updateUser(userId, {
+        username: newUsername,
+        password,
+        email,
+        firstName,
+        lastName,
+        isActive
+      });
+      
+      res.json({ success: true, user: { ...user, password: undefined } });
+    } catch (error) {
+      console.error("Update user error:", error);
+      res.status(500).json({ error: "Failed to update user" });
+    }
+  });
+
+  app.delete("/api/admin/users/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      // Only allow Admin user to delete users
+      const sessionUser = (req.session as any)?.user;
+      const username = sessionUser?.username;
+      
+      if (username !== 'Admin') {
+        return res.status(403).json({ error: "Only Admin user can delete users" });
       }
-    } catch (error) {
-      console.error("FlipShop add to cart error:", error);
-      res.status(500).json({ error: "Failed to add to cart" });
-    }
-  });
-
-  app.post("/api/flipshop/wishlist/add", isAuthenticated, (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { productId } = req.body;
       
-      const result = FlipShopService.addToWishlist(productId, userId);
+      const userId = req.params.id;
       
-      if (result.success) {
-        res.json(result);
-      } else {
-        res.status(400).json(result);
+      // Prevent admin from deleting themselves
+      if (userId === sessionUser?.id) {
+        return res.status(400).json({ error: "Cannot delete your own account" });
       }
+      
+      const success = await storage.deleteUser(userId);
+      res.json({ success });
     } catch (error) {
-      console.error("FlipShop add to wishlist error:", error);
-      res.status(500).json({ error: "Failed to add to wishlist" });
-    }
-  });
-
-  app.get("/api/flipshop/recommendations/:productId", isAuthenticated, (req, res) => {
-    try {
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 4;
-      const recommendations = FlipShopService.getRecommendations(req.params.productId, limit);
-      res.json(recommendations);
-    } catch (error) {
-      console.error("FlipShop recommendations error:", error);
-      res.status(500).json({ error: "Failed to fetch recommendations" });
+      console.error("Delete user error:", error);
+      res.status(500).json({ error: "Failed to delete user" });
     }
   });
 
