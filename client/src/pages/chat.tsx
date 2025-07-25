@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import ChatArea from "@/components/chat/ChatArea";
 import { apiRequest } from "@/lib/queryClient";
-import type { Conversation, Message, File } from "@shared/schema";
+import type { Conversation, Message, File as DBFile } from "@shared/schema";
 
 export default function Chat() {
   const { id: conversationId } = useParams<{ id?: string }>();
@@ -29,7 +29,7 @@ export default function Chat() {
   });
 
   // Fetch files for current conversation
-  const { data: files = [] } = useQuery<File[]>({
+  const { data: files = [] } = useQuery<DBFile[]>({
     queryKey: ["/api/conversations", conversationId, "files"],
     enabled: !!conversationId,
   });

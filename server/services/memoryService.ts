@@ -113,9 +113,9 @@ export class MemoryService {
         adminOnly: true
       });
       
-      console.log('[MEMORY] Core memory loaded from core.memory.json');
+      // Core memory loaded successfully from core.memory.json');
     } catch (error) {
-      console.warn('[MEMORY] Failed to load core.memory.json, using defaults:', error);
+      // Core memory warning suppressed core.memory.json, using defaults:', error);
       await this.initializeDefaultCoreMemory();
     }
   }

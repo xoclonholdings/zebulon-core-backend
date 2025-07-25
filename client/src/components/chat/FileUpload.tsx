@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface FileUploadProps {
   conversationId: string;
-  onUpload: (files: File[]) => void;
+  onUpload: (files: any[]) => void;
   onClose: () => void;
 }
 

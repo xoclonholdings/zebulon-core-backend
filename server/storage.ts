@@ -100,7 +100,7 @@ class MemoryCache {
 const memoryCache = new MemoryCache();
 
 export interface IStorage {
-  // User operations - Replit Auth required
+  // User operations for authentication system
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
@@ -178,7 +178,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  // User operations - Replit Auth required
+  // User operations for authentication system  
   async getUser(id: string): Promise<User | undefined> {
     const cacheKey = this.generateCacheKey('user', id);
     const cached = memoryCache.get(cacheKey);

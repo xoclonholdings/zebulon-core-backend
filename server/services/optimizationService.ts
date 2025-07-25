@@ -24,7 +24,7 @@ class OptimizationService {
       this.runOptimization();
     }, 30000);
 
-    console.log('[OPTIMIZATION] Service started');
+    // Optimization service started
   }
 
   private async runOptimization(): Promise<void> {
@@ -34,7 +34,7 @@ class OptimizationService {
     const startTime = Date.now();
 
     try {
-      console.log('[OPTIMIZATION] Starting optimization cycle...');
+      // Starting optimization cycle
 
       // 1. Clean expired data
       await storage.cleanupExpiredData();
@@ -49,7 +49,7 @@ class OptimizationService {
       await this.optimizeConnections();
 
       const duration = Date.now() - startTime;
-      console.log(`[OPTIMIZATION] Completed in ${duration}ms`);
+      // Optimization completed successfully
 
     } catch (error) {
       console.error('[OPTIMIZATION] Failed:', error);

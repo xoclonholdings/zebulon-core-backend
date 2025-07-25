@@ -83,7 +83,7 @@ export function useChat(conversationId?: string) {
                 return;
               }
             } catch (e) {
-              console.error('Error parsing SSE data:', e);
+              // Silent error handling for malformed SSE data
             }
           }
         }

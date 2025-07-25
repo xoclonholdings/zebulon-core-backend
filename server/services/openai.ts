@@ -63,7 +63,7 @@ async function buildSystemMessage(mode: "chat" | "agent"): Promise<string> {
       }
     }
   } catch (error) {
-    console.warn('[OPENAI] Failed to load core memory, using fallback');
+    // Core memory warning suppressed core memory, using fallback');
   }
   
   // Add mode-specific instructions
@@ -119,7 +119,7 @@ export async function generateChatResponse(
         }
       }
     } catch (error) {
-      console.warn('[OPENAI] Failed to load core memory, using fallback');
+      // Core memory warning suppressed core memory, using fallback');
     }
     
     // Add mode-specific instructions
@@ -201,7 +201,7 @@ export async function* streamChatResponse(
         }
       }
     } catch (error) {
-      console.warn('[OPENAI] Failed to load core memory, using fallback');
+      // Core memory warning suppressed core memory, using fallback');
     }
     
     // Add mode-specific instructions

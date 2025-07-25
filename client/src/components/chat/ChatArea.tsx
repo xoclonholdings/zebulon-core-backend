@@ -22,12 +22,12 @@ import ChatMessage from "./ChatMessage";
 import SocialFeed from "../social/SocialFeed";
 import ModeSelector from "./ModeSelector";
 import { useChat } from "@/hooks/use-chat";
-import type { Conversation, Message, File, ConversationMode } from "@shared/schema";
+import type { Conversation, Message, File as DBFile, ConversationMode } from "@shared/schema";
 
 interface ChatAreaProps {
   conversation?: Conversation;
   messages: Message[];
-  files: File[];
+  files: DBFile[];
   conversationId?: string;
 }
 
@@ -81,7 +81,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
         mode: currentMode
       });
     } catch (error) {
-      console.error("Failed to send message:", error);
+      // Error handled by UI toast notification
     }
   };
 
@@ -98,13 +98,13 @@ export default function ChatArea({ conversation, messages, files, conversationId
       try {
         await updateModeMutation.mutateAsync(mode);
       } catch (error) {
-        console.error("Failed to update mode:", error);
+        // Error handled by UI feedback
       }
     }
     setShowModeSelector(false);
   };
 
-  const handleFileUpload = (files: File[]) => {
+  const handleFileUpload = (files: any[]) => {
     if (conversationId) {
       queryClient.invalidateQueries({ queryKey: ["/api/conversations", conversationId, "files"] });
     }
