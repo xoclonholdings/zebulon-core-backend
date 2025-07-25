@@ -51,13 +51,13 @@ app.use((req, res, next) => {
   // Run database migrations
   await runMigrations();
 
-  // Initialize memory system with default values
+  // Initialize memory system with core.memory.json
   try {
     const { MemoryService } = await import("./services/memoryService");
-    await MemoryService.initializeDefaultCoreMemory();
-    log('Core memory initialized successfully');
+    await MemoryService.loadCoreMemoryFromFile();
+    log('Core memory loaded from core.memory.json successfully');
   } catch (error) {
-    log('[WARNING] Failed to initialize core memory:', error);
+    log('[WARNING] Failed to initialize core memory:', String(error));
   }
 
   const server = await registerRoutes(app);

@@ -21,16 +21,57 @@ export async function generateChatResponse(
   model: string = "gpt-4o"
 ): Promise<string> {
   try {
-    // Add mode-specific system message
-    const systemMessage = mode === "agent" 
-      ? {
-          role: "system" as const,
-          content: "You are ZED, an autonomous AI agent. Work independently and provide comprehensive, thorough solutions. Take initiative to solve problems completely without asking for additional input unless absolutely necessary. Provide detailed explanations and actionable insights."
+    // Load core memory to build system message
+    let systemContent = "You are ZED, an advanced AI assistant with document processing capabilities.";
+    
+    try {
+      const { MemoryService } = await import("./memoryService");
+      const corePersonality = await MemoryService.getCoreMemory("zed_personality");
+      const tone = await MemoryService.getCoreMemory("tone");
+      const rules = await MemoryService.getCoreMemory("rules");
+      const defaultContext = await MemoryService.getCoreMemory("default_context");
+      
+      // Build system message from core memory
+      if (corePersonality?.value) {
+        systemContent = corePersonality.value;
+      }
+      
+      if (tone?.value) {
+        systemContent += `\n\nTone: ${tone.value}`;
+      }
+      
+      if (rules?.value) {
+        try {
+          const rulesArray = JSON.parse(rules.value);
+          systemContent += `\n\nCore Rules:\n${rulesArray.map((rule: string) => `- ${rule}`).join('\n')}`;
+        } catch (e) {
+          systemContent += `\n\nCore Rules: ${rules.value}`;
         }
-      : {
-          role: "system" as const,
-          content: "You are ZED, an enhanced AI assistant. Engage in helpful conversation and provide clear, concise responses. Ask clarifying questions when needed to better assist the user."
-        };
+      }
+      
+      if (defaultContext?.value) {
+        try {
+          const context = JSON.parse(defaultContext.value);
+          systemContent += `\n\nDefault Context: Domain: ${context.primary_domain}, User: ${context.default_user}, Timezone: ${context.timezone}`;
+        } catch (e) {
+          systemContent += `\n\nDefault Context: ${defaultContext.value}`;
+        }
+      }
+    } catch (error) {
+      console.warn('[OPENAI] Failed to load core memory, using fallback');
+    }
+    
+    // Add mode-specific instructions
+    if (mode === "agent") {
+      systemContent += "\n\nYou operate in agent mode, taking proactive actions and providing comprehensive analysis. Work independently and provide thorough solutions.";
+    } else {
+      systemContent += "\n\nYou provide helpful responses in a conversational manner. Ask clarifying questions when needed.";
+    }
+    
+    const systemMessage = {
+      role: "system" as const,
+      content: systemContent
+    };
 
     const fullMessages = [systemMessage, ...messages];
 
@@ -62,16 +103,57 @@ export async function* streamChatResponse(
   model: string = "gpt-4o"
 ): AsyncGenerator<StreamResponse> {
   try {
-    // Add mode-specific system message
-    const systemMessage = mode === "agent" 
-      ? {
-          role: "system" as const,
-          content: "You are ZED, an autonomous AI agent. Work independently and provide comprehensive, thorough solutions. Take initiative to solve problems completely without asking for additional input unless absolutely necessary. Provide detailed explanations and actionable insights."
+    // Load core memory to build system message
+    let systemContent = "You are ZED, an advanced AI assistant with document processing capabilities.";
+    
+    try {
+      const { MemoryService } = await import("./memoryService");
+      const corePersonality = await MemoryService.getCoreMemory("zed_personality");
+      const tone = await MemoryService.getCoreMemory("tone");
+      const rules = await MemoryService.getCoreMemory("rules");
+      const defaultContext = await MemoryService.getCoreMemory("default_context");
+      
+      // Build system message from core memory
+      if (corePersonality?.value) {
+        systemContent = corePersonality.value;
+      }
+      
+      if (tone?.value) {
+        systemContent += `\n\nTone: ${tone.value}`;
+      }
+      
+      if (rules?.value) {
+        try {
+          const rulesArray = JSON.parse(rules.value);
+          systemContent += `\n\nCore Rules:\n${rulesArray.map((rule: string) => `- ${rule}`).join('\n')}`;
+        } catch (e) {
+          systemContent += `\n\nCore Rules: ${rules.value}`;
         }
-      : {
-          role: "system" as const,
-          content: "You are ZED, an enhanced AI assistant. Engage in helpful conversation and provide clear, concise responses. Ask clarifying questions when needed to better assist the user."
-        };
+      }
+      
+      if (defaultContext?.value) {
+        try {
+          const context = JSON.parse(defaultContext.value);
+          systemContent += `\n\nDefault Context: Domain: ${context.primary_domain}, User: ${context.default_user}, Timezone: ${context.timezone}`;
+        } catch (e) {
+          systemContent += `\n\nDefault Context: ${defaultContext.value}`;
+        }
+      }
+    } catch (error) {
+      console.warn('[OPENAI] Failed to load core memory, using fallback');
+    }
+    
+    // Add mode-specific instructions
+    if (mode === "agent") {
+      systemContent += "\n\nYou operate in agent mode, taking proactive actions and providing comprehensive analysis. Work independently and provide thorough solutions.";
+    } else {
+      systemContent += "\n\nYou provide helpful responses in a conversational manner. Ask clarifying questions when needed.";
+    }
+    
+    const systemMessage = {
+      role: "system" as const,
+      content: systemContent
+    };
 
     const fullMessages = [systemMessage, ...messages];
 

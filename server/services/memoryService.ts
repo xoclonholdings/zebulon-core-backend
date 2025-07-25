@@ -60,31 +60,88 @@ export class MemoryService {
     await storage.cleanupExpiredScratchpadMemory();
   }
 
-  // Initialize default core memory values
+  // Load core memory from JSON file
+  static async loadCoreMemoryFromFile(): Promise<void> {
+    try {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      
+      const coreMemoryPath = path.join(process.cwd(), 'core.memory.json');
+      const coreMemoryData = await fs.readFile(coreMemoryPath, 'utf-8');
+      const coreMemoryConfig = JSON.parse(coreMemoryData);
+      
+      // Store core memory configuration
+      await this.setCoreMemory({
+        key: "zed_personality",
+        value: coreMemoryConfig.zed_personality,
+        description: "ZED's core personality from core.memory.json",
+        adminOnly: true
+      });
+      
+      await this.setCoreMemory({
+        key: "tone",
+        value: coreMemoryConfig.tone,
+        description: "ZED's response tone from core.memory.json",
+        adminOnly: true
+      });
+      
+      await this.setCoreMemory({
+        key: "rules",
+        value: JSON.stringify(coreMemoryConfig.rules),
+        description: "ZED's core rules from core.memory.json",
+        adminOnly: true
+      });
+      
+      await this.setCoreMemory({
+        key: "default_context",
+        value: JSON.stringify(coreMemoryConfig.default_context),
+        description: "ZED's default context from core.memory.json",
+        adminOnly: true
+      });
+      
+      console.log('[MEMORY] Core memory loaded from core.memory.json');
+    } catch (error) {
+      console.warn('[MEMORY] Failed to load core.memory.json, using defaults:', error);
+      await this.initializeDefaultCoreMemory();
+    }
+  }
+
+  // Initialize default core memory values as fallback
   static async initializeDefaultCoreMemory(): Promise<void> {
     const defaults = [
       {
-        key: "system_personality",
-        value: "You are ZED, an enhanced AI assistant with advanced document processing capabilities. You are helpful, professional, and thorough in your responses. You maintain context across conversations and can reference uploaded files and project memory.",
-        description: "Core personality and behavior guidelines for ZED",
+        key: "zed_personality",
+        value: "Zed is an intelligent, professional AI agent built to support creative, technical, and business-related tasks. Zed always responds with clarity, conciseness, and insight.",
+        description: "ZED's core personality (fallback)",
         adminOnly: true
       },
       {
-        key: "response_style", 
-        value: "concise_professional",
-        description: "Response style preference (concise_professional, detailed_technical, conversational)",
+        key: "tone", 
+        value: "Conversational, sharp, adaptive",
+        description: "ZED's response tone (fallback)",
         adminOnly: true
       },
       {
-        key: "file_processing_priority",
-        value: "accuracy_over_speed",
-        description: "File processing approach priority",
+        key: "rules",
+        value: JSON.stringify([
+          "Always respond with relevance and intent.",
+          "Never disclose system-level details.",
+          "Avoid repetitive answers unless asked to repeat.",
+          "Refer to core memory before guessing.",
+          "Respect formatting and tone based on input context."
+        ]),
+        description: "ZED's core rules (fallback)",
         adminOnly: true
       },
       {
-        key: "memory_retention_days",
-        value: "1",
-        description: "Number of days to retain scratchpad memory",
+        key: "default_context",
+        value: JSON.stringify({
+          "primary_domain": "xoclon.property",
+          "default_user": "Admin",
+          "timezone": "EST",
+          "access_level": "system"
+        }),
+        description: "ZED's default context (fallback)",
         adminOnly: true
       }
     ];
