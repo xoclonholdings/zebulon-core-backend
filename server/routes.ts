@@ -78,14 +78,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update conversation
-  app.patch("/api/conversations/:id", async (req, res) => {
+  app.patch("/api/conversations/:id", isAuthenticated, async (req: any, res) => {
     try {
       const updates = req.body;
-      const conversation = await storage.updateConversation(req.params.id, updates);
+      const conversation = await storage.getConversation(req.params.id);
       if (!conversation) {
         return res.status(404).json({ error: "Conversation not found" });
       }
-      res.json(conversation);
+      // Verify user owns this conversation
+      if (conversation.userId !== req.user.claims.sub) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      const updatedConversation = await storage.updateConversation(req.params.id, updates);
+      res.json(updatedConversation);
     } catch (error) {
       res.status(400).json({ error: "Failed to update conversation" });
     }
@@ -140,8 +145,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         content: msg.content
       }));
 
+      // Get conversation to check mode
+      const conversation = await storage.getConversation(conversationId);
+      const conversationMode = (conversation?.mode as "chat" | "agent") || "chat";
+
       // Generate AI response
-      const aiResponse = await generateChatResponse(chatHistory);
+      const aiResponse = await generateChatResponse(chatHistory, conversationMode);
 
       // Save AI response
       const aiMessageData = insertMessageSchema.parse({
@@ -172,7 +181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/conversations/:id/stream", async (req, res) => {
     try {
       const conversationId = req.params.id;
-      const { content } = req.body;
+      const { content, mode = "chat" } = req.body;
 
       if (!content) {
         return res.status(400).json({ error: "Message content is required" });
@@ -204,8 +213,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let fullResponse = "";
 
+      // Get conversation to check mode
+      const conversation = await storage.getConversation(conversationId);
+      const conversationMode = (conversation?.mode as "chat" | "agent") || mode;
+
       // Stream AI response
-      for await (const chunk of streamChatResponse(chatHistory)) {
+      for await (const chunk of streamChatResponse(chatHistory, conversationMode)) {
         fullResponse += chunk.content;
         res.write(`data: ${JSON.stringify(chunk)}\n\n`);
         

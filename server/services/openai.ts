@@ -17,13 +17,28 @@ export interface StreamResponse {
 
 export async function generateChatResponse(
   messages: ChatMessage[],
+  mode: "chat" | "agent" = "chat",
   model: string = "gpt-4o"
 ): Promise<string> {
   try {
+    // Add mode-specific system message
+    const systemMessage = mode === "agent" 
+      ? {
+          role: "system" as const,
+          content: "You are ZED, an autonomous AI agent. Work independently and provide comprehensive, thorough solutions. Take initiative to solve problems completely without asking for additional input unless absolutely necessary. Provide detailed explanations and actionable insights."
+        }
+      : {
+          role: "system" as const,
+          content: "You are ZED, an enhanced AI assistant. Engage in helpful conversation and provide clear, concise responses. Ask clarifying questions when needed to better assist the user."
+        };
+
+    const fullMessages = [systemMessage, ...messages];
+
     const response = await openai.chat.completions.create({
       model,
-      messages,
-      temperature: 0.7,
+      messages: fullMessages,
+      temperature: mode === "agent" ? 0.3 : 0.7,
+      max_tokens: mode === "agent" ? 4000 : 2000,
     });
 
     return response.choices[0].message.content || "";
@@ -35,13 +50,28 @@ export async function generateChatResponse(
 
 export async function* streamChatResponse(
   messages: ChatMessage[],
+  mode: "chat" | "agent" = "chat",
   model: string = "gpt-4o"
 ): AsyncGenerator<StreamResponse> {
   try {
+    // Add mode-specific system message
+    const systemMessage = mode === "agent" 
+      ? {
+          role: "system" as const,
+          content: "You are ZED, an autonomous AI agent. Work independently and provide comprehensive, thorough solutions. Take initiative to solve problems completely without asking for additional input unless absolutely necessary. Provide detailed explanations and actionable insights."
+        }
+      : {
+          role: "system" as const,
+          content: "You are ZED, an enhanced AI assistant. Engage in helpful conversation and provide clear, concise responses. Ask clarifying questions when needed to better assist the user."
+        };
+
+    const fullMessages = [systemMessage, ...messages];
+
     const stream = await openai.chat.completions.create({
       model,
-      messages,
-      temperature: 0.7,
+      messages: fullMessages,
+      temperature: mode === "agent" ? 0.3 : 0.7,
+      max_tokens: mode === "agent" ? 4000 : 2000,
       stream: true,
     });
 

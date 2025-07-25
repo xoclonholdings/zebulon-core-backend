@@ -11,15 +11,18 @@ import {
   Sparkles,
   Zap,
   Brain,
-  Rss
+  Rss,
+  MessageSquare,
+  Settings
 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import FileUpload from "./FileUpload";
 import ChatMessage from "./ChatMessage";
 import SocialFeed from "../social/SocialFeed";
+import ModeSelector from "./ModeSelector";
 import { useChat } from "@/hooks/use-chat";
-import type { Conversation, Message, File } from "@shared/schema";
+import type { Conversation, Message, File, ConversationMode } from "@shared/schema";
 
 interface ChatAreaProps {
   conversation?: Conversation;
@@ -32,6 +35,8 @@ export default function ChatArea({ conversation, messages, files, conversationId
   const [inputValue, setInputValue] = useState("");
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [showSocialFeed, setShowSocialFeed] = useState(false);
+  const [showModeSelector, setShowModeSelector] = useState(false);
+  const [currentMode, setCurrentMode] = useState<ConversationMode>(conversation?.mode as ConversationMode || "chat");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
@@ -39,16 +44,25 @@ export default function ChatArea({ conversation, messages, files, conversationId
   const { isStreaming, streamingMessage } = useChat(conversationId);
 
   const sendMessageMutation = useMutation({
-    mutationFn: async (data: { message: string; conversationId?: string }) => {
-      return apiRequest("/api/chat", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
+    mutationFn: async (data: { message: string; conversationId?: string; mode?: ConversationMode }) => {
+      return apiRequest("POST", "/api/chat", { ...data, mode: currentMode });
     },
     onSuccess: () => {
       if (conversationId) {
         queryClient.invalidateQueries({ queryKey: ["/api/conversations", conversationId, "messages"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
+      }
+    },
+  });
+
+  const updateModeMutation = useMutation({
+    mutationFn: async (mode: ConversationMode) => {
+      if (!conversationId) return;
+      return apiRequest("PATCH", `/api/conversations/${conversationId}`, { mode });
+    },
+    onSuccess: () => {
+      if (conversationId) {
+        queryClient.invalidateQueries({ queryKey: ["/api/conversations", conversationId] });
         queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
       }
     },
@@ -63,7 +77,8 @@ export default function ChatArea({ conversation, messages, files, conversationId
     try {
       await sendMessageMutation.mutateAsync({ 
         message, 
-        conversationId 
+        conversationId,
+        mode: currentMode
       });
     } catch (error) {
       console.error("Failed to send message:", error);
@@ -77,7 +92,19 @@ export default function ChatArea({ conversation, messages, files, conversationId
     }
   };
 
-  const handleFileUpload = (files: File[]) => {
+  const handleModeChange = async (mode: ConversationMode) => {
+    setCurrentMode(mode);
+    if (conversationId && mode !== conversation?.mode) {
+      try {
+        await updateModeMutation.mutateAsync(mode);
+      } catch (error) {
+        console.error("Failed to update mode:", error);
+      }
+    }
+    setShowModeSelector(false);
+  };
+
+  const handleFileUpload = (files: FileList) => {
     if (conversationId) {
       queryClient.invalidateQueries({ queryKey: ["/api/conversations", conversationId, "files"] });
     }
@@ -208,7 +235,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
       </div>
 
       {/* File Upload Area */}
-      {showFileUpload && (
+      {showFileUpload && conversationId && (
         <FileUpload
           conversationId={conversationId}
           onUpload={handleFileUpload}
@@ -216,28 +243,52 @@ export default function ChatArea({ conversation, messages, files, conversationId
         />
       )}
 
+      {/* Mode Selector */}
+      {showModeSelector && (
+        <div className="border-t border-white/10 p-6 zed-glass relative z-10">
+          <div className="max-w-4xl mx-auto">
+            <ModeSelector
+              selectedMode={currentMode}
+              onModeChange={handleModeChange}
+              disabled={updateModeMutation.isPending}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Input Area */}
       <div className="border-t border-white/10 zed-glass p-6 relative z-10">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-end space-x-4">
             <div className="flex-1 relative">
-              <div className="flex items-center space-x-2 mb-3">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowFileUpload(true)}
-                  className="zed-button text-muted-foreground hover:text-purple-400 h-auto p-2 rounded-xl"
-                >
-                  <Paperclip size={18} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="zed-button text-muted-foreground hover:text-cyan-400 h-auto p-2 rounded-xl"
-                >
-                  <Mic size={18} />
-                </Button>
-                <div className="flex-1" />
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowFileUpload(true)}
+                    className="zed-button text-muted-foreground hover:text-purple-400 h-auto p-2 rounded-xl"
+                  >
+                    <Paperclip size={18} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="zed-button text-muted-foreground hover:text-cyan-400 h-auto p-2 rounded-xl"
+                  >
+                    <Mic size={18} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowModeSelector(!showModeSelector)}
+                    className="zed-button text-muted-foreground hover:text-cyan-400 h-auto px-3 py-2 rounded-xl flex items-center space-x-1"
+                  >
+                    {currentMode === "chat" ? <MessageSquare size={14} /> : <Brain size={14} />}
+                    <span className="text-xs capitalize">{currentMode}</span>
+                    <Settings size={10} />
+                  </Button>
+                </div>
                 <div className="text-xs text-muted-foreground flex items-center">
                   <Sparkles size={12} className="mr-1 text-purple-400" />
                   Ready for your next task
@@ -249,7 +300,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ask ZED anything... analyze data, process documents, generate insights..."
+                  placeholder={`Message ZED in ${currentMode} mode...`}
                   className="zed-input resize-none min-h-[60px] pr-14 text-base"
                   rows={1}
                   disabled={sendMessageMutation.isPending || isStreaming}

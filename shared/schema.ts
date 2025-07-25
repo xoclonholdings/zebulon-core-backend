@@ -31,6 +31,7 @@ export const conversations = pgTable("conversations", {
   title: text("title").notNull(),
   preview: text("preview"),
   model: text("model").notNull().default("gpt-4o"),
+  mode: text("mode").notNull().default("chat"), // "chat" | "agent"
   isActive: boolean("is_active").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -83,6 +84,10 @@ export const insertConversationSchema = createInsertSchema(conversations).omit({
   createdAt: true,
   updatedAt: true,
 });
+
+// Mode validation
+export const modeSchema = z.enum(["chat", "agent"]);
+export type ConversationMode = z.infer<typeof modeSchema>;
 
 export const insertMessageSchema = createInsertSchema(messages).omit({
   id: true,
