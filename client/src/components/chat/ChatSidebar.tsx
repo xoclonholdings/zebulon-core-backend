@@ -89,7 +89,7 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
 
   if (isCollapsed) {
     return (
-      <div className="w-16 zed-sidebar flex flex-col items-center py-4 space-y-4">
+      <div className="w-16 flex flex-col items-center py-4 space-y-4 zed-glass border-r border-white/10 backdrop-blur-xl">
         <Button
           onClick={() => setIsCollapsed(false)}
           variant="ghost"
@@ -118,7 +118,7 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
   }
 
   return (
-    <div className="w-80 zed-sidebar flex flex-col h-full relative">
+    <div className="w-80 flex flex-col h-full relative zed-glass border-r border-white/10 backdrop-blur-xl">
       {/* Floating Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-4 w-20 h-20 bg-purple-600/5 rounded-full blur-2xl zed-float" />

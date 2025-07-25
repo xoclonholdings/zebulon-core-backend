@@ -45,7 +45,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
 
   const sendMessageMutation = useMutation({
     mutationFn: async (data: { message: string; conversationId?: string; mode?: ConversationMode }) => {
-      return apiRequest("POST", "/api/chat", { ...data, mode: currentMode });
+      return await apiRequest("/api/chat", "POST", { ...data, mode: currentMode });
     },
     onSuccess: () => {
       if (conversationId) {
@@ -58,7 +58,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
   const updateModeMutation = useMutation({
     mutationFn: async (mode: ConversationMode) => {
       if (!conversationId) return;
-      return apiRequest("PATCH", `/api/conversations/${conversationId}`, { mode });
+      return await apiRequest(`/api/conversations/${conversationId}`, "PATCH", { mode });
     },
     onSuccess: () => {
       if (conversationId) {
@@ -104,7 +104,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
     setShowModeSelector(false);
   };
 
-  const handleFileUpload = (files: FileList) => {
+  const handleFileUpload = (files: File[]) => {
     if (conversationId) {
       queryClient.invalidateQueries({ queryKey: ["/api/conversations", conversationId, "files"] });
     }

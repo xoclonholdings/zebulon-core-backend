@@ -13,7 +13,8 @@ import {
   TrendingUp,
   Package,
   DollarSign,
-  Eye
+  Eye,
+  ShoppingBag
 } from "lucide-react";
 
 interface FlipShopProduct {
