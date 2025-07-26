@@ -12,44 +12,13 @@ import zLogoPath from "@assets/IMG_2227_1753477194826.png";
 export default function Login() {
   const [credentials, setCredentials] = useState({ username: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
+  const [securePhrase, setSecurePhrase] = useState("");
+  const [showSecondaryAuth, setShowSecondaryAuth] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { toast } = useToast();
 
-
-
-  const loginMutation = useMutation({
-    mutationFn: async (data: { username: string; password: string }) => {
-      const response = await fetch("/api/login", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Login failed");
-      }
-      
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Welcome to ZED",
-        description: "Successfully logged in!",
-      });
-      // Reload to trigger auth check
-      window.location.reload();
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Login failed",
-        description: error.message || "Invalid credentials",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!credentials.username || !credentials.password) {
       toast({
@@ -59,7 +28,56 @@ export default function Login() {
       });
       return;
     }
-    loginMutation.mutate(credentials);
+
+    setIsLoading(true);
+
+    try {
+      const loginData: any = { 
+        username: credentials.username, 
+        password: credentials.password 
+      };
+      
+      if (securePhrase) {
+        loginData.securePhrase = securePhrase;
+      }
+
+      const response = await fetch("/api/login", {
+        method: "POST",
+        body: JSON.stringify(loginData),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: "Welcome to ZED",
+          description: "Successfully logged in!",
+        });
+        window.location.reload();
+      } else if (data.requiresSecondaryAuth) {
+        setShowSecondaryAuth(true);
+        toast({
+          title: "Additional verification required",
+          description: "Please enter your secure phrase to continue",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Login failed",
+          description: data.error || "Invalid credentials",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Login failed",
+        description: "Network error. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
 
@@ -117,7 +135,7 @@ export default function Login() {
                   value={credentials.username}
                   onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
                   className="zed-input"
-                  disabled={loginMutation.isPending}
+                  disabled={isLoading}
                 />
               </div>
 
@@ -130,7 +148,7 @@ export default function Login() {
                     value={credentials.password}
                     onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
                     className="zed-input pr-10"
-                    disabled={loginMutation.isPending}
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
@@ -142,12 +160,28 @@ export default function Login() {
                 </div>
               </div>
 
+              {showSecondaryAuth && (
+                <div className="space-y-2 border-t border-gray-700 pt-4">
+                  <div className="text-sm text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded-lg p-3">
+                    🔐 Admin verification required. Enter your secure phrase:
+                  </div>
+                  <Input
+                    type="password"
+                    placeholder="Secure Phrase (XOCLON_SECURE_2025)"
+                    value={securePhrase}
+                    onChange={(e) => setSecurePhrase(e.target.value)}
+                    className="zed-input"
+                    disabled={isLoading}
+                  />
+                </div>
+              )}
+
               <Button
                 type="submit"
                 className="w-full zed-gradient hover:zed-gradient-hover text-white"
-                disabled={loginMutation.isPending}
+                disabled={isLoading}
               >
-                {loginMutation.isPending ? (
+                {isLoading ? (
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     <span>Signing in...</span>
@@ -155,7 +189,7 @@ export default function Login() {
                 ) : (
                   <div className="flex items-center space-x-2">
                     <Sparkles size={16} />
-                    <span>Sign In</span>
+                    <span>{showSecondaryAuth ? "Verify Access" : "Sign In"}</span>
                   </div>
                 )}
               </Button>
