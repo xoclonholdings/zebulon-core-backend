@@ -54,6 +54,17 @@ app.use((req, res, next) => {
   // Run database migrations
   await runMigrations();
 
+  // Setup Prisma authentication
+  try {
+    const { setupPrismaAuth } = await import("./prismaAuth");
+    const prismaReady = await setupPrismaAuth(app);
+    if (prismaReady) {
+      log('Prisma authentication system ready');
+    }
+  } catch (error) {
+    log('[WARNING] Failed to setup Prisma authentication:', String(error));
+  }
+
   // Initialize memory system with core.memory.json
   try {
     const { MemoryService } = await import("./services/memoryService");

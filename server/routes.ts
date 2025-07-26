@@ -4,6 +4,8 @@ import { storage } from "./storage";
 import { upload, processFile, cleanupFile } from "./services/fileProcessor";
 import { generateChatResponse, streamChatResponse } from "./services/openai";
 import { setupLocalAuth, isAuthenticated } from "./localAuth";
+import { prismaAuth, prismaLogin, getCurrentUser } from "./prismaAuth";
+import { PrismaChatService } from "./prismaChatService";
 import { insertConversationSchema, insertMessageSchema, insertFileSchema, insertSessionSchema, insertCoreMemorySchema, insertProjectMemorySchema, insertScratchpadMemorySchema } from "@shared/schema";
 
 import { optimizationService } from "./services/optimizationService";
@@ -13,6 +15,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Auth middleware
   await setupLocalAuth(app);
+
+  // Add Prisma authentication routes
+  app.post("/api/prisma/login", prismaLogin);
+  app.get("/api/prisma/user", prismaAuth, getCurrentUser);
+  app.get("/api/prisma/conversations", prismaAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const conversations = await PrismaChatService.getConversations(userId);
+      res.json(conversations);
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+      res.status(500).json({ error: "Failed to fetch conversations" });
+    }
+  });
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
