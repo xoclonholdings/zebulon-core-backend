@@ -274,8 +274,11 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
       {/* User Profile */}
       <div className="p-4 border-t border-white/10">
         <div className="flex items-center space-x-3">
-          <div className="relative">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 flex items-center justify-center overflow-hidden">
+          <div className="relative group">
+            <div 
+              className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 flex items-center justify-center overflow-hidden cursor-pointer hover:scale-105 transition-transform"
+              onClick={() => document.getElementById('profile-upload')?.click()}
+            >
               {user?.profileImageUrl ? (
                 <img 
                   src={user.profileImageUrl} 
@@ -287,9 +290,10 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
               )}
             </div>
             <input
+              id="profile-upload"
               type="file"
               accept="image/*"
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              className="hidden"
               disabled={isUploadingPicture}
               onChange={async (e) => {
                 const file = e.target.files?.[0];
@@ -313,26 +317,34 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
                       // Refresh user data
                       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
                     } else {
-                      throw new Error('Upload failed');
+                      const error = await response.json();
+                      throw new Error(error.error || 'Upload failed');
                     }
                   } catch (error) {
+                    console.error('Upload error:', error);
                     toast({
                       title: "Upload failed",
-                      description: "Failed to upload profile picture. Please try again.",
+                      description: error instanceof Error ? error.message : "Failed to upload profile picture. Please try again.",
                       variant: "destructive",
                     });
                   } finally {
                     setIsUploadingPicture(false);
+                    // Reset the input so the same file can be selected again
+                    e.target.value = '';
                   }
                 }
               }}
             />
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center border-2 border-black">
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center border-2 border-black group-hover:bg-purple-400 transition-colors">
               {isUploadingPicture ? (
                 <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
               ) : (
                 <Camera size={12} className="text-white" />
               )}
+            </div>
+            {/* Hover tooltip */}
+            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+              Click to upload photo
             </div>
           </div>
           <div className="flex-1 min-w-0">
