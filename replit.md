@@ -113,6 +113,13 @@
 - ✅ **Session Management**: Compatible with existing session system for seamless user experience
 - ✅ **Memory System**: Core memory, project memory, and scratchpad memory tables available
 - ✅ **Analytics Integration**: Full analytics tracking and file storage capabilities through database
+- ✅ **Query Logging CRUD API**: Comprehensive logging system for tracking user queries, ZED responses, and interaction analytics
+  - **CREATE**: Log query interactions with metadata, duration, and context
+  - **READ**: Retrieve logs with filtering, pagination, and search capabilities  
+  - **UPDATE**: Batch operations for metadata updates and log management
+  - **DELETE**: Automated cleanup and admin deletion capabilities
+  - **Analytics**: User statistics, query patterns, and performance metrics
+  - **Security**: User-scoped access with admin override capabilities
 
 ### Previous Updates (January 25, 2025)
 

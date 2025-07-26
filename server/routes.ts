@@ -6,6 +6,7 @@ import { generateChatResponse, streamChatResponse } from "./services/openai";
 import { setupLocalAuth, isAuthenticated } from "./localAuth";
 import { prismaAuth, prismaLogin, getCurrentUser } from "./prismaAuth";
 import { PrismaChatService } from "./prismaChatService";
+import { QueryLogger } from "./services/queryLogger";
 import { insertConversationSchema, insertMessageSchema, insertFileSchema, insertSessionSchema, insertCoreMemorySchema, insertProjectMemorySchema, insertScratchpadMemorySchema } from "@shared/schema";
 
 import { optimizationService } from "./services/optimizationService";
@@ -27,6 +28,221 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching conversations:", error);
       res.status(500).json({ error: "Failed to fetch conversations" });
+    }
+  });
+
+  // ========================================
+  // QUERY LOGGING CRUD API ROUTES
+  // ========================================
+
+  // CREATE: Log a new query interaction
+  app.post("/api/query-logs", prismaAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { query, response, conversationId, model, duration, metadata } = req.body;
+
+      if (!query || !response) {
+        return res.status(400).json({ error: "Query and response are required" });
+      }
+
+      const logEntry = await QueryLogger.logQuery({
+        userId,
+        query,
+        response,
+        conversationId,
+        model,
+        duration,
+        metadata
+      });
+
+      res.status(201).json({
+        success: true,
+        logId: logEntry.id,
+        message: "Query interaction logged successfully"
+      });
+    } catch (error) {
+      console.error("Error logging query:", error);
+      res.status(500).json({ error: "Failed to log query interaction" });
+    }
+  });
+
+  // READ: Get query logs with filtering
+  app.get("/api/query-logs", prismaAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const {
+        conversationId,
+        dateFrom,
+        dateTo,
+        model,
+        limit = 50,
+        offset = 0,
+        includeAll = false
+      } = req.query;
+
+      const filters: any = {
+        limit: parseInt(limit),
+        offset: parseInt(offset)
+      };
+
+      // Admin users can see all logs, regular users only their own
+      if (!includeAll) {
+        filters.userId = userId;
+      }
+
+      if (conversationId) filters.conversationId = conversationId;
+      if (model) filters.model = model;
+      if (dateFrom) filters.dateFrom = new Date(dateFrom);
+      if (dateTo) filters.dateTo = new Date(dateTo);
+
+      const logs = await QueryLogger.getQueryLogs(filters);
+
+      res.json({
+        logs,
+        total: logs.length,
+        filters: filters
+      });
+    } catch (error) {
+      console.error("Error fetching query logs:", error);
+      res.status(500).json({ error: "Failed to fetch query logs" });
+    }
+  });
+
+  // READ: Get user query statistics
+  app.get("/api/query-logs/stats", prismaAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { days = 30, targetUserId } = req.query;
+
+      // Allow checking stats for other users (admin feature)
+      const statsUserId = targetUserId || userId;
+      
+      const stats = await QueryLogger.getUserQueryStats(statsUserId, parseInt(days));
+
+      res.json({
+        userId: statsUserId,
+        stats
+      });
+    } catch (error) {
+      console.error("Error fetching query stats:", error);
+      res.status(500).json({ error: "Failed to fetch query statistics" });
+    }
+  });
+
+  // READ: Get top/recent queries
+  app.get("/api/query-logs/top", prismaAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { limit = 10, includeAll = false } = req.query;
+
+      const targetUserId = includeAll ? undefined : userId;
+      const topQueries = await QueryLogger.getTopQueries(targetUserId, parseInt(limit));
+
+      res.json({
+        queries: topQueries,
+        limit: parseInt(limit)
+      });
+    } catch (error) {
+      console.error("Error fetching top queries:", error);
+      res.status(500).json({ error: "Failed to fetch top queries" });
+    }
+  });
+
+  // READ: Search queries by content
+  app.get("/api/query-logs/search", prismaAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { q: searchTerm, limit = 20, includeAll = false } = req.query;
+
+      if (!searchTerm) {
+        return res.status(400).json({ error: "Search term (q) is required" });
+      }
+
+      const targetUserId = includeAll ? undefined : userId;
+      const results = await QueryLogger.searchQueries(searchTerm, targetUserId, parseInt(limit));
+
+      res.json({
+        results,
+        searchTerm,
+        count: results.length
+      });
+    } catch (error) {
+      console.error("Error searching queries:", error);
+      res.status(500).json({ error: "Failed to search queries" });
+    }
+  });
+
+  // DELETE: Cleanup old query logs (admin only)
+  app.delete("/api/query-logs/cleanup", prismaAuth, async (req: any, res) => {
+    try {
+      const { daysToKeep = 90 } = req.body;
+
+      const deletedCount = await QueryLogger.cleanupOldLogs(parseInt(daysToKeep));
+
+      res.json({
+        success: true,
+        deletedCount,
+        message: `Cleaned up ${deletedCount} old query logs`
+      });
+    } catch (error) {
+      console.error("Error cleaning up query logs:", error);
+      res.status(500).json({ error: "Failed to cleanup query logs" });
+    }
+  });
+
+  // UPDATE: Batch operations for query logs
+  app.patch("/api/query-logs/batch", prismaAuth, async (req: any, res) => {
+    try {
+      const { action, logIds, metadata } = req.body;
+
+      if (!action || !logIds || !Array.isArray(logIds)) {
+        return res.status(400).json({ error: "Action and logIds array are required" });
+      }
+
+      switch (action) {
+        case 'update_metadata':
+          const { prisma } = await import("../prismaAuth");
+          const updated = await prisma.analytics.updateMany({
+            where: {
+              id: { in: logIds },
+              event_type: 'query_interaction'
+            },
+            data: {
+              metadata: {
+                ...metadata,
+                updated_at: new Date().toISOString()
+              }
+            }
+          });
+
+          res.json({
+            success: true,
+            updatedCount: updated.count,
+            action
+          });
+          break;
+
+        case 'delete':
+          const deleted = await prisma.analytics.deleteMany({
+            where: {
+              id: { in: logIds },
+              event_type: 'query_interaction'
+            }
+          });
+
+          res.json({
+            success: true,
+            deletedCount: deleted.count,
+            action
+          });
+          break;
+
+        default:
+          res.status(400).json({ error: "Invalid action. Use 'update_metadata' or 'delete'" });
+      }
+    } catch (error) {
+      console.error("Error performing batch operation:", error);
+      res.status(500).json({ error: "Failed to perform batch operation" });
     }
   });
 
