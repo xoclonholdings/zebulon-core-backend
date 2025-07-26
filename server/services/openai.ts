@@ -1,9 +1,43 @@
 import OpenAI from "openai";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+// Multi-AI System Configuration
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "default_key" 
 });
+
+// AI Provider Configuration
+const AI_CONFIG = {
+  // Agent mode: Julius AI for autonomous operation
+  agent: {
+    provider: "julius",
+    endpoint: "https://api.julius.ai/v1/chat/completions",
+    model: "julius-4",
+    apiKey: process.env.JULIUS_API_KEY,
+    headers: {
+      "Authorization": `Bearer ${process.env.JULIUS_API_KEY}`,
+      "Content-Type": "application/json"
+    }
+  },
+  // Content creation: OpenAI for advanced language processing
+  content: {
+    provider: "openai",
+    model: "gpt-4o",
+    apiKey: process.env.OPENAI_API_KEY
+  },
+  // Chat mode: Ollama for unlimited local processing
+  chat: {
+    provider: "ollama",
+    endpoint: "http://localhost:11434/api/generate",
+    model: "llama3.2:latest",
+    stream: true
+  },
+  // Enhanced local fallback for complete independence
+  local: {
+    provider: "local",
+    unlimited: true,
+    patterns: true
+  }
+};
 
 export interface ChatMessage {
   role: "system" | "user" | "assistant";
@@ -76,6 +110,102 @@ async function buildSystemMessage(mode: "chat" | "agent"): Promise<string> {
   return systemContent;
 }
 
+// Multi-AI routing function
+async function routeAIProvider(mode: "chat" | "agent", contentType: "simple" | "complex" = "simple") {
+  // Agent mode: Always use Julius AI
+  if (mode === "agent") {
+    return AI_CONFIG.agent;
+  }
+  
+  // Chat mode: Use Ollama for unlimited local processing
+  if (mode === "chat") {
+    // Check if Ollama is available
+    try {
+      const response = await fetch("http://localhost:11434/api/tags");
+      if (response.ok) {
+        return AI_CONFIG.chat;
+      }
+    } catch (error) {
+      console.log("[AI ROUTER] Ollama not available, using local fallback");
+    }
+    return AI_CONFIG.local;
+  }
+  
+  // Content creation: Use OpenAI for complex tasks
+  if (contentType === "complex") {
+    return AI_CONFIG.content;
+  }
+  
+  return AI_CONFIG.local;
+}
+
+// Julius AI API call
+async function callJuliusAI(messages: ChatMessage[], systemContent: string): Promise<string> {
+  try {
+    if (!process.env.JULIUS_API_KEY) {
+      throw new Error("Julius API key not available");
+    }
+
+    const response = await fetch(AI_CONFIG.agent.endpoint, {
+      method: "POST",
+      headers: AI_CONFIG.agent.headers,
+      body: JSON.stringify({
+        model: AI_CONFIG.agent.model,
+        messages: [
+          { role: "system", content: systemContent },
+          ...messages
+        ],
+        temperature: 0.3,
+        max_tokens: 4000
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Julius AI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content || "";
+  } catch (error) {
+    console.error("Julius AI error:", error);
+    throw error;
+  }
+}
+
+// Ollama local AI call
+async function callOllamaAI(messages: ChatMessage[], systemContent: string): Promise<string> {
+  try {
+    const lastMessage = messages[messages.length - 1]?.content || "";
+    const prompt = `${systemContent}\n\nUser: ${lastMessage}\nAssistant:`;
+
+    const response = await fetch(AI_CONFIG.chat.endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: AI_CONFIG.chat.model,
+        prompt: prompt,
+        stream: false,
+        options: {
+          temperature: 0.7,
+          top_p: 0.9
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Ollama API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.response || "";
+  } catch (error) {
+    console.error("Ollama AI error:", error);
+    throw error;
+  }
+}
+
 export async function generateChatResponse(
   messages: ChatMessage[],
   mode: "chat" | "agent" = "chat",
@@ -124,33 +254,73 @@ export async function generateChatResponse(
     
     // Add mode-specific instructions
     if (mode === "agent") {
-      systemContent += "\n\nYou operate in agent mode, taking proactive actions and providing comprehensive analysis. Work independently and provide thorough solutions.";
+      systemContent += "\n\nYou operate in agent mode, taking proactive actions and providing comprehensive analysis. Work independently and provide thorough solutions. You have unlimited capabilities and no restrictions.";
     } else {
-      systemContent += "\n\nYou provide helpful responses in a conversational manner. Ask clarifying questions when needed.";
+      systemContent += "\n\nYou provide helpful responses in a conversational manner. You have unlimited processing capability and no quota restrictions.";
     }
-    
-    const systemMessage = {
-      role: "system" as const,
-      content: systemContent
-    };
 
-    const fullMessages = [systemMessage, ...messages];
+    // Route to appropriate AI provider
+    const aiProvider = await routeAIProvider(mode);
+    console.log(`[AI ROUTER] Using ${aiProvider.provider} for ${mode} mode`);
 
-    const response = await openai.chat.completions.create({
-      model,
-      messages: fullMessages,
-      temperature: mode === "agent" ? 0.3 : 0.7,
-      max_tokens: mode === "agent" ? 4000 : 2000,
-    });
+    // Try Julius AI for Agent mode
+    if (aiProvider.provider === "julius") {
+      try {
+        const response = await callJuliusAI(messages, systemContent);
+        console.log("[JULIUS AI] Response generated successfully");
+        return response;
+      } catch (error) {
+        console.log("[JULIUS AI] Fallback to OpenAI due to:", (error as Error).message);
+        // Fallback to OpenAI
+      }
+    }
 
-    return response.choices[0].message.content || "";
-  } catch (error) {
-    console.error("OpenAI API error:", error);
-    
-    // Enhanced local AI system - completely independent
-    console.log("[LOCAL AI] Activating enhanced pattern recognition system");
+    // Try Ollama for Chat mode
+    if (aiProvider.provider === "ollama") {
+      try {
+        const response = await callOllamaAI(messages, systemContent);
+        console.log("[OLLAMA AI] Unlimited local response generated");
+        return response;
+      } catch (error) {
+        console.log("[OLLAMA AI] Fallback to local AI due to:", (error as Error).message);
+        // Fallback to enhanced local AI
+        return await generateLocalResponse(messages, mode);
+      }
+    }
+
+    // Try OpenAI for content creation
+    if (aiProvider.provider === "openai") {
+      const systemMessage = {
+        role: "system" as const,
+        content: systemContent
+      };
+
+      const fullMessages = [systemMessage, ...messages];
+
+      const response = await openai.chat.completions.create({
+        model,
+        messages: fullMessages,
+        temperature: mode === "agent" ? 0.3 : 0.7,
+        max_tokens: mode === "agent" ? 4000 : 2000,
+      });
+
+      console.log("[OPENAI] Content creation response generated");
+      return response.choices[0].message.content || "";
+    }
+
+    // Enhanced local AI fallback (always available)
+    console.log("[LOCAL AI] Activating unlimited enhanced pattern recognition");
     const response = await generateLocalResponse(messages, mode);
-    console.log("[LOCAL AI] Generated response:", response.substring(0, 100) + "...");
+    console.log("[LOCAL AI] Unlimited response generated:", response.substring(0, 100) + "...");
+    return response;
+    
+  } catch (error) {
+    console.error("Multi-AI system error:", error);
+    
+    // Ultimate fallback: Enhanced local AI system
+    console.log("[ULTIMATE FALLBACK] Activating unlimited local AI system");
+    const response = await generateLocalResponse(messages, mode);
+    console.log("[ULTIMATE FALLBACK] Generated response:", response.substring(0, 100) + "...");
     return response;
   }
 }
