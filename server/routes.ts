@@ -25,6 +25,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
+
+  // Upload profile picture
+  app.post('/api/auth/profile-picture', isAuthenticated, upload.single('profilePicture'), async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const file = req.file;
+      
+      if (!file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      // Generate a profile picture URL (in a real app, you'd upload to cloud storage)
+      const profileImageUrl = `/uploads/${file.filename}`;
+      
+      // Update user's profile picture
+      const updatedUser = await storage.updateUser(userId, { profileImageUrl });
+      
+      res.json({ 
+        success: true, 
+        profileImageUrl,
+        user: updatedUser 
+      });
+    } catch (error) {
+      console.error("Profile picture upload error:", error);
+      res.status(500).json({ error: "Failed to upload profile picture" });
+    }
+  });
   
   // Get conversations for authenticated user
   app.get("/api/conversations", isAuthenticated, async (req: any, res) => {

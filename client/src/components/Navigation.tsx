@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   MessageSquare, 
-  ShoppingBag,
   Menu,
   X
 } from "lucide-react";
@@ -15,7 +14,6 @@ export default function Navigation() {
 
   const navItems = [
     { path: "/", label: "Chat", icon: MessageSquare },
-    { path: "/flipshop", label: "Shop", icon: ShoppingBag },
   ];
 
   return (

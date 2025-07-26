@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 import { 
   MessageSquare, 
@@ -9,7 +10,8 @@ import {
   X, 
   Sparkles,
   Zap,
-  ShoppingBag
+  Camera,
+  Upload
 } from "lucide-react";
 import zLogoPath from "@assets/IMG_2227_1753477194826.png";
 import { useLocation, Link } from "wouter";
@@ -37,7 +39,9 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
   const [location] = useLocation();
   const queryClient = useQueryClient();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isUploadingPicture, setIsUploadingPicture] = useState(false);
   const { user } = useAuth() as { user?: LocalUser };
+  const { toast } = useToast();
 
   const createConversationMutation = useMutation({
     mutationFn: async () => {
@@ -195,16 +199,6 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
 
         {/* Navigation */}
         <div className="mt-4 space-y-2">
-          <Link href="/flipshop">
-            <Button
-              variant="ghost"
-              className="w-full justify-start space-x-3 h-12 text-left zed-button text-muted-foreground hover:text-foreground"
-            >
-              <ShoppingBag size={18} />
-              <span>Flip.Shop</span>
-            </Button>
-          </Link>
-          
           <SettingsModal />
         </div>
       </div>
@@ -277,11 +271,79 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
         </div>
       </div>
 
-      {/* Status */}
+      {/* User Profile */}
       <div className="p-4 border-t border-white/10">
-        <div className="flex items-center justify-center space-x-2">
-          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-          <span className="text-xs text-muted-foreground">System Online</span>
+        <div className="flex items-center space-x-3">
+          <div className="relative">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 flex items-center justify-center overflow-hidden">
+              {user?.profileImageUrl ? (
+                <img 
+                  src={user.profileImageUrl} 
+                  alt={user.firstName || "User"} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <User size={20} className="text-white" />
+              )}
+            </div>
+            <input
+              type="file"
+              accept="image/*"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              disabled={isUploadingPicture}
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setIsUploadingPicture(true);
+                  try {
+                    const formData = new FormData();
+                    formData.append('profilePicture', file);
+                    
+                    const response = await fetch('/api/auth/profile-picture', {
+                      method: 'POST',
+                      body: formData,
+                    });
+                    
+                    if (response.ok) {
+                      const result = await response.json();
+                      toast({
+                        title: "Profile picture updated",
+                        description: "Your profile picture has been successfully updated!",
+                      });
+                      // Refresh user data
+                      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+                    } else {
+                      throw new Error('Upload failed');
+                    }
+                  } catch (error) {
+                    toast({
+                      title: "Upload failed",
+                      description: "Failed to upload profile picture. Please try again.",
+                      variant: "destructive",
+                    });
+                  } finally {
+                    setIsUploadingPicture(false);
+                  }
+                }
+              }}
+            />
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center border-2 border-black">
+              {isUploadingPicture ? (
+                <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Camera size={12} className="text-white" />
+              )}
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-foreground truncate">
+              {user?.firstName || user?.email || "ZED Admin"}
+            </p>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-xs text-muted-foreground">Online</span>
+            </div>
+          </div>
         </div>
       </div>
 
