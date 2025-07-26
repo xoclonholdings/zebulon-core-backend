@@ -237,7 +237,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
 
         {/* Mode Selector */}
         {showModeSelector && (
-          <div className="border-t border-white/10 p-4 md:p-6 zed-glass relative z-10">
+          <div className="border-t border-white/10 p-4 md:p-6 zed-glass relative z-20 max-h-[60vh] overflow-y-auto">
             <div className="max-w-4xl mx-auto">
               <ModeSelector
                 selectedMode={currentMode}

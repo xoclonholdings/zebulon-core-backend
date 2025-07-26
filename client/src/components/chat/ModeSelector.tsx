@@ -51,25 +51,25 @@ export default function ModeSelector({ selectedMode, onModeChange, disabled }: M
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-h-[80vh] overflow-y-auto">
       <div className="text-center space-y-2">
         <div className="flex items-center justify-center space-x-2">
           <Bot className="text-cyan-400" size={20} />
-          <h3 className="text-lg font-semibold text-foreground">Choose Your ZED Experience</h3>
+          <h3 className="text-lg md:text-xl font-semibold text-foreground">Choose Your ZED Experience</h3>
         </div>
         <p className="text-sm text-muted-foreground">
           Select how you want ZED to interact with you
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto">
         {modes.map((mode) => {
           const isSelected = selectedMode === mode.id;
           
           return (
             <Card
               key={mode.id}
-              className={`p-6 cursor-pointer transition-all duration-300 hover:zed-glow ${
+              className={`p-4 md:p-6 cursor-pointer transition-all duration-300 hover:zed-glow ${
                 isSelected 
                   ? 'ring-2 ring-cyan-400/50 zed-gradient border-transparent' 
                   : 'zed-message hover:border-cyan-400/30'

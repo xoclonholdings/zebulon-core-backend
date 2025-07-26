@@ -435,3 +435,57 @@
   font-style: italic;
   color: hsl(240, 4%, 75%);
 }
+
+/* Mobile responsiveness and scrolling optimizations */
+.h-screen-mobile {
+  height: 100vh;
+  height: -webkit-fill-available;
+  height: 100dvh;
+}
+
+.scroll-smooth {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.overflow-auto {
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
+}
+
+.overflow-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3);
+  border-radius: 3px;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.5);
+}
+
+/* Touch-friendly mobile interactions */
+.btn-touch {
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+}
+
+@media (max-width: 768px) {
+  .zed-button {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+  }
+  
+  .zed-input {
+    min-height: 48px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
