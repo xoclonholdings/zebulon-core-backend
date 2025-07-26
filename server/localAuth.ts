@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { storage } from "./storage";
 
-// Default credentials - changeable through settings
+// Default credentials and security settings - changeable through settings
 let LOCAL_USERS = [
   {
     id: "user_001",
@@ -15,6 +15,14 @@ let LOCAL_USERS = [
   }
 ];
 
+// Admin security settings - updatable by admin
+let ADMIN_SECURITY_SETTINGS = {
+  securePhrase: "XOCLON_SECURE_2025",
+  sessionTimeoutMinutes: 45,
+  maxFailedAttempts: 3,
+  lockoutDurationMinutes: 15
+};
+
 export interface LocalUser {
   id: string;
   username: string;
@@ -25,7 +33,7 @@ export interface LocalUser {
 }
 
 export function getLocalSession() {
-  const sessionTtl = 45 * 60 * 1000; // 45 minutes for Admin security
+  const sessionTtl = ADMIN_SECURITY_SETTINGS.sessionTimeoutMinutes * 60 * 1000;
   
   return session({
     secret: process.env.SESSION_SECRET || "zed-local-secret-key-change-in-production",
@@ -75,11 +83,11 @@ export async function setupLocalAuth(app: any) {
       const attempts = VERIFICATION_ATTEMPTS.get(attemptKey) || { count: 0, lastAttempt: 0 };
       
       // Check for repeated failed attempts
-      if (attempts.count >= 3 && Date.now() - attempts.lastAttempt < 15 * 60 * 1000) {
+      if (attempts.count >= ADMIN_SECURITY_SETTINGS.maxFailedAttempts && Date.now() - attempts.lastAttempt < ADMIN_SECURITY_SETTINGS.lockoutDurationMinutes * 60 * 1000) {
         return res.status(429).json({ 
           error: "Too many failed attempts", 
           requiresChallenge: true,
-          message: "Please wait 15 minutes or provide your secure phrase to bypass"
+          message: `Please wait ${ADMIN_SECURITY_SETTINGS.lockoutDurationMinutes} minutes or provide your secure phrase to bypass`
         });
       }
 
@@ -110,7 +118,7 @@ export async function setupLocalAuth(app: any) {
         }
         
         // Verify secure phrase if provided
-        if (securePhrase && securePhrase !== "XOCLON_SECURE_2025") {
+        if (securePhrase && securePhrase !== ADMIN_SECURITY_SETTINGS.securePhrase) {
           VERIFICATION_ATTEMPTS.set(attemptKey, {
             count: attempts.count + 1,
             lastAttempt: Date.now(),
@@ -120,7 +128,7 @@ export async function setupLocalAuth(app: any) {
         }
         
         // If verification passed, mark device as trusted
-        if (securePhrase === "XOCLON_SECURE_2025" || deviceTrusted) {
+        if (securePhrase === ADMIN_SECURITY_SETTINGS.securePhrase || deviceTrusted) {
           TRUSTED_DEVICES.set(deviceFingerprint, {
             userId: user.id,
             verified: true,
@@ -161,7 +169,7 @@ export async function setupLocalAuth(app: any) {
           firstName: user.firstName,
           lastName: user.lastName,
           isAdmin: user.username === 'Admin',
-          sessionExpiry: 45 // minutes
+          sessionExpiry: ADMIN_SECURITY_SETTINGS.sessionTimeoutMinutes
         }
       });
     } catch (error) {
@@ -266,7 +274,115 @@ export async function setupLocalAuth(app: any) {
       res.status(404).json({ error: "User not found" });
     }
   });
+
+  // Get current security settings (Admin only)
+  app.get("/api/admin/security-settings", isLocalAuthenticated, async (req: Request, res: Response) => {
+    const user = (req.session as any)?.user;
+    if (!user || user.username !== 'Admin') {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    
+    res.json({
+      currentSecurePhrase: ADMIN_SECURITY_SETTINGS.securePhrase,
+      sessionTimeoutMinutes: ADMIN_SECURITY_SETTINGS.sessionTimeoutMinutes,
+      maxFailedAttempts: ADMIN_SECURITY_SETTINGS.maxFailedAttempts,
+      lockoutDurationMinutes: ADMIN_SECURITY_SETTINGS.lockoutDurationMinutes
+    });
+  });
+
+  // Update security settings (Admin only)
+  app.post("/api/admin/security-settings", isLocalAuthenticated, async (req: Request, res: Response) => {
+    const user = (req.session as any)?.user;
+    if (!user || user.username !== 'Admin') {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    const { 
+      newSecurePhrase, 
+      sessionTimeoutMinutes, 
+      maxFailedAttempts, 
+      lockoutDurationMinutes 
+    } = req.body;
+
+    // Validate inputs
+    if (newSecurePhrase && (typeof newSecurePhrase !== 'string' || newSecurePhrase.length < 8)) {
+      return res.status(400).json({ error: "Secure phrase must be at least 8 characters long" });
+    }
+
+    if (sessionTimeoutMinutes && (sessionTimeoutMinutes < 5 || sessionTimeoutMinutes > 480)) {
+      return res.status(400).json({ error: "Session timeout must be between 5 and 480 minutes" });
+    }
+
+    if (maxFailedAttempts && (maxFailedAttempts < 1 || maxFailedAttempts > 10)) {
+      return res.status(400).json({ error: "Max failed attempts must be between 1 and 10" });
+    }
+
+    if (lockoutDurationMinutes && (lockoutDurationMinutes < 1 || lockoutDurationMinutes > 60)) {
+      return res.status(400).json({ error: "Lockout duration must be between 1 and 60 minutes" });
+    }
+
+    // Update settings
+    if (newSecurePhrase) {
+      ADMIN_SECURITY_SETTINGS.securePhrase = newSecurePhrase;
+    }
+    if (sessionTimeoutMinutes) {
+      ADMIN_SECURITY_SETTINGS.sessionTimeoutMinutes = sessionTimeoutMinutes;
+    }
+    if (maxFailedAttempts) {
+      ADMIN_SECURITY_SETTINGS.maxFailedAttempts = maxFailedAttempts;
+    }
+    if (lockoutDurationMinutes) {
+      ADMIN_SECURITY_SETTINGS.lockoutDurationMinutes = lockoutDurationMinutes;
+    }
+
+    res.json({
+      success: true,
+      message: "Security settings updated successfully",
+      settings: {
+        securePhrase: ADMIN_SECURITY_SETTINGS.securePhrase,
+        sessionTimeoutMinutes: ADMIN_SECURITY_SETTINGS.sessionTimeoutMinutes,
+        maxFailedAttempts: ADMIN_SECURITY_SETTINGS.maxFailedAttempts,
+        lockoutDurationMinutes: ADMIN_SECURITY_SETTINGS.lockoutDurationMinutes
+      }
+    });
+  });
 }
+
+export const isLocalAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
+  const session = req.session as any;
+  
+  if (!session?.userId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  // Check session expiry
+  if (session.lastActivity && Date.now() - session.lastActivity > ADMIN_SECURITY_SETTINGS.sessionTimeoutMinutes * 60 * 1000) {
+    req.session.destroy(() => {});
+    return res.status(401).json({ message: "Session expired" });
+  }
+
+  // Update last activity
+  session.lastActivity = Date.now();
+
+  // Enhanced device verification for Admin
+  if (session.user?.username === 'Admin') {
+    const currentFingerprint = getDeviceFingerprint(req);
+    if (session.deviceFingerprint !== currentFingerprint) {
+      req.session.destroy(() => {});
+      return res.status(401).json({ message: "Device verification failed" });
+    }
+  }
+
+  // Attach user to request
+  (req as any).user = {
+    claims: {
+      sub: session.userId,
+      username: session.user?.username
+    }
+  };
+
+  next();
+};
 
 export const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
   const session = req.session as any;
