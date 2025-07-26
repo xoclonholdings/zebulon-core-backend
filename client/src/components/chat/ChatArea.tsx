@@ -37,6 +37,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [showSocialFeed, setShowSocialFeed] = useState(false);
   const [showModeSelector, setShowModeSelector] = useState(false);
+  const [hasStartedTyping, setHasStartedTyping] = useState(false);
   const [currentMode, setCurrentMode] = useState<ConversationMode>(conversation?.mode as ConversationMode || "chat");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -120,7 +121,12 @@ export default function ChatArea({ conversation, messages, files, conversationId
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
-  }, [inputValue]);
+    
+    // Hide welcome message when user starts typing
+    if (inputValue.trim() && !hasStartedTyping) {
+      setHasStartedTyping(true);
+    }
+  }, [inputValue, hasStartedTyping]);
 
   return (
     <div className="flex-1 flex h-screen-mobile relative overflow-hidden">
@@ -163,24 +169,21 @@ export default function ChatArea({ conversation, messages, files, conversationId
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 md:py-6 space-y-4 md:space-y-6 relative z-10">
-          {messages.length === 0 && !isStreaming ? (
-            <div className="flex items-start space-x-4 max-w-4xl mx-auto">
-              <Card className="flex-1 p-4 md:p-6 zed-message zed-morph-border ml-4">
-                <div className="flex items-center space-x-2 mb-4">
-                  <div className="flex items-center space-x-2">
-                    <img src={zLogoPath} alt="Z" className="w-4 h-4" />
-                    <span className="text-lg font-semibold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">ZED</span>
-                  </div>
+          {/* Only show welcome message if no messages AND user hasn't started typing */}
+          {messages.length === 0 && !isStreaming && !hasStartedTyping ? (
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <Card className="max-w-md p-6 zed-message zed-morph-border text-center">
+                <div className="flex items-center justify-center space-x-2 mb-4">
+                  <img src={zLogoPath} alt="Z" className="w-6 h-6" />
+                  <span className="text-xl font-semibold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">ZED</span>
                   <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-300">AI Assistant</Badge>
                 </div>
-                <div className="prose prose-sm max-w-none">
-                  <p className="text-base md:text-lg leading-relaxed">
-                    Hello! I'm <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent font-semibold inline-flex items-center gap-1"><img src={zLogoPath} alt="Z" className="w-4 h-4" />ZED</span>, your enhanced AI assistant. I combine advanced AI capabilities with powerful document processing to help you with any task.
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-4 flex items-center">
-                    <Zap size={16} className="mr-2 text-cyan-400" />
-                    Upload files up to 32GB • Analyze documents • Generate insights • Process any data format
-                  </p>
+                <p className="text-sm text-muted-foreground">
+                  Enhanced AI assistant ready to help with any task
+                </p>
+                <div className="mt-4 text-xs text-muted-foreground/70 flex items-center justify-center">
+                  <Zap size={12} className="mr-1 text-cyan-400" />
+                  Start typing to begin
                 </div>
               </Card>
             </div>
