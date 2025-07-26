@@ -43,11 +43,16 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background: #000000 !important;
     min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile */
     overflow-x: hidden;
     /* Prevent any layout shifts during loading */
     visibility: visible;
     opacity: 1;
     transition: none;
+    /* Mobile-specific optimizations */
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
   
   /* Ensure immediate black background */
@@ -71,6 +76,101 @@
 
   ::-webkit-scrollbar-thumb:hover {
     background: hsl(266, 85%, 68%);
+  }
+}
+
+/* Mobile and Responsive Design */
+@layer utilities {
+  /* Responsive layout utilities */
+  .h-screen-mobile {
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height */
+  }
+  
+  .min-h-screen-mobile {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  
+  /* Mobile-first responsive sidebar */
+  .sidebar-mobile {
+    @apply fixed inset-y-0 left-0 z-50 w-80 transform transition-transform duration-300 ease-in-out;
+  }
+  
+  .sidebar-mobile.hidden {
+    @apply -translate-x-full;
+  }
+  
+  /* Chat area responsive */
+  .chat-area-mobile {
+    @apply flex-1 flex flex-col;
+  }
+  
+  /* Responsive text sizing */
+  .text-responsive {
+    @apply text-sm sm:text-base;
+  }
+  
+  /* Touch-friendly buttons */
+  .btn-touch {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+/* Responsive breakpoints */
+@media (max-width: 768px) {
+  /* Mobile portrait and landscape */
+  .sidebar-desktop {
+    display: none;
+  }
+  
+  .chat-container {
+    flex-direction: column;
+  }
+  
+  /* Ensure sidebar doesn't take full width on mobile */
+  .sidebar-mobile {
+    width: min(80vw, 320px);
+  }
+}
+
+@media (max-width: 640px) {
+  /* Small mobile devices */
+  .sidebar-mobile {
+    width: min(85vw, 280px);
+  }
+  
+  /* Smaller padding on mobile */
+  .p-mobile {
+    @apply p-3;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Mobile landscape - reduce vertical spacing */
+  .py-mobile-landscape {
+    @apply py-1;
+  }
+  
+  /* Compact sidebar on landscape */
+  .sidebar-mobile {
+    width: min(60vw, 280px);
+  }
+  
+  /* Ensure content fits in landscape */
+  .h-screen-mobile {
+    height: 100vh;
+  }
+}
+
+/* Ensure proper viewport on iOS */
+@supports (-webkit-touch-callout: none) {
+  .h-screen-mobile {
+    height: -webkit-fill-available;
+  }
+  
+  .min-h-screen-mobile {
+    min-height: -webkit-fill-available;
   }
 }
 

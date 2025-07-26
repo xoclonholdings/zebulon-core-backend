@@ -25,6 +25,8 @@ import SettingsModal from "@/components/settings/SettingsModal";
 
 interface ChatSidebarProps {
   conversations: Conversation[];
+  onClose?: () => void;
+  isMobile?: boolean;
 }
 
 interface LocalUser {
@@ -35,7 +37,7 @@ interface LocalUser {
   profileImageUrl?: string;
 }
 
-export default function ChatSidebar({ conversations }: ChatSidebarProps) {
+export default function ChatSidebar({ conversations, onClose, isMobile = false }: ChatSidebarProps) {
   const [location] = useLocation();
   const queryClient = useQueryClient();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -123,7 +125,7 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
   }
 
   return (
-    <div className="w-80 flex flex-col h-full relative zed-glass border-r border-purple-500/30 backdrop-blur-xl">
+    <div className={`${isMobile ? 'w-full h-screen-mobile' : 'w-80 h-full'} flex flex-col relative zed-glass ${isMobile ? '' : 'border-r'} border-purple-500/30 backdrop-blur-xl`}>
       {/* Cyberpunk Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-4 w-20 h-20 bg-purple-600/10 rounded-full blur-2xl zed-float" />
@@ -145,14 +147,25 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
           
           <div className="flex items-center space-x-2">
             <LogoutButton />
-            <Button
-              onClick={() => setIsCollapsed(true)}
-              variant="ghost"
-              size="sm"
-              className="w-8 h-8 zed-button rounded-xl p-0 text-muted-foreground hover:text-foreground"
-            >
-              <X size={16} />
-            </Button>
+            {isMobile ? (
+              <Button
+                onClick={onClose}
+                variant="ghost"
+                size="sm"
+                className="w-8 h-8 zed-button rounded-xl p-0 text-muted-foreground hover:text-foreground"
+              >
+                <X size={16} />
+              </Button>
+            ) : (
+              <Button
+                onClick={() => setIsCollapsed(true)}
+                variant="ghost"
+                size="sm"
+                className="w-8 h-8 zed-button rounded-xl p-0 text-muted-foreground hover:text-foreground"
+              >
+                <X size={16} />
+              </Button>
+            )}
           </div>
         </div>
 

@@ -29,9 +29,10 @@ interface ChatAreaProps {
   messages: Message[];
   files: DBFile[];
   conversationId?: string;
+  isMobile?: boolean;
 }
 
-export default function ChatArea({ conversation, messages, files, conversationId }: ChatAreaProps) {
+export default function ChatArea({ conversation, messages, files, conversationId, isMobile = false }: ChatAreaProps) {
   const [inputValue, setInputValue] = useState("");
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [showSocialFeed, setShowSocialFeed] = useState(false);

@@ -1,13 +1,31 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import ChatArea from "@/components/chat/ChatArea";
 import { apiRequest } from "@/lib/queryClient";
+import { Button } from "@/components/ui/button";
+import { Menu, X } from "lucide-react";
 import type { Conversation, Message, File as DBFile } from "@shared/schema";
 
 export default function Chat() {
   const { id: conversationId } = useParams<{ id?: string }>();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth >= 768) {
+        setIsSidebarOpen(true); // Always show sidebar on desktop
+      }
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Fetch conversations for sidebar
   const { data: conversations = [] } = useQuery<Conversation[]>({
@@ -35,7 +53,7 @@ export default function Chat() {
   });
 
   return (
-    <div className="flex h-screen bg-black relative overflow-hidden">
+    <div className="flex h-screen-mobile bg-black relative overflow-hidden">
       {/* Cyberpunk Grid Background */}
       <div className="absolute inset-0 opacity-10 pointer-events-none" 
            style={{
@@ -53,13 +71,48 @@ export default function Chat() {
         <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl zed-float" style={{ animationDelay: '2s' }} />
       </div>
       
-      <ChatSidebar conversations={conversations} />
-      <ChatArea 
-        conversation={currentConversation}
-        messages={messages}
-        files={files}
-        conversationId={conversationId}
-      />
+      {/* Mobile Menu Button */}
+      {isMobile && (
+        <Button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="fixed top-4 left-4 z-50 w-12 h-12 rounded-xl bg-black/80 backdrop-blur-sm border border-purple-500/30 hover:bg-purple-500/20 transition-all duration-200"
+          size="sm"
+        >
+          {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+        </Button>
+      )}
+
+      {/* Mobile Backdrop */}
+      {isMobile && isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+      
+      {/* Sidebar - Responsive */}
+      <div className={`
+        ${isMobile ? 'sidebar-mobile' : 'sidebar-desktop'} 
+        ${isMobile && !isSidebarOpen ? 'hidden' : ''}
+        ${isMobile ? 'z-50' : 'relative'}
+      `}>
+        <ChatSidebar 
+          conversations={conversations} 
+          onClose={() => setIsSidebarOpen(false)}
+          isMobile={isMobile}
+        />
+      </div>
+      
+      {/* Chat Area - Responsive */}
+      <div className={`chat-area-mobile ${isMobile ? 'w-full' : 'flex-1'}`}>
+        <ChatArea 
+          conversation={currentConversation}
+          messages={messages}
+          files={files}
+          conversationId={conversationId}
+          isMobile={isMobile}
+        />
+      </div>
     </div>
   );
 }
