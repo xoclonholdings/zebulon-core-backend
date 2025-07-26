@@ -246,6 +246,253 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ========================================
+  // INTERACTION LOGGING API ROUTES
+  // ========================================
+
+  // POST: Log user interaction with ZED
+  app.post("/api/log", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.user?.id;
+      const { prompt, response, metadata } = req.body;
+
+      // Validate required fields
+      if (!prompt || !response) {
+        return res.status(400).json({ 
+          error: "Both prompt and response are required" 
+        });
+      }
+
+      if (!userId) {
+        return res.status(401).json({ 
+          error: "User not authenticated" 
+        });
+      }
+
+      // Import Prisma client
+      const { PrismaClient } = await import("@prisma/client");
+      const prisma = new PrismaClient();
+
+      try {
+        // Create interaction log entry
+        const logEntry = await prisma.interaction_log.create({
+          data: {
+            user_id: userId,
+            prompt: prompt.toString(),
+            response: response.toString(),
+            metadata: metadata || {},
+            timestamp: new Date()
+          }
+        });
+
+        console.log(`[INTERACTION_LOG] Logged interaction for user ${userId}: ${logEntry.id}`);
+
+        res.status(201).json({
+          success: true,
+          logId: logEntry.id,
+          timestamp: logEntry.timestamp,
+          message: "Interaction logged successfully"
+        });
+
+      } finally {
+        await prisma.$disconnect();
+      }
+
+    } catch (error) {
+      console.error("Error logging interaction:", error);
+      res.status(500).json({ 
+        error: "Failed to log interaction",
+        details: error.message 
+      });
+    }
+  });
+
+  // GET: Fetch interaction history for specific user
+  app.get("/api/logs/:userId", isAuthenticated, async (req: any, res) => {
+    try {
+      const requestedUserId = req.params.userId;
+      const sessionUserId = req.session.user?.id;
+      const { limit = 50, offset = 0, dateFrom, dateTo } = req.query;
+
+      // Security check: users can only access their own logs unless admin
+      const isAdmin = req.session.user?.email === 'admin@zed.local';
+      if (!isAdmin && requestedUserId !== sessionUserId) {
+        return res.status(403).json({ 
+          error: "Access denied. You can only view your own interaction logs" 
+        });
+      }
+
+      // Import Prisma client
+      const { PrismaClient } = await import("@prisma/client");
+      const prisma = new PrismaClient();
+
+      try {
+        // Build query filters
+        const whereClause: any = {
+          user_id: requestedUserId
+        };
+
+        // Add date filtering if provided
+        if (dateFrom || dateTo) {
+          whereClause.timestamp = {};
+          if (dateFrom) {
+            whereClause.timestamp.gte = new Date(dateFrom);
+          }
+          if (dateTo) {
+            whereClause.timestamp.lte = new Date(dateTo);
+          }
+        }
+
+        // Fetch interaction logs with user details
+        const logs = await prisma.interaction_log.findMany({
+          where: whereClause,
+          orderBy: { timestamp: 'desc' },
+          take: parseInt(limit),
+          skip: parseInt(offset),
+          include: {
+            users: {
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true
+              }
+            }
+          }
+        });
+
+        // Get total count for pagination
+        const totalCount = await prisma.interaction_log.count({
+          where: whereClause
+        });
+
+        // Format response with memory-friendly structure
+        const formattedLogs = logs.map(log => ({
+          id: log.id,
+          prompt: log.prompt,
+          response: log.response,
+          timestamp: log.timestamp,
+          metadata: log.metadata,
+          user: {
+            email: log.users.email,
+            name: `${log.users.firstName || ''} ${log.users.lastName || ''}`.trim()
+          }
+        }));
+
+        res.json({
+          success: true,
+          userId: requestedUserId,
+          logs: formattedLogs,
+          pagination: {
+            total: totalCount,
+            limit: parseInt(limit),
+            offset: parseInt(offset),
+            hasMore: (parseInt(offset) + parseInt(limit)) < totalCount
+          },
+          filters: {
+            dateFrom,
+            dateTo
+          }
+        });
+
+      } finally {
+        await prisma.$disconnect();
+      }
+
+    } catch (error) {
+      console.error("Error fetching interaction logs:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch interaction logs",
+        details: error.message 
+      });
+    }
+  });
+
+  // GET: Get interaction statistics for user (admin dashboard)
+  app.get("/api/logs/:userId/stats", isAuthenticated, async (req: any, res) => {
+    try {
+      const requestedUserId = req.params.userId;
+      const sessionUserId = req.session.user?.id;
+      const { days = 30 } = req.query;
+
+      // Security check: users can only access their own stats unless admin
+      const isAdmin = req.session.user?.email === 'admin@zed.local';
+      if (!isAdmin && requestedUserId !== sessionUserId) {
+        return res.status(403).json({ 
+          error: "Access denied. You can only view your own statistics" 
+        });
+      }
+
+      // Import Prisma client
+      const { PrismaClient } = await import("@prisma/client");
+      const prisma = new PrismaClient();
+
+      try {
+        const since = new Date();
+        since.setDate(since.getDate() - parseInt(days));
+
+        // Get basic statistics
+        const totalInteractions = await prisma.interaction_log.count({
+          where: {
+            user_id: requestedUserId,
+            timestamp: { gte: since }
+          }
+        });
+
+        // Get daily interaction counts
+        const dailyStats = await prisma.$queryRaw`
+          SELECT 
+            DATE(timestamp) as date,
+            COUNT(*) as interaction_count,
+            AVG(LENGTH(prompt)) as avg_prompt_length,
+            AVG(LENGTH(response)) as avg_response_length
+          FROM interaction_log 
+          WHERE user_id = ${requestedUserId}
+            AND timestamp >= ${since}
+          GROUP BY DATE(timestamp)
+          ORDER BY date DESC
+        `;
+
+        // Get recent prompts for analysis
+        const recentPrompts = await prisma.interaction_log.findMany({
+          where: {
+            user_id: requestedUserId,
+            timestamp: { gte: since }
+          },
+          select: {
+            prompt: true,
+            timestamp: true
+          },
+          orderBy: { timestamp: 'desc' },
+          take: 10
+        });
+
+        res.json({
+          success: true,
+          userId: requestedUserId,
+          period_days: parseInt(days),
+          statistics: {
+            total_interactions: totalInteractions,
+            daily_breakdown: dailyStats,
+            recent_prompts: recentPrompts.map(p => ({
+              prompt: p.prompt.substring(0, 100) + (p.prompt.length > 100 ? '...' : ''),
+              timestamp: p.timestamp
+            }))
+          }
+        });
+
+      } finally {
+        await prisma.$disconnect();
+      }
+
+    } catch (error) {
+      console.error("Error fetching interaction statistics:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch interaction statistics",
+        details: error.message 
+      });
+    }
+  });
+
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {

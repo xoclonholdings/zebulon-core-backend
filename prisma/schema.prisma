@@ -21,6 +21,7 @@ model User {
   knowledge_base    knowledge_base[]
   project_memory    ProjectMemory[]
   scratchpad_memory ScratchpadMemory[]
+  interaction_logs  interaction_log[]
 
   @@map("users")
 }
@@ -171,6 +172,20 @@ model chat_sessions {
   updated_at      DateTime?    @default(now()) @db.Timestamp(6)
   conversations   Conversation @relation(fields: [conversation_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "chat_sessions_conversation_id_conversations_id_fk")
   users           User         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "chat_sessions_user_id_users_id_fk")
+}
+
+model interaction_log {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
+  user_id    String    @db.VarChar
+  prompt     String
+  response   String
+  timestamp  DateTime  @default(now()) @db.Timestamp(6)
+  metadata   Json?
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  users      User      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "interaction_log_user_id_users_id_fk")
+
+  @@index([user_id], map: "idx_interaction_log_user_id")
+  @@index([timestamp], map: "idx_interaction_log_timestamp")
 }
 
 model file_storage {
