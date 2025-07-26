@@ -156,33 +156,7 @@ export default function ChatSidebar({ conversations }: ChatSidebarProps) {
           </div>
         </div>
 
-        {/* User Info */}
-        {user && (
-          <div className="flex items-center space-x-3 p-3 rounded-xl zed-glass mb-4">
-            <div className="w-8 h-8 zed-avatar rounded-xl flex items-center justify-center">
-              {user.profileImageUrl ? (
-                <img 
-                  src={user.profileImageUrl} 
-                  alt="Profile" 
-                  className="w-full h-full rounded-xl object-cover"
-                />
-              ) : (
-                <User size={16} className="text-white" />
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">
-                {user.firstName || user.lastName ? 
-                  `${user.firstName || ''} ${user.lastName || ''}`.trim() : 
-                  user.email?.split('@')[0] || 'User'
-                }
-              </p>
-              <p className="text-xs text-muted-foreground truncate">
-                {user.email}
-              </p>
-            </div>
-          </div>
-        )}
+
 
         {/* New Conversation Button */}
         <Button
