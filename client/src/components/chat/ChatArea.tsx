@@ -45,16 +45,37 @@ export default function ChatArea({ conversation, messages, files, conversationId
   
   const { isStreaming, streamingMessage } = useChat(conversationId);
 
+  // Debug logging for ChatArea
+  console.log("💬 ChatArea Debug:", {
+    conversationId,
+    messagesCount: messages.length,
+    hasMessages: messages.length > 0,
+    conversation: conversation?.id,
+    firstMessage: messages[0]?.content?.substring(0, 50)
+  });
+
   const sendMessageMutation = useMutation({
     mutationFn: async (data: { message: string; conversationId?: string; mode?: ConversationMode }) => {
-      return await apiRequest("/api/chat", "POST", { ...data, mode: currentMode });
+      console.log("💬 Sending message:", data);
+      if (!data.conversationId) {
+        throw new Error("No conversation ID provided");
+      }
+      const endpoint = `/api/conversations/${data.conversationId}/messages`;
+      console.log("📡 Endpoint:", endpoint);
+      const result = await apiRequest(endpoint, "POST", { content: data.message, role: "user" });
+      console.log("✅ Message sent successfully:", result);
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      console.log("🔄 Invalidating queries after successful message");
       if (conversationId) {
         queryClient.invalidateQueries({ queryKey: ["/api/conversations", conversationId, "messages"] });
         queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
       }
     },
+    onError: (error) => {
+      console.error("❌ Message send failed:", error);
+    }
   });
 
   const updateModeMutation = useMutation({
@@ -73,6 +94,28 @@ export default function ChatArea({ conversation, messages, files, conversationId
     if (!inputValue.trim()) return;
     
     const message = inputValue.trim();
+    console.log("🚀 User sending message:", message);
+    console.log("📍 Conversation ID:", conversationId);
+    console.log("🎯 Current mode:", currentMode);
+    
+    if (!conversationId) {
+      console.error("❌ No conversation ID - creating new conversation");
+      // Create a new conversation first
+      try {
+        const newConversation = await apiRequest("/api/conversations", "POST", { 
+          title: message.slice(0, 50),
+          mode: currentMode 
+        });
+        console.log("✅ Created new conversation:", newConversation);
+        // Redirect to the new conversation
+        window.history.pushState({}, '', `/chat/${newConversation.id}`);
+        return;
+      } catch (error) {
+        console.error("❌ Failed to create conversation:", error);
+        return;
+      }
+    }
+    
     setInputValue("");
     
     try {
@@ -82,7 +125,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
         mode: currentMode
       });
     } catch (error) {
-      // Error handled by UI feedback
+      console.error("❌ Handle send error:", error);
     }
   };
 

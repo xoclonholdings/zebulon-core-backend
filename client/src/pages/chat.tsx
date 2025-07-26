@@ -40,10 +40,19 @@ export default function Chat() {
   });
 
   // Fetch messages for current conversation
-  const { data: messages = [] } = useQuery<Message[]>({
+  const { data: messages = [], isLoading: messagesLoading, error: messagesError } = useQuery<Message[]>({
     queryKey: ["/api/conversations", conversationId, "messages"],
     enabled: !!conversationId,
     refetchInterval: 5000, // Refresh every 5 seconds when active
+  });
+
+  // Debug logging for messages
+  console.log("💬 Chat Page Debug:", {
+    conversationId,
+    messagesCount: messages.length,
+    messagesLoading,
+    messagesError,
+    messages: messages.slice(0, 2) // Show first 2 messages for debugging
   });
 
   // Fetch files for current conversation

@@ -634,7 +634,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const conversationId = req.params.id;
       const { content, role = "user" } = req.body;
 
+      console.log(`💬 [MESSAGE] Received message for conversation ${conversationId}:`, content);
+
       if (!content) {
+        console.error("❌ [MESSAGE] No content provided");
         return res.status(400).json({ error: "Message content is required" });
       }
 
@@ -645,7 +648,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         content
       });
       
+      console.log("📝 [MESSAGE] Saving user message...");
       const userMessage = await storage.createMessage(userMessageData);
+      console.log("✅ [MESSAGE] User message saved:", userMessage.id);
 
       // Get conversation history for context
       const messages = await storage.getMessagesByConversation(conversationId);
@@ -654,12 +659,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         content: msg.content
       }));
 
+      console.log(`📚 [MESSAGE] Got ${chatHistory.length} messages for context`);
+
       // Get conversation to check mode
       const conversation = await storage.getConversation(conversationId);
       const conversationMode = (conversation?.mode as "chat" | "agent") || "chat";
 
+      console.log(`🎯 [MESSAGE] Conversation mode: ${conversationMode}`);
+
       // Generate AI response
+      console.log("🤖 [MESSAGE] Generating AI response...");
       const aiResponse = await generateChatResponse(chatHistory, conversationMode);
+      console.log("✅ [MESSAGE] AI response generated:", aiResponse.substring(0, 100) + "...");
 
       // Save AI response
       const aiMessageData = insertMessageSchema.parse({
@@ -669,6 +680,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       const aiMessage = await storage.createMessage(aiMessageData);
+      console.log("✅ [MESSAGE] AI message saved:", aiMessage.id);
 
       // Update conversation title if it's the first exchange
       if (messages.length <= 2) {
@@ -677,11 +689,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           title,
           preview: aiResponse.slice(0, 100) + (aiResponse.length > 100 ? "..." : "")
         });
+        console.log("📝 [MESSAGE] Updated conversation title:", title);
       }
 
+      console.log("🎉 [MESSAGE] Message processing complete");
       res.json({ userMessage, aiMessage });
     } catch (error) {
-      console.error("Message error:", error);
+      console.error("❌ [MESSAGE] Error:", error);
       res.status(500).json({ error: "Failed to process message" });
     }
   });
