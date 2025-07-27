@@ -1,4 +1,4 @@
-import express, { type Request, Response, NextFunction } from "express";
+import express, { type Request, type Response, type NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { checkDatabaseConnection } from "./db";
@@ -11,99 +11,61 @@ app.use(express.urlencoded({ extended: false }));
 // Serve uploaded files statically
 app.use('/uploads', express.static('uploads'));
 
-app.use((req, res, next) => {
+// Request timing + response capture
+app.use((req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
   const path = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
-  const originalResJson = res.json;
+  const originalResJson = res.json.bind(res);
   res.json = function (bodyJson, ...args) {
     capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
+    return originalResJson(bodyJson, ...args);
   };
 
-  res.on("finish", () => {
+  res.on('finish', () => {
     const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
-      log(logLine);
+    log(`[${req.method}] ${path} - ${res.statusCode} (${duration}ms)`);
+    if (capturedJsonResponse) {
+      log(`Response: ${JSON.stringify(capturedJsonResponse)}`);
     }
   });
 
   next();
 });
 
+// Vite dev server or static build
+import http from "http";
+
+let server: http.Server;
+
+if (process.env.NODE_ENV === "development") {
+  server = http.createServer(app);
+  setupVite(app, server);
+} else {
+  serveStatic(app);
+}
+
+// Error handler middleware
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  log("Global error handler:", err);
+  res.status(500).json({ error: "Internal server error" });
+});
+
 (async () => {
-  // Initialize database and check connectivity
-  log('Checking database connection...');
-  const dbHealthy = await checkDatabaseConnection();
-  if (!dbHealthy) {
-    log('[WARNING] Database connection failed - some features may not work properly');
-  } else {
-    log('Database connection established successfully');
-  }
-
-  // Run database migrations
-  await runMigrations();
-
-  // Setup Prisma authentication
   try {
-    const { setupPrismaAuth } = await import("./prismaAuth");
-    const prismaReady = await setupPrismaAuth(app);
-    if (prismaReady) {
-      log('Prisma authentication system ready');
-    }
+    await checkDatabaseConnection();
+    await runMigrations();
+
+    // Register all API routes
+    const server = await registerRoutes(app);
+
+    const PORT = process.env.PORT ? parseInt(process.env.PORT) : 5000;
+    server.listen(PORT, () => {
+      log(`🚀 Server listening on http://localhost:${PORT}`);
+    });
   } catch (error) {
-    log('[WARNING] Failed to setup Prisma authentication:', String(error));
+    log("❌ Failed to start server: " + String(error));
+    process.exit(1);
   }
-
-  // Initialize memory system with core.memory.json
-  try {
-    const { MemoryService } = await import("./services/memoryService");
-    await MemoryService.loadCoreMemoryFromFile();
-    log('Core memory loaded from core.memory.json successfully');
-  } catch (error) {
-    log('[WARNING] Failed to initialize core memory:', String(error));
-  }
-
-  const server = await registerRoutes(app);
-
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    throw err;
-  });
-
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
-  }
-
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
-    log('ZED AI Assistant ready with optimized storage and seamless performance');
-  });
 })();
