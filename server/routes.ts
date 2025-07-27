@@ -205,17 +205,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const conversationId = req.params.id;
       const { content, role = "user" } = req.body;
 
-      console.log(`💬 [MESSAGE] Received message for conversation ${conversationId}:`, content);
-
       if (!content) {
-        console.error("❌ [MESSAGE] No content provided");
         return res.status(400).json({ error: "Message content is required" });
       }
 
       const userMessageData = insertMessageSchema.parse({ conversationId, role, content });
-      console.log("📝 [MESSAGE] Saving user message...");
       const userMessage = await storage.createMessage(userMessageData);
-      console.log("✅ [MESSAGE] User message saved:", userMessage.id);
 
       const messages = await storage.getMessagesByConversation(conversationId);
       const chatHistory = messages.map(msg => ({
@@ -223,17 +218,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         content: msg.content
       }));
 
-      console.log(`📚 [MESSAGE] Got ${chatHistory.length} messages for context`);
-
       const conversation = await storage.getConversation(conversationId);
       const conversationMode = (conversation?.mode as "chat" | "agent") || "chat";
 
-      console.log(`🎯 [MESSAGE] Conversation mode: ${conversationMode}`);
-
       try {
-        console.log("🤖 [MESSAGE] Generating AI response...");
         const aiResponse = await generateChatResponse(chatHistory, conversationMode);
-        console.log("✅ [MESSAGE] AI response generated:", aiResponse.substring(0, 100) + "...");
 
         const aiMessageData = insertMessageSchema.parse({
           conversationId,
@@ -242,7 +231,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         const aiMessage = await storage.createMessage(aiMessageData);
-        console.log("✅ [MESSAGE] AI message saved:", aiMessage.id);
 
         if (messages.length <= 2) {
           const title = content.slice(0, 50) + (content.length > 50 ? "..." : "");
@@ -250,22 +238,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
             title,
             preview: aiResponse.slice(0, 100) + (aiResponse.length > 100 ? "..." : "")
           });
-          console.log("📝 [MESSAGE] Updated conversation title:", title);
         }
 
-        console.log("🎉 [MESSAGE] Message processing complete");
         res.json({ userMessage, aiMessage });
       } catch (error) {
-        console.error("❌ [MESSAGE] AI Error:", error);
         res.status(500).json({ error: "AI response unavailable. Please try again later or contact support." });
       }
     } catch (error) {
-      console.error("❌ [MESSAGE] Error:", error);
       res.status(500).json({ error: "Failed to process message" });
     }
   });
 
-  // ...add any additional route definitions here...
+  // POST: /api/ask - AI question answering endpoint
+  app.post("/api/ask", isAuthenticated, async (req, res) => {
+    try {
+      const { prompt, model, stream } = req.body;
+      if (!prompt) {
+        return res.status(400).json({ error: "Prompt is required" });
+      }
+      const answer = await generateChatResponse([{ role: "user", content: prompt }], model || "chat");
+      res.json({ answer });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get AI answer" });
+    }
+  });
+
+  // Middleware to handle 404 - Not Found
+  app.use((req, res) => {
+    res.status(404).json({ error: "Not Found" });
+  });
+
+  // Middleware to handle errors
+  app.use((err: any, req: any, res: any, next: any) => {
+    res.status(500).json({ error: "Internal Server Error" });
+  });
 
   const httpServer = createServer(app);
   return httpServer;
