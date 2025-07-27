@@ -18,10 +18,10 @@ model User {
   analytics         analytics[]
   chat_sessions     chat_sessions[]
   conversations     Conversation[]
+  interaction_logs  interaction_log[]
   knowledge_base    knowledge_base[]
   project_memory    ProjectMemory[]
   scratchpad_memory ScratchpadMemory[]
-  interaction_logs  interaction_log[]
 
   @@map("users")
 }
