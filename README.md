@@ -67,7 +67,7 @@ npm run dev
 
 5. **Access Application**
 - Open http://localhost:5000
-- Login with Admin/Zed2025 (or your configured credentials)
+- Login with your configured credentials
 
 ## Production Deployment
 
@@ -104,17 +104,12 @@ NODE_ENV=production npm start
 DATABASE_URL=postgresql://user:pass@host:port/db
 OPENAI_API_KEY=your_openai_api_key
 SESSION_SECRET=secure_random_string
-ADMIN_USERNAME=Admin
-ADMIN_PASSWORD=Zed2025
-ADMIN_SECURE_PHRASE=XOCLON_SECURE_2025
+ADMIN_USERNAME=*****
+ADMIN_PASSWORD=*****
+ADMIN_SECURE_PHRASE=********
 ```
 
 ### Admin Access
-
-Default admin credentials:
-- Username: `Admin`
-- Password: `Zed2025`
-- Secure Phrase: `XOCLON_SECURE_2025`
 
 Admin users have access to:
 - User management panel
