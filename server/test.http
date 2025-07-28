@@ -1,8 +1,0 @@
-POST http://localhost:5000/api/ask
-Content-Type: application/json
-
-{
-"model": "tinyllama",
-"prompt": "Where is the capital of Ghana?",
-"stream": false
-}

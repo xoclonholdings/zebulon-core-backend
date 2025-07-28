@@ -10,6 +10,7 @@ import { QueryLogger } from "./services/queryLogger";
 import { insertConversationSchema, insertMessageSchema, insertFileSchema, insertSessionSchema, insertCoreMemorySchema, insertProjectMemorySchema, insertScratchpadMemorySchema } from "@shared/schema";
 import { optimizationService } from "./services/optimizationService";
 import { MemoryService } from "./services/memoryService";
+import { Router } from "express";
 
 // Helper for admin check
 function isAdminUser(sessionUser: any) {
@@ -262,6 +263,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to get AI answer" });
     }
   });
+
+  const router = Router();
+
+  router.post("/api/verify", async (req, res) => {
+    const { username, method, phrase } = req.body;
+
+    // Example: Only allow secure_phrase for Admin
+    if (
+      username === "Admin" &&
+      method === "secure_phrase" &&
+      phrase === "XOCLON_SECURE_2025"
+    ) {
+      return res.json({ success: true, message: "Secondary authentication passed" });
+    } else {
+      return res.status(401).json({ error: "Secondary authentication failed" });
+    }
+  });
+
+  app.use(router);
 
   // Middleware to handle 404 - Not Found
   app.use((req, res) => {
