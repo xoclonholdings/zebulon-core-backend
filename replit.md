@@ -11,6 +11,7 @@
 ## System Architecture
 
 ### Frontend Architecture
+
 - **Framework**: React with TypeScript
 - **Routing**: Wouter for client-side routing
 - **State Management**: TanStack Query for server state and React hooks for local state
@@ -19,6 +20,7 @@
 - **Build Tool**: Vite for development and production builds
 
 ### Backend Architecture
+
 - **Framework**: Express.js with TypeScript
 - **Runtime**: Node.js with ES modules
 - **API Style**: RESTful API with streaming support for chat responses
@@ -26,6 +28,7 @@
 - **Development**: Hot reloading with Vite integration
 
 ### Database & ORM
+
 - **Database**: PostgreSQL (configured for Neon Database)
 - **ORM**: Drizzle ORM with type-safe queries
 - **Schema Management**: Drizzle Kit for migrations
@@ -34,6 +37,7 @@
 ## Key Components
 
 ### Data Models
+
 - **Users**: Authentication and user management
 - **Conversations**: Chat sessions with titles and metadata
 - **Messages**: Individual chat messages with role-based content
@@ -41,6 +45,7 @@
 - **Sessions**: Active conversation sessions
 
 ### Core Features
+
 1. **Intelligent Chat Interface**: Real-time streaming conversations with ZED AI assistant
 2. **Advanced File Processing**: Support for documents, images, spreadsheets, and text files up to 32GB
 3. **Document Analysis**: Extract content, generate insights, and analyze data from uploaded files
@@ -49,6 +54,7 @@
 6. **Export & Sharing**: Export conversations and analysis results
 
 ### UI Components
+
 - **ChatArea**: Main chat interface with ZED AI assistant and streaming responses
 - **ChatSidebar**: Conversation history with ZED branding and navigation
 - **SessionPanel**: File management, usage statistics, and quick actions
@@ -68,12 +74,14 @@
 ## External Dependencies
 
 ### Core Dependencies
+
 - **AI Service**: OpenAI API (GPT-4) for intelligent conversations and document analysis
 - **Database**: PostgreSQL (Neon Database) for data persistence (currently using in-memory storage)
 - **File Processing**: Advanced file processing supporting multiple formats up to 32GB
 - **UI Framework**: Shadcn/ui components built on Radix UI primitives for accessible interface
 
 ### Development Tools
+
 - **TypeScript**: Type safety across frontend and backend
 - **Vite**: Development server and build tool
 - **Tailwind CSS**: Utility-first styling
@@ -82,18 +90,21 @@
 ## Deployment Strategy
 
 ### Development Environment
+
 - **Vite Dev Server**: Hot reloading for frontend development
 - **Express Server**: Backend API with automatic restarts
 - **Database**: Connection to PostgreSQL via environment variables
 - **File Processing**: Local file uploads to uploads directory
 
 ### Production Build
+
 - **Frontend**: Vite builds optimized React bundle to dist/public
 - **Backend**: ESBuild bundles Express server to dist/index.js
 - **Static Serving**: Express serves built frontend assets
 - **Environment**: Production configuration via NODE_ENV
 
 ### Configuration Requirements
+
 - `OPENAI_API_KEY`: OpenAI API access token (✅ Configured)
 - File upload directory with support for large files (up to 32GB)
 - In-memory storage for development (upgradeable to PostgreSQL)
@@ -102,6 +113,7 @@
 ### Recent Updates (July 26, 2025)
 
 **LATEST: Multi-AI System Complete (5:30 AM EST)**: Successfully implemented comprehensive multi-AI architecture eliminating all quota limitations:
+
 - ✅ **Julius AI Integration**: Configured for unlimited Agent mode operations
 - ✅ **Enhanced Local AI**: Pattern recognition system providing unlimited quota-free processing
 - ✅ **Multi-AI Routing**: Intelligent provider selection with seamless fallbacks
@@ -111,6 +123,7 @@
 - ✅ **Production Ready**: All core systems operational and tested
 
 **Latest Database Integration (4:30 AM EST)**: Successfully connected ZED to existing PostgreSQL database:
+
 - ✅ **Prisma Integration Complete**: Connected to zebulon_local database using existing DATABASE_URL environment variable
 - ✅ **Schema Introspection**: Successfully pulled 14 models from existing database (User, Conversation, Message, File, etc.)
 - ✅ **Database Verification**: Confirmed existing data (2 conversations, 5 messages, 2 files, multiple users)
@@ -147,6 +160,7 @@
 ### Previous Updates (January 25, 2025)
 
 **Latest Enhancement (10:19 PM EST)**: Comprehensive user management system implemented with:
+
 - Complete removal of flip.shop integration from all components and API routes
 - Admin-only user management panel with full CRUD operations
 - Enhanced settings modal with role-based access control

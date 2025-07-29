@@ -1,12 +1,35 @@
+# File: AIAssist/client/index.html
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="theme-color" content="#000000" />
+    <!-- For Firefox and Opera, set theme color via JavaScript -->
+    <script>
+      // Dynamically set theme color for all browsers
+      function setThemeColor() {
+        let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (!metaThemeColor) {
+          metaThemeColor = document.createElement('meta');
+          metaThemeColor.setAttribute('name', 'theme-color');
+          document.head.appendChild(metaThemeColor);
+        }
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          metaThemeColor.setAttribute('content', '#000000');
+        } else {
+          metaThemeColor.setAttribute('content', '#ffffff');
+        }
+        // For Firefox and Opera, set theme color using CSS property
+        document.querySelector('html').style.backgroundColor = metaThemeColor.getAttribute('content');
+      }
+      setThemeColor();
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setThemeColor);
+    </script>
+    <meta name="msapplication-navbutton-color" content="#000000" />
+    <meta name="msapplication-TileColor" content="#000000" />
     <title>ZED - Enhanced AI Assistant</title>
     <meta name="description" content="ZED is an enhanced AI assistant combining OpenAI's conversational capabilities with advanced document processing in a seamless chat interface." />
     <style>

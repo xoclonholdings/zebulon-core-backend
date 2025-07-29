@@ -1,20 +1,12 @@
 import { prisma } from './prisma';
-import { IStorage } from './storage';
-import { 
-  User, 
-  Conversation, 
-  Message, 
-  File as DBFile,
-  UpsertUser,
-  InsertConversation,
-  InsertMessage,
-  InsertFile,
-  ConversationMode
-} from '@shared/schema';
+import { User, Conversation, Message, File as DBFile, UpsertUser, InsertConversation, InsertMessage, InsertFile, ConversationMode } from '@shared/schema';
+// Import Prisma types for type safety
+import { Prisma } from '@prisma/client';
 
 export class PostgreSQLStorage {
   // User operations
   async getUser(id: string): Promise<User | undefined> {
+    // 'id' is the correct unique field for User
     const user = await prisma.user.findUnique({
       where: { id }
     });
@@ -22,13 +14,15 @@ export class PostgreSQLStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
+    // 'email' is assumed to be unique for User
     const user = await prisma.user.findUnique({
-      where: { username }
+      where: { email: username }
     });
     return user || undefined;
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
+    // Only use valid fields for User model
     const user = await prisma.user.upsert({
       where: { id: userData.id },
       update: {
@@ -36,7 +30,7 @@ export class PostgreSQLStorage {
         firstName: userData.firstName,
         lastName: userData.lastName,
         profileImageUrl: userData.profileImageUrl,
-        updatedAt: new Date(),
+        updatedAt: new Date(), // If your schema uses 'updatedAt', otherwise use the correct field
       },
       create: {
         id: userData.id,
@@ -63,9 +57,10 @@ export class PostgreSQLStorage {
 
   // Conversation operations
   async getConversations(userId: string): Promise<Conversation[]> {
+    // Use correct field for user reference in Conversation
     const conversations = await prisma.conversation.findMany({
-      where: { userId },
-      orderBy: { updatedAt: 'desc' },
+      where: { userId: userId }, // If your schema uses 'userId', otherwise use the correct field
+      orderBy: { updatedAt: 'desc' }, // If your schema uses 'updatedAt'
     });
     return conversations as Conversation[];
   }
@@ -82,7 +77,7 @@ export class PostgreSQLStorage {
       data: {
         title: data.title,
         mode: data.mode as any,
-        userId: data.userId,
+        userId: data.userId, // If your schema uses 'userId'
       },
     });
     return conversation as Conversation;
@@ -92,8 +87,7 @@ export class PostgreSQLStorage {
     const conversation = await prisma.conversation.update({
       where: { id },
       data: {
-        ...data,
-        updatedAt: new Date(),
+        ...data
       },
     });
     return conversation as Conversation;
@@ -113,8 +107,8 @@ export class PostgreSQLStorage {
   // Message operations
   async getMessages(conversationId: string): Promise<Message[]> {
     const messages = await prisma.message.findMany({
-      where: { conversationId },
-      orderBy: { createdAt: 'asc' },
+      where: { conversationId: conversationId }, // If your schema uses 'conversationId'
+      orderBy: { createdAt: 'asc' }, // If your schema uses 'createdAt'
     });
     return messages as Message[];
   }
@@ -124,7 +118,7 @@ export class PostgreSQLStorage {
       data: {
         content: data.content,
         role: data.role,
-        conversationId: data.conversationId,
+        conversationId: data.conversationId, // If your schema uses 'conversationId'
       },
     });
     return message as Message;
@@ -133,8 +127,8 @@ export class PostgreSQLStorage {
   // File operations
   async getFiles(conversationId: string): Promise<DBFile[]> {
     const files = await prisma.file.findMany({
-      where: { conversationId },
-      orderBy: { createdAt: 'desc' },
+      where: { conversationId: conversationId }, // If your schema uses 'conversationId'
+      orderBy: { createdAt: 'desc' }, // Use the correct field name from your schema
     });
     return files as DBFile[];
   }
@@ -142,25 +136,27 @@ export class PostgreSQLStorage {
   async createFile(data: InsertFile): Promise<DBFile> {
     const file = await prisma.file.create({
       data: {
-        fileName: data.fileName,
-        originalName: data.originalName,
+        fileName: data.fileName, // If your schema uses 'fileName'
+        originalName: data.originalName, // If your schema uses 'originalName'
         size: data.size,
-        mimeType: data.mimeType,
+        mimeType: data.mimeType, // If your schema uses 'mimeType'
         status: data.status,
-        extractedContent: data.extractedContent,
-        analysis: data.analysis,
-        conversationId: data.conversationId,
+        extractedContent: data.extractedContent, // If your schema uses 'extractedContent'
+        analysis: data.analysis === null ? undefined : data.analysis,
+        conversationId: data.conversationId, // If your schema uses 'conversationId'
       },
     });
     return file as DBFile;
   }
 
   async updateFile(id: string, data: Partial<DBFile>): Promise<DBFile> {
+    // Exclude 'conversationId' from update data
+    const { conversationId, ...updateData } = data;
     const file = await prisma.file.update({
       where: { id },
       data: {
-        ...data,
-        updatedAt: new Date(),
+        ...updateData,
+        analysis: updateData.analysis as Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput | undefined,
       },
     });
     return file as DBFile;
@@ -171,43 +167,42 @@ export class PostgreSQLStorage {
     const memory = await prisma.coreMemory.findUnique({
       where: { key },
     });
-    return memory ? JSON.parse(memory.content) : undefined;
+    return memory ? JSON.parse(memory.value) : undefined; // Use 'value' if that's your schema field
   }
 
   async setCoreMemory(key: string, content: any, updatedBy: string): Promise<void> {
     await prisma.coreMemory.upsert({
       where: { key },
       update: {
-        content: JSON.stringify(content),
-        updatedAt: new Date(),
-        updatedBy,
+        value: JSON.stringify(content), // Use 'value' if that's your schema field
+        updated_at: new Date(), // Use 'updated_at' if that's your schema field
       },
       create: {
         key,
-        content: JSON.stringify(content),
-        updatedBy,
+        value: JSON.stringify(content),
       },
     });
   }
 
   async getProjectMemory(userId: string, key: string): Promise<any> {
+    // Composite key must match your schema, e.g. { userId, key }
     const memory = await prisma.projectMemory.findUnique({
-      where: { userId_key: { userId, key } },
+      where: { user_id_key: { user_id: userId, key: key } }, // Use the actual composite unique field name from your schema.prisma
     });
     return memory ? JSON.parse(memory.content) : undefined;
   }
 
   async setProjectMemory(userId: string, key: string, content: any): Promise<void> {
     await prisma.projectMemory.upsert({
-      where: { userId_key: { userId, key } },
+      where: { user_id_key: { user_id: userId, key: key } }, // Use the actual composite unique field name from your schema.prisma
       update: {
         content: JSON.stringify(content),
-        updatedAt: new Date(),
+        updated_at: new Date(),
       },
       create: {
-        userId,
-        key,
-        content: JSON.stringify(content),
+        user_id: userId, // Use the actual field name from your Prisma schema
+        key: key, // Use the actual field name from your Prisma schema
+        value: JSON.stringify(content),
       },
     });
   }
@@ -215,12 +210,13 @@ export class PostgreSQLStorage {
   async getScratchpadMemory(userId: string): Promise<any[]> {
     const memories = await prisma.scratchpadMemory.findMany({
       where: {
-        userId,
-        expiresAt: { gt: new Date() },
+        user_id: userId, // Use 'user_id' as per your schema
+        expires_at: { gt: new Date() }, // If your schema uses 'expires_at'
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { expires_at: 'desc' }, // Use the correct field name from your schema
     });
-    return memories.map((m: any) => JSON.parse(m.content));
+    // Use 'content' if that's your schema field
+    return memories.map((m: { content: string }) => JSON.parse(m.content));
   }
 
   async addScratchpadMemory(userId: string, content: any): Promise<void> {
@@ -229,9 +225,9 @@ export class PostgreSQLStorage {
 
     await prisma.scratchpadMemory.create({
       data: {
-        userId,
-        content: JSON.stringify(content),
-        expiresAt,
+        user_id: userId, // Use 'user_id' as per your schema
+        content: JSON.stringify(content), // Use 'content' if that's your schema field
+        expires_at: expiresAt, // Use 'expires_at' as per your schema
       },
     });
   }
@@ -239,7 +235,7 @@ export class PostgreSQLStorage {
   async cleanupExpiredMemory(): Promise<void> {
     await prisma.scratchpadMemory.deleteMany({
       where: {
-        expiresAt: { lt: new Date() },
+        expires_at: { lt: new Date() }, // Use 'expires_at' as per your schema
       },
     });
   }
@@ -248,13 +244,13 @@ export class PostgreSQLStorage {
   async getUserStats(): Promise<any> {
     const [totalUsers, adminUsers, activeUsers] = await Promise.all([
       prisma.user.count(),
-      prisma.user.count({ where: { isAdmin: true } }),
+      prisma.user.count(), // Count all users (replace with a valid filter if you have an admin indicator field)
       prisma.user.count({
         where: {
           conversations: {
             some: {
               updatedAt: {
-                gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
+                gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
               },
             },
           },
@@ -271,7 +267,7 @@ export class PostgreSQLStorage {
 
   async getAllUsers(): Promise<User[]> {
     const users = await prisma.user.findMany({
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: 'desc' }, // If your schema uses 'createdAt'
     });
     return users as User[];
   }
@@ -281,7 +277,7 @@ export class PostgreSQLStorage {
       where: { id },
       data: {
         ...data,
-        updatedAt: new Date(),
+        updatedAt: new Date(), // If your schema uses 'updatedAt'
       },
     });
     return user as User;

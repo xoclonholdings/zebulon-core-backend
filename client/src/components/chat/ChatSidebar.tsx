@@ -21,12 +21,12 @@ import { apiRequest } from "@/lib/queryClient";
 import type { Conversation } from "@shared/schema";
 
 import LogoutButton from "@/components/auth/LogoutButton";
-import SettingsModal from "@/components/settings/SettingsModal";
 
 interface ChatSidebarProps {
   conversations: Conversation[];
   onClose?: () => void;
   isMobile?: boolean;
+  onMenuClick?: () => void;
 }
 
 interface LocalUser {
@@ -37,7 +37,7 @@ interface LocalUser {
   profileImageUrl?: string;
 }
 
-export default function ChatSidebar({ conversations, onClose, isMobile = false }: ChatSidebarProps) {
+export default function ChatSidebar({ conversations, onClose, isMobile = false, onMenuClick }: ChatSidebarProps) {
   const [location] = useLocation();
   const queryClient = useQueryClient();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -133,70 +133,81 @@ export default function ChatSidebar({ conversations, onClose, isMobile = false }
       </div>
 
       {/* Header */}
-      <div className="p-6 border-b border-white/10 relative z-10">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <div>
-              <h2 className="text-xl font-bold flex items-center space-x-2">
-                <img src={zLogoPath} alt="Z" className="w-5 h-5" />
+      <div className="p-2 sm:p-3 border-b border-white/10 relative z-10">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center space-x-2">
+            {/* Logo Button - Compact and Clickable */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-10 h-10 p-1.5 rounded-lg hover:bg-gradient-to-r hover:from-pink-500/20 hover:via-purple-500/20 hover:to-blue-500/20 transition-all duration-300 hover:scale-105 border border-transparent hover:border-purple-500/50"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('ZED logo button clicked!', { isMobile, onClose, onMenuClick });
+                if (isMobile && onClose) {
+                  onClose();
+                } else if (onMenuClick) {
+                  onMenuClick();
+                }
+              }}
+            >
+              <img src={zLogoPath} alt="Z" className="w-6 h-6" />
+            </Button>
+            
+            <div className="text-left">
+              <h1 className="text-sm font-bold">
                 <span className="bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">ZED</span>
-              </h2>
-              <p className="text-xs text-muted-foreground">Enhanced AI Assistant</p>
+              </h1>
+              <p className="text-xs text-muted-foreground hidden sm:block">AI Assistant</p>
             </div>
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1">
             <LogoutButton />
             {isMobile ? (
               <Button
                 onClick={onClose}
                 variant="ghost"
                 size="sm"
-                className="w-8 h-8 zed-button rounded-xl p-0 text-muted-foreground hover:text-foreground"
+                className="w-8 h-8 zed-button rounded-lg p-0 text-muted-foreground hover:text-foreground"
               >
-                <X size={16} />
+                <X size={14} />
               </Button>
             ) : (
               <Button
                 onClick={() => setIsCollapsed(true)}
                 variant="ghost"
                 size="sm"
-                className="w-8 h-8 zed-button rounded-xl p-0 text-muted-foreground hover:text-foreground"
+                className="w-8 h-8 zed-button rounded-lg p-0 text-muted-foreground hover:text-foreground"
               >
-                <X size={16} />
+                <X size={14} />
               </Button>
             )}
           </div>
         </div>
 
-
-
-        {/* New Conversation Button */}
+        {/* Compact New Chat Button */}
         <Button
           onClick={() => createConversationMutation.mutate()}
           disabled={createConversationMutation.isPending}
-          className="w-full zed-gradient hover:zed-gradient-hover rounded-xl p-4 text-white font-medium transition-all duration-300"
+          className="w-full h-9 zed-gradient rounded-lg text-white font-medium transition-all duration-300 text-sm"
         >
-          <div className="flex items-center justify-center space-x-2">
-            <Plus size={18} />
-            <span>New Conversation</span>
-            <Sparkles size={14} className="text-cyan-300" />
+          <div className="flex items-center justify-center space-x-1.5">
+            <Plus size={14} />
+            <span>New Chat</span>
+            <Sparkles size={12} className="text-cyan-300" />
           </div>
         </Button>
-
-        {/* Navigation */}
-        <div className="mt-4 space-y-2">
-          <SettingsModal />
-        </div>
       </div>
 
       {/* Conversations List */}
-      <div className="flex-1 px-4 overflow-y-auto">
-        <div className="space-y-2 py-4">
+      <div className="flex-1 px-2 overflow-y-auto">
+        <div className="space-y-1 py-2">
           {conversations.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <MessageSquare size={48} className="mx-auto mb-4 opacity-50" />
-              <p className="text-sm">No conversations yet</p>
+            <div className="text-center py-6 text-muted-foreground">
+              <MessageSquare size={32} className="mx-auto mb-3 opacity-50" />
+              <p className="text-xs">No conversations yet</p>
               <p className="text-xs">Start a new chat to begin</p>
             </div>
           ) : (
@@ -208,30 +219,25 @@ export default function ChatSidebar({ conversations, onClose, isMobile = false }
                 <div
                   key={conversation.id}
                   className={`
-                    group relative p-3 rounded-xl cursor-pointer transition-all zed-button
+                    group relative p-2 rounded-lg cursor-pointer transition-all zed-button
                     ${isActive 
-                      ? 'zed-glass border-purple-500/50 shadow-lg shadow-purple-500/20' 
+                      ? 'zed-glass border-purple-500/50 shadow-md shadow-purple-500/20' 
                       : 'hover:bg-white/5'
                     }
                   `}
                   onClick={() => window.history.pushState({}, '', `/chat/${conversation.id}`)}
                 >
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-medium text-foreground truncate mb-1">
+                      <h3 className="text-xs font-medium text-foreground truncate mb-1">
                         {conversation.title || 'New Conversation'}
                       </h3>
-                      {conversation.preview && (
-                        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
-                          {conversation.preview}
-                        </p>
-                      )}
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground">
                           {formatDate(date)}
                         </span>
                         {conversation.mode && (
-                          <span className={`text-xs px-2 py-1 rounded-full ${
+                          <span className={`text-xs px-1.5 py-0.5 rounded-full ${
                             conversation.mode === 'agent' 
                               ? 'bg-purple-500/20 text-purple-400'
                               : 'bg-cyan-500/20 text-cyan-400'
@@ -246,9 +252,9 @@ export default function ChatSidebar({ conversations, onClose, isMobile = false }
                       variant="ghost"
                       size="sm"
                       onClick={(e) => handleDeleteConversation(e, conversation.id)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300 hover:bg-red-500/20 h-auto p-1 ml-2 rounded-lg"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300 hover:bg-red-500/20 h-auto p-1 ml-1 rounded"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={12} />
                     </Button>
                   </div>
                 </div>
@@ -258,12 +264,12 @@ export default function ChatSidebar({ conversations, onClose, isMobile = false }
         </div>
       </div>
 
-      {/* User Profile */}
-      <div className="p-4 border-t border-white/10">
-        <div className="flex items-center space-x-3">
+      {/* Compact User Profile */}
+      <div className="p-1 border-t border-white/10">
+        <div className="flex items-center space-x-2">
           <div className="relative group">
             <div 
-              className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 flex items-center justify-center overflow-hidden cursor-pointer hover:scale-105 transition-transform"
+              className="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 flex items-center justify-center overflow-hidden cursor-pointer hover:scale-105 transition-transform"
               onClick={() => document.getElementById('profile-upload')?.click()}
             >
               {user?.profileImageUrl ? (
@@ -273,7 +279,7 @@ export default function ChatSidebar({ conversations, onClose, isMobile = false }
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <User size={20} className="text-white" />
+                <User size={12} className="text-white" />
               )}
             </div>
             <input
@@ -301,7 +307,6 @@ export default function ChatSidebar({ conversations, onClose, isMobile = false }
                         title: "Profile picture updated",
                         description: "Your profile picture has been successfully updated!",
                       });
-                      // Refresh user data
                       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
                     } else {
                       const error = await response.json();
@@ -322,11 +327,11 @@ export default function ChatSidebar({ conversations, onClose, isMobile = false }
                 }
               }}
             />
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center border-2 border-black group-hover:bg-purple-400 transition-colors">
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center border border-black group-hover:bg-purple-400 transition-colors">
               {isUploadingPicture ? (
-                <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-2 h-2 border border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <Camera size={12} className="text-white" />
+                <Camera size={8} className="text-white" />
               )}
             </div>
             {/* Hover tooltip */}
@@ -335,11 +340,11 @@ export default function ChatSidebar({ conversations, onClose, isMobile = false }
             </div>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground truncate">
+            <p className="text-xs font-medium text-foreground truncate">
               {user?.firstName || user?.email || "ZED Admin"}
             </p>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <div className="flex items-center space-x-1">
+              <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
               <span className="text-xs text-muted-foreground">Online</span>
             </div>
           </div>
@@ -347,12 +352,12 @@ export default function ChatSidebar({ conversations, onClose, isMobile = false }
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-white/10 relative z-10">
-        <div className="flex items-center justify-center space-x-2 text-xs text-muted-foreground">
-          <Zap size={12} className="text-purple-400" />
-          <span>Powered by OpenAI</span>
+      <div className="p-1 border-t border-white/10 relative z-10">
+        <div className="flex items-center justify-center space-x-1 text-xs text-muted-foreground">
+          <Zap size={10} className="text-purple-400" />
+          <span className="text-xs">Powered by OpenAI</span>
           <div className="w-1 h-1 bg-purple-400 rounded-full"></div>
-          <span>Local Auth</span>
+          <span className="text-xs">Local Auth</span>
         </div>
       </div>
     </div>

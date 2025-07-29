@@ -13,7 +13,7 @@ Accept: application/json
 POST http://localhost:5000/api/verify
 Content-Type: application/json
 Accept: application/json
-Cookie: zed_session=YOUR_SESSION_COOKIE_HERE
+Cookie: {{Primary_login.response.headers.set-cookie}}
 
 {
   "username": "Admin",
@@ -25,9 +25,9 @@ Cookie: zed_session=YOUR_SESSION_COOKIE_HERE
 POST http://localhost:5000/api/conversations/123/messages
 Content-Type: application/json
 Accept: application/json
-Cookie: zed_session=YOUR_SESSION_COOKIE_HERE
+Cookie: {{Primary_login.response.headers.set-cookie}}
 
 {
-  "content": "What is the capital of France?",
+  "content": "What is the capital of Ghana?",
   "role": "user"
 }

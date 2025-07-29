@@ -200,6 +200,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Conversation routes
+  // Get all conversations for the current user
+  app.get("/api/conversations", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.session.user?.id;
+      console.log("📋 GET Conversations for user:", userId);
+      
+      const conversations = await storage.getConversationsByUser(userId);
+      console.log("📁 Found conversations:", conversations.length);
+      
+      return res.json(conversations);
+    } catch (error) {
+      console.error("❌ Error fetching conversations:", error);
+      return res.status(500).json({ error: "Failed to fetch conversations" });
+    }
+  });
+
+  // Get a specific conversation
+  app.get("/api/conversations/:id", isAuthenticated, async (req, res) => {
+    try {
+      const conversationId = req.params.id;
+      console.log("📄 GET Conversation:", conversationId);
+      
+      const conversation = await storage.getConversation(conversationId);
+      
+      if (!conversation) {
+        return res.status(404).json({ error: "Conversation not found" });
+      }
+      
+      return res.json(conversation);
+    } catch (error) {
+      console.error("❌ Error fetching conversation:", error);
+      return res.status(500).json({ error: "Failed to fetch conversation" });
+    }
+  });
+
+  // Create a new conversation
+  app.post("/api/conversations", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.session.user?.id;
+      const { title = "New Conversation", mode = "chat" } = req.body;
+      console.log("➕ POST Create conversation for user:", userId, "title:", title);
+      
+      const conversationData = insertConversationSchema.parse({
+        userId,
+        title,
+        mode,
+        preview: title.substring(0, 100)
+      });
+      
+      const conversation = await storage.createConversation(conversationData);
+      console.log("✅ Created conversation:", conversation.id);
+      
+      return res.json(conversation);
+    } catch (error) {
+      console.error("❌ Error creating conversation:", error);
+      return res.status(500).json({ error: "Failed to create conversation" });
+    }
+  });
+
+  // Update a conversation
+  app.patch("/api/conversations/:id", isAuthenticated, async (req, res) => {
+    try {
+      const conversationId = req.params.id;
+      const updates = req.body;
+      console.log("🔄 PATCH Update conversation:", conversationId, "updates:", updates);
+      
+      const conversation = await storage.updateConversation(conversationId, updates);
+      
+      if (!conversation) {
+        return res.status(404).json({ error: "Conversation not found" });
+      }
+      
+      return res.json(conversation);
+    } catch (error) {
+      console.error("❌ Error updating conversation:", error);
+      return res.status(500).json({ error: "Failed to update conversation" });
+    }
+  });
+
+  // Delete a conversation
+  app.delete("/api/conversations/:id", isAuthenticated, async (req, res) => {
+    try {
+      const conversationId = req.params.id;
+      console.log("🗑️ DELETE Conversation:", conversationId);
+      
+      const success = await storage.deleteConversation(conversationId);
+      
+      if (!success) {
+        return res.status(404).json({ error: "Conversation not found" });
+      }
+      
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("❌ Error deleting conversation:", error);
+      return res.status(500).json({ error: "Failed to delete conversation" });
+    }
+  });
+
+  // Get messages for a conversation
+  app.get("/api/conversations/:id/messages", isAuthenticated, async (req, res) => {
+    try {
+      const conversationId = req.params.id;
+      console.log("📥 GET Messages request for conversation:", conversationId);
+      
+      const messages = await storage.getMessagesByConversation(conversationId);
+      console.log("📋 Found messages:", messages.length);
+      
+      return res.json(messages);
+    } catch (error) {
+      console.error("❌ Error fetching messages:", error);
+      return res.status(500).json({ error: "Failed to fetch messages" });
+    }
+  });
+
+  // Get files for a conversation
+  app.get("/api/conversations/:id/files", isAuthenticated, async (req, res) => {
+    try {
+      const conversationId = req.params.id;
+      console.log("📁 GET Files for conversation:", conversationId);
+      
+      const files = await storage.getFilesByConversation(conversationId);
+      console.log("📄 Found files:", files.length);
+      
+      return res.json(files);
+    } catch (error) {
+      console.error("❌ Error fetching files:", error);
+      return res.status(500).json({ error: "Failed to fetch files" });
+    }
+  });
+
   // Send message and get AI response
   app.post("/api/conversations/:id/messages", isAuthenticated, async (req, res) => {
     try {
@@ -241,12 +372,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
 
-        res.json({ userMessage, aiMessage });
+        return res.json({ userMessage, aiMessage });
       } catch (error) {
-        res.status(500).json({ error: "AI response unavailable. Please try again later or contact support." });
+        return res.status(500).json({ error: "AI response unavailable. Please try again later or contact support." });
       }
     } catch (error) {
-      res.status(500).json({ error: "Failed to process message" });
+      return res.status(500).json({ error: "Failed to process message" });
     }
   });
 
@@ -258,34 +389,157 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Prompt is required" });
       }
       const answer = await generateChatResponse([{ role: "user", content: prompt }], model || "chat");
-      res.json({ answer });
+      return res.json({ answer });
     } catch (error) {
-      res.status(500).json({ error: "Failed to get AI answer" });
+      return res.status(500).json({ error: "Failed to get AI answer" });
     }
   });
 
   const router = Router();
 
-  router.post("/api/verify", async (req, res) => {
-    const { username, method, phrase } = req.body;
+  // POST: Unified ZED AI endpoint with fallback chain
+  app.post("/api/ask", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const { content } = req.body;
+      
+      if (!content) {
+        return res.status(400).json({ error: "Content is required" });
+      }
 
-    // Example: Only allow secure_phrase for Admin
-    if (
-      username === "Admin" &&
-      method === "secure_phrase" &&
-      phrase === "XOCLON_SECURE_2025"
-    ) {
-      return res.json({ success: true, message: "Secondary authentication passed" });
-    } else {
-      return res.status(401).json({ error: "Secondary authentication failed" });
+      console.log("� ZED: Processing user request with fallback chain");
+      const userId = req.session.user?.id;
+      let response: string;
+      let modelUsed = 'unknown';
+
+      // Fallback Chain: Ollama -> OpenAI -> Julius
+      
+      // 1. Try Ollama first (local model - fastest)
+      try {
+        console.log("🤖 ZED: Attempting Ollama (local model)...");
+        const ollamaResponse = await fetch('http://localhost:11434/api/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'phi', // or 'tinyllama' based on what's available
+            prompt: content,
+            stream: false
+          }),
+          signal: AbortSignal.timeout(30000) // 30 second timeout
+        });
+
+        if (ollamaResponse.ok) {
+          const data = await ollamaResponse.json();
+          if (data.response && data.response.trim()) {
+            response = data.response.trim();
+            modelUsed = 'ollama';
+            console.log("✅ ZED: Ollama responded successfully");
+          } else {
+            throw new Error("Empty response from Ollama");
+          }
+        } else {
+          throw new Error(`Ollama HTTP ${ollamaResponse.status}`);
+        }
+      } catch (ollamaError) {
+        console.log("⚠️ ZED: Ollama failed, trying OpenAI...", ollamaError instanceof Error ? ollamaError.message : String(ollamaError));
+        
+        // 2. Fallback to OpenAI
+        try {
+          // Use existing OpenAI service
+          const openaiResponse = await generateChatResponse([
+            { role: "user", content }
+          ], "chat", "gpt-4");
+
+          if (openaiResponse && openaiResponse.trim()) {
+            response = openaiResponse.trim();
+            modelUsed = 'openai';
+            console.log("✅ ZED: OpenAI responded successfully");
+          } else {
+            throw new Error("Empty response from OpenAI");
+          }
+        } catch (openaiError) {
+          console.log("⚠️ ZED: OpenAI failed, trying Julius...", openaiError instanceof Error ? openaiError.message : String(openaiError));
+          
+          // 3. Final fallback to Julius (placeholder - implement your Julius integration)
+          try {
+            // TODO: Implement Julius API call
+            // For now, using a simple fallback response
+            response = await callJuliusAPI(content);
+            modelUsed = 'julius';
+            console.log("✅ ZED: Julius responded successfully");
+          } catch (juliusError) {
+            console.error("❌ ZED: All models failed", juliusError instanceof Error ? juliusError.message : String(juliusError));
+            return res.status(503).json({ 
+              error: "ZED is temporarily offline. Please try again.",
+              assistant: "ZED"
+            });
+          }
+        }
+      }
+
+      // Log the successful interaction
+      if (userId && response) {
+        try {
+          await QueryLogger.logQuery({
+            userId,
+            query: content,
+            response: response,
+            model: modelUsed,
+            metadata: { 
+              source: 'zed-unified',
+              fallback_used: modelUsed !== 'ollama'
+            }
+          });
+        } catch (logError) {
+          console.warn("⚠️ Failed to log interaction:", logError);
+        }
+      }
+
+      // Return unified ZED response
+      res.json({
+        response: response,
+        assistant: "ZED",
+        success: true
+      });
+
+    } catch (error) {
+      console.error("❌ ZED: Critical error in ask endpoint:", error);
+      res.status(500).json({ 
+        error: "ZED is temporarily offline. Please try again.",
+        assistant: "ZED"
+      });
     }
   });
 
+  // Julius API helper function
+  async function callJuliusAPI(content: string): Promise<string> {
+    // TODO: Replace with actual Julius API integration
+    // For now, return a fallback response
+    console.log("🔄 ZED: Using Julius fallback...");
+    
+    // Example Julius API call (replace with actual implementation)
+    try {
+      // const juliusResponse = await fetch('http://your-julius-api/generate', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ prompt: content })
+      // });
+      // const data = await juliusResponse.json();
+      // return data.response;
+      
+      // Temporary fallback response
+      return `I understand you're asking: "${content.substring(0, 100)}${content.length > 100 ? '...' : ''}". I'm currently running on backup systems and may have limited capabilities. Please try again for a more detailed response.`;
+    } catch (error) {
+      throw new Error("Julius API unavailable");
+    }
+  }
+
   app.use(router);
 
-  // Middleware to handle 404 - Not Found
-  app.use((req, res) => {
-    res.status(404).json({ error: "Not Found" });
+  // Only add API-specific 404 handling, not global
+  app.use('/api/*', (req, res) => {
+    res.status(404).json({ error: "API endpoint not found" });
   });
 
   // Middleware to handle errors

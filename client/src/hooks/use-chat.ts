@@ -1,11 +1,55 @@
 import { useState, useCallback, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from './use-toast';
+import { useChatMock } from './use-chat-mock';
 
 interface StreamMessage {
   content: string;
   done: boolean;
 }
+
+interface ZEDResponse {
+  response: string;
+  assistant: string;
+  success: boolean;
+  error?: string;
+}
+
+// Unified ZED AI function - all requests go through /api/ask
+const getZEDResponse = async (content: string): Promise<ZEDResponse> => {
+  console.log('🧠 ZED: Processing user request...');
+  
+  try {
+    const response = await fetch('/api/ask', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ content }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `Server error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return {
+      response: data.response || 'ZED is processing your request...',
+      assistant: 'ZED',
+      success: true
+    };
+  } catch (error) {
+    console.error('❌ Error communicating with ZED:', error);
+    
+    return {
+      response: 'ZED is temporarily offline. Please try again.',
+      assistant: 'ZED',
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+};
 
 export function useChat(conversationId?: string) {
   const [isStreaming, setIsStreaming] = useState(false);
@@ -31,12 +75,16 @@ export function useChat(conversationId?: string) {
     abortControllerRef.current = abortController;
 
     try {
-      const response = await fetch(`/api/conversations/${conversationId}/stream`, {
+      // Send user message - backend will handle AI response
+      const response = await fetch(`/api/conversations/${conversationId}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ 
+          content, 
+          role: 'user' 
+        }),
         signal: abortController.signal,
       });
 
@@ -44,50 +92,17 @@ export function useChat(conversationId?: string) {
         throw new Error('Failed to send message');
       }
 
-      const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error('No response body');
-      }
+      setIsStreaming(false);
+      setStreamingMessage('');
+      
+      // Refresh queries to get the new messages
+      queryClient.invalidateQueries({
+        queryKey: ['/api/conversations', conversationId, 'messages'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['/api/conversations'],
+      });
 
-      let fullMessage = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = new TextDecoder().decode(value);
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data: StreamMessage = JSON.parse(line.slice(6));
-              
-              if (data.content) {
-                fullMessage += data.content;
-                setStreamingMessage(fullMessage);
-              }
-
-              if (data.done) {
-                setIsStreaming(false);
-                setStreamingMessage('');
-                
-                // Refresh queries
-                queryClient.invalidateQueries({
-                  queryKey: ['/api/conversations', conversationId, 'messages'],
-                });
-                queryClient.invalidateQueries({
-                  queryKey: ['/api/conversations'],
-                });
-                
-                return;
-              }
-            } catch (e) {
-              // Silent error handling for malformed SSE data
-            }
-          }
-        }
-      }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
         // Request was cancelled, don't show error
@@ -109,6 +124,47 @@ export function useChat(conversationId?: string) {
     }
   }, [conversationId, queryClient, toast]);
 
+  const appendMessage = useCallback(async (content: string, role: 'user' | 'assistant', metadata?: any): Promise<void> => {
+    if (!conversationId) {
+      throw new Error('No conversation ID provided');
+    }
+
+    try {
+      const response = await fetch(`/api/conversations/${conversationId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          content, 
+          role,
+          metadata: role === 'assistant' ? { assistant: 'ZED', ...metadata } : metadata
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to append ${role} message`);
+      }
+
+      // Refresh queries after successful message append
+      queryClient.invalidateQueries({
+        queryKey: ['/api/conversations', conversationId, 'messages'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['/api/conversations'],
+      });
+
+    } catch (error) {
+      console.error(`Error appending ${role} message:`, error);
+      toast({
+        title: 'Error',
+        description: role === 'assistant' ? 'ZED encountered an error' : 'Failed to save your message',
+        variant: 'destructive',
+      });
+      throw error;
+    }
+  }, [conversationId, queryClient, toast]);
+
   const stopStreaming = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -119,6 +175,7 @@ export function useChat(conversationId?: string) {
 
   return {
     sendMessage,
+    appendMessage,
     stopStreaming,
     isStreaming,
     streamingMessage,

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import zLogo from "@assets/Zed-ai-logo_1753468041342.png";
+import "./enhanced-login.css";
 
 export default function EnhancedLogin() {
   const [username, setUsername] = useState("");
@@ -101,16 +102,8 @@ export default function EnhancedLogin() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
         {/* Cyberpunk Grid Background */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="w-full h-full" style={{
-            backgroundImage: `
-              linear-gradient(rgba(147, 51, 234, 0.3) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(147, 51, 234, 0.3) 1px, transparent 1px),
-              linear-gradient(rgba(59, 130, 246, 0.2) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(59, 130, 246, 0.2) 1px, transparent 1px)
-            `,
-            backgroundSize: '100px 100px, 100px 100px, 20px 20px, 20px 20px'
-          }} />
+        <div className="absolute inset-0">
+          <div className="w-full h-full cyberpunk-grid-bg" />
         </div>
 
         <Card className="w-full max-w-md bg-black/80 border-red-500/30 backdrop-blur-sm shadow-2xl shadow-red-500/20">
@@ -119,8 +112,7 @@ export default function EnhancedLogin() {
               <img 
                 src={zLogo} 
                 alt="Z Logo" 
-                className="h-16 w-16 object-contain"
-                style={{ filter: 'brightness(0) invert(1)' }}
+                className="h-16 w-16 object-contain zed-logo-invert"
               />
             </div>
             
@@ -189,15 +181,7 @@ export default function EnhancedLogin() {
     <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
       {/* Cyberpunk Grid Background */}
       <div className="absolute inset-0 opacity-10">
-        <div className="w-full h-full" style={{
-          backgroundImage: `
-            linear-gradient(rgba(147, 51, 234, 0.3) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(147, 51, 234, 0.3) 1px, transparent 1px),
-            linear-gradient(rgba(59, 130, 246, 0.2) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(59, 130, 246, 0.2) 1px, transparent 1px)
-          `,
-          backgroundSize: '100px 100px, 100px 100px, 20px 20px, 20px 20px'
-        }} />
+        <div className="w-full h-full enhanced-login-bg" />
       </div>
 
       <Card className="w-full max-w-md bg-black/80 border-purple-500/30 backdrop-blur-sm shadow-2xl shadow-purple-500/20">
@@ -207,8 +191,7 @@ export default function EnhancedLogin() {
             <img 
               src={zLogo} 
               alt="Z Logo" 
-              className="h-16 w-16 object-contain"
-              style={{ filter: 'brightness(0) invert(1)' }}
+              className="h-16 w-16 object-contain zed-logo-invert"
             />
           </div>
           

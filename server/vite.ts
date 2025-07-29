@@ -20,9 +20,10 @@ export function log(message: string, source = "express") {
 }
 
 export async function setupVite(app: Express, server?: Server) {
+  const hmrPort = parseInt(process.env.HMR_PORT || "24679");
   const serverOptions = {
     middlewareMode: true,
-    hmr: server ? { server } : undefined,
+    hmr: server ? { server, port: hmrPort } : { port: hmrPort },
     allowedHosts: true as const,
   };
 
@@ -83,3 +84,10 @@ export function serveStatic(app: Express) {
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
+
+// Export default for language server compatibility
+export default {
+  setupVite,
+  serveStatic,
+  log,
+};

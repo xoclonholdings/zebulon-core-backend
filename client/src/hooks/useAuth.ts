@@ -1,17 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
+import { getQueryFn } from "@/lib/queryClient";
 
 export function useAuth() {
-  const { data: user, isLoading, error } = useQuery({
+  const { data: user, isLoading, error, refetch } = useQuery({
     queryKey: ["/api/auth/user"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    staleTime: 0, // Always check freshness
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
+
+  // Debug logging for authentication state
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Auth State:', { user, isLoading, error: error?.message, isAuthenticated: !!user && !error });
+  }
 
   return {
     user,
     isLoading,
     isAuthenticated: !!user && !error,
+    refetch,
   };
 }

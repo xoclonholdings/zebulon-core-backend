@@ -3,41 +3,39 @@ import express, { type Request, type Response, type NextFunction } from "express
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import cors from "cors";
-import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { checkDatabaseConnection } from "./db";
-import { runMigrations } from "./migrations";
 import authRoutes from "./routes/auth";
-import authMiddleware from "./middleware/auth";
 
 const app = express();
 
-// CORS FIRST!
+// CORS configuration
 app.use(cors({
-  origin: "http://localhost:5001",
+  origin: ["http://localhost:5173", "http://localhost:5000"],
   credentials: true,
   exposedHeaders: ["Set-Cookie"],
 }));
 
 app.use(express.json());
 app.use(cookieParser());
+
+// Session configuration
 app.use(session({
-  secret: "your_secret",
+  secret: process.env.SESSION_SECRET || "fallback_secret_key_for_development",
   resave: false,
   saveUninitialized: false,
-  name: "zed_session", // Explicitly set session name
+  name: "zed_session",
   cookie: {
     httpOnly: true,
     sameSite: "lax",
-    secure: false, // true in production
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    secure: false, // Set to true in production
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   },
 }));
 
 // Serve uploaded files statically
 app.use('/uploads', express.static('uploads'));
 
-// Request timing + response capture
+// Request logging middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
   const path = req.path;
@@ -66,41 +64,50 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   res.status(500).json({ error: "Internal server error" });
 });
 
-// Use authentication routes and middleware
-// app.use(authRoutes); // Disabled - using localAuth instead
+// Authentication routes
+app.use(authRoutes);
 
-// Example protected route
-app.post("/api/conversations/:id/messages", authMiddleware, (req, res) => {
-  // If authMiddleware passes, user is authenticated
-  res.json({ message: "Message received." });
+// Simple AI chat endpoint for testing
+app.post("/api/ask", (req: Request, res: Response) => {
+  const { message } = req.body;
+  log(`Received message: ${message}`);
+  
+  // Simple mock response
+  res.json({
+    message: `ZED: I received your message "${message}". The server is working correctly!`,
+    timestamp: new Date().toISOString(),
+    source: "ZED_MOCK"
+  });
 });
 
+// Health check endpoint
+app.get("/api/health", (req: Request, res: Response) => {
+  res.json({ 
+    status: "healthy", 
+    timestamp: new Date().toISOString(),
+    server: "ZED AI Assistant"
+  });
+});
+
+// Start server
 (async () => {
   try {
-    // Try database connection, but don't fail if it's not available
-    try {
-      await checkDatabaseConnection();
-      await runMigrations();
-      log("✅ Database connected and migrations completed");
-    } catch (dbError) {
-      log("⚠️ Database connection failed - running in offline mode:", String(dbError));
-      // Continue server startup without database
-    }
+    log("🔧 Starting simplified ZED server...");
 
-    // Register all API routes FIRST before Vite setup
-    const httpServer = await registerRoutes(app);
-
-    // Setup Vite/static serving AFTER API routes
+    // Setup Vite for development or static serving for production
     if (process.env.NODE_ENV === "development") {
       await setupVite(app);
     } else {
       serveStatic(app);
     }
 
-    const PORT = process.env.PORT ? parseInt(process.env.PORT) : 5001;
+    const PORT = process.env.PORT ? parseInt(process.env.PORT) : 5000;
 
-    httpServer.listen(PORT, () => {
-      log(`🚀 Server listening on http://localhost:${PORT}`);
+    app.listen(PORT, () => {
+      log(`🚀 ZED AI Assistant server listening on http://localhost:${PORT}`);
+      log("📝 Login credentials: Admin / Zed2025");
+      log("🔒 Authentication endpoint ready at /api/login");
+      log("💬 Chat endpoint ready at /api/ask");
     });
 
   } catch (error) {

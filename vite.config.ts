@@ -27,11 +27,36 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    sourcemap: process.env.NODE_ENV === "development",
+    minify: process.env.NODE_ENV === "production",
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+        },
+      },
+    },
   },
   server: {
+    port: 5001,
+    hmr: {
+      port: parseInt(process.env.HMR_PORT || "24679")  // Use configurable port for WebSocket HMR
+    },
     fs: {
       strict: true,
-      deny: ["**/.*"],
+      deny: ["**/.*", "**/node_modules/**"],
     },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5001',
+        changeOrigin: true,
+        secure: false
+      }
+    }
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom'],
+    exclude: ['@vite/client', '@vite/env'],
   },
 });
