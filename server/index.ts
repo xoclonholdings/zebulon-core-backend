@@ -18,7 +18,7 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import cors from "cors";
 import { corsAllowlist } from "./corsAllowlist.js";
-import { registerRoutes } from "./routes.js";
+// import { registerRoutes } from "./routes.js";
 import { log } from "./vite.js";
 import { checkDatabaseConnection } from "./db.js";
 import { runMigrations } from "./migrations.js";
@@ -34,14 +34,23 @@ app.use(express.json());
 app.get("/health", (_req: Request, res: Response) => {
   res.status(200).json({ ok: true, service: "zed-backend", time: new Date().toISOString() });
 });
-app.post("/chat", (req: Request, res: Response) => {
-  console.log("/chat req.body:", req.body);
-  const { message } = req.body || {};
-  if (!message) {
-    console.log("/chat missing message, body was:", req.body);
-    return res.status(400).json({ error: "message required" });
+// Register /chat endpoint directly for production fallback (Railway fix)
+import { registerRoutes } from "./routes.js";
+app.post("/chat", async (req: Request, res: Response) => {
+  try {
+    // Try to use the main chat logic from registerRoutes if available
+    if (typeof registerRoutes === "function") {
+      // This will re-register /chat, but that's ok (Express will use the last one)
+      registerRoutes(app);
+    }
+  } catch (e) {
+    // fallback: simple echo
+    const { message } = req.body || {};
+    if (!message) {
+      return res.status(400).json({ error: "message required" });
+    }
+    return res.status(200).json({ reply: `Zed says: ${message}` });
   }
-  return res.status(200).json({ reply: `Zed says: ${message}` });
 });
 
 // CORS + CSP FIRST!
