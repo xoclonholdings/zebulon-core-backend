@@ -98,7 +98,11 @@ const corsOptions: CorsOptions = {
 app.use(morgan('dev'));
 app.use(cors(corsOptions));
 
-app.post("/chat", async (req, res) => {
+// Health
+app.get('/health', (_req, res) => res.status(200).send('OK'));
+
+// Chat (expects JSON: { message: string })
+app.post('/chat', async (req, res) => {
   try {
     const { message } = req.body || {};
     if (!message) return res.status(400).json({ error: 'message required' });
