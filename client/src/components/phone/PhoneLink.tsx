@@ -43,6 +43,7 @@ export default function PhoneLink({ isCollapsed = false }: PhoneLinkProps) {
   const [pairingCode, setPairingCode] = useState('');
   const [showPairing, setShowPairing] = useState(false);
 
+  // Force redeploy: TS7030 fix present, this comment triggers a new commit
   useEffect(() => {
     // Simulate device detection
     if (status === 'pairing') {
