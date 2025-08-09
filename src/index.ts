@@ -1,3 +1,7 @@
+console.log('[server] src/index.ts starting');
+console.log('[server] NODE_ENV:', process.env.NODE_ENV);
+console.log('[server] PORT:', process.env.PORT);
+console.log('[server] CWD:', process.cwd());
 import express from 'express';
 import morgan from 'morgan';
 import { buildCors } from './cors';
