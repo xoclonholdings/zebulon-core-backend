@@ -1,32 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-API_BASE="${1:-$PROD_API_BASE}"
+API_BASE="${1:-https://zed-backend-production.up.railway.app}"
 
-if [ -z "$API_BASE" ]; then
-  echo "Usage: ./scripts/prod-check.sh https://<your-railway-domain>"
-  exit 1
-fi
+echo "==> GET $API_BASE/health"
+HEALTH_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/health" || true)
+echo "Health HTTP: $HEALTH_CODE"
 
-echo "==> Checking /health at $API_BASE/health"
-HTTP_HEALTH=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/health" || true)
-echo "Health status: $HTTP_HEALTH"
-
-echo "==> Hitting /chat"
-CHAT_RESP=$(curl -s -i "$API_BASE/chat" \
-  -H "Content-Type: application/json" \
-  --data '{"message":"Hello Zed"}' || true)
-
+echo "==> POST $API_BASE/chat"
+CHAT_OUT=$(curl -s -i "$API_BASE/chat" -H "Content-Type: application/json" -d '{"message":"Hello Zed"}' || true)
 echo "---- /chat response ----"
-echo "$CHAT_RESP"
+echo "$CHAT_OUT"
 echo "------------------------"
 
-if [[ "$HTTP_HEALTH" != "200" ]]; then
+if [[ "$HEALTH_CODE" != "200" ]]; then
   echo "::FAIL:: /health not 200"
   exit 2
 fi
 
-if echo "$CHAT_RESP" | grep -qi "HTTP/.* 200"; then
+if echo "$CHAT_OUT" | grep -qi "HTTP/.* 200"; then
   echo "::OK:: /chat returned 200"
   exit 0
 fi

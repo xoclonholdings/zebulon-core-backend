@@ -1,3 +1,16 @@
+/**
+ * ZED BACKEND ENTRYPOINT
+ *
+ * API BASE URL: /
+ *
+ * Guaranteed endpoints for frontend integration:
+ *   - GET  /health   (returns 200 OK JSON or text)
+ *   - POST /chat     (expects { message: string }, returns { reply: string })
+ *
+ * All environments (dev/prod) will always expose these endpoints at the root path.
+ *
+ * If you change the API base path, update this block and notify frontend developers.
+ */
 import "dotenv/config";
 import express, { type Request, type Response, type NextFunction } from "express";
 import morgan from "morgan";
@@ -12,16 +25,27 @@ import { runMigrations } from "./migrations";
 import authRoutes from "./routes/auth";
 import authMiddleware from "./middleware/auth";
 
+
 const app = express();
+
+// --- GUARANTEED ENDPOINTS FOR FRONTEND ---
+app.get("/health", (_req: Request, res: Response) => {
+  // Always return 200 for health checks
+  res.status(200).json({ ok: true, service: "zed-backend", time: new Date().toISOString() });
+});
+app.post("/chat", (req: Request, res: Response) => {
+  // Always echo the message for transport verification
+  const { message } = req.body || {};
+  if (!message) return res.status(400).json({ error: "message required" });
+  return res.status(200).json({ reply: `Zed says: ${message}` });
+});
+
+
 
 // CORS + CSP FIRST!
 app.use(corsAllowlist);
-// Health and status routes
-app.get("/health", (req: Request, res: Response) => {
-  res.status(200).json({ ok: true });
-});
 app.get("/", (req: Request, res: Response) => {
-  res.type('text/plain').send('zed-backend online');
+  res.type("text/plain").send("zed-backend online");
 });
 
 app.use(express.json());
@@ -98,22 +122,7 @@ const corsOptions: CorsOptions = {
 app.use(morgan('dev'));
 app.use(cors(corsOptions));
 
-// Health
-app.get('/health', (_req, res) => res.status(200).send('OK'));
 
-// Chat (expects JSON: { message: string })
-app.post('/chat', async (req, res) => {
-  try {
-    const { message } = req.body || {};
-    if (!message) return res.status(400).json({ error: 'message required' });
-    // TODO: replace this with your actual chat handler call
-    // For now, echo to verify transport works in prod:
-    return res.status(200).json({ reply: `Zed says: ${message}` });
-  } catch (e: any) {
-    console.error('Chat error:', e?.message || e);
-    return res.status(500).json({ error: 'Internal error' });
-  }
-});
 
 (async () => {
   try {
@@ -183,47 +192,8 @@ app.post('/chat', async (req, res) => {
       });
     }
 
-    // --- Start simple chat server on port 3001 in production ---
-    if (process.env.NODE_ENV === "production") {
-      const express = await import("express");
-      const simpleApp = express.default();
-      simpleApp.use(express.json());
-      simpleApp.get("/health", (req, res) => {
-        res.json({ ok: true, service: "zed-backend", time: new Date().toISOString() });
-      });
-      simpleApp.get("/", (req, res) => {
-        res.type("text/plain").send("zed-backend alive");
-      });
-      simpleApp.post("/api/chat", (req, res) => {
-        const { message } = req.body;
-        if (!message || typeof message !== "string") {
-          return res.status(400).json({ error: "Missing or invalid 'message' in request body" });
-        }
-        if (!process.env.OPENAI_API_KEY) {
-          return res.status(501).json({ error: "Model API key not set. Cannot process request." });
-        }
-        return res.json({ reply: "pong", ok: true });
-      });
-      simpleApp.listen(3001, HOST, () => {
-        log(`🚀 Simple chat server listening on http://${HOST}:3001`);
-      });
-    }
-    app.post("/api/ask", (req: Request, res: Response) => {
-      const { messages } = req.body;
-      if (!messages || !Array.isArray(messages)) {
-        return res.status(200).json({ ok: true, error: 'No messages provided', service: 'zed-backend' });
-      } else {
-        return res.status(200).json({ ok: true, service: 'zed-backend', echo: messages });
-      }
-    });
-    app.post("/api/chat", (req: Request, res: Response) => {
-      const { messages } = req.body;
-      if (!messages || !Array.isArray(messages)) {
-        return res.status(200).json({ ok: true, error: 'No messages provided', service: 'zed-backend' });
-      } else {
-        return res.status(200).json({ ok: true, service: 'zed-backend', echo: messages });
-      }
-    });
+
+
 
   } catch (error) {
     log("❌ Failed to start server: " + String(error));
