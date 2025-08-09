@@ -67,6 +67,8 @@ export default function PhoneLink({ isCollapsed = false }: PhoneLinkProps) {
 
       return () => clearTimeout(timer);
     }
+    // Always return undefined if not pairing
+    return undefined;
   }, [status, connectedDevices]);
 
   const generatePairingCode = () => {
