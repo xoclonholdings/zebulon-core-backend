@@ -1,7 +1,9 @@
 import "dotenv/config";
 import express, { type Request, type Response, type NextFunction } from "express";
+import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import session from "express-session";
+import cors, { type CorsOptions } from "cors";
 import { corsAllowlist } from "./corsAllowlist";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
@@ -78,6 +80,37 @@ app.post("/api/conversations/:id/messages", authMiddleware, (req, res) => {
   res.json({ message: "Message received." });
 });
 
+// CORS configuration
+const allowed = (process.env.CORS_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
+
+const corsOptions: CorsOptions = {
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true); // allow server-to-server and curl
+    if (allowed.length === 0) return cb(null, true); // wide open if not configured
+    if (allowed.includes(origin)) return cb(null, true);
+    return cb(new Error(`CORS blocked for: ${origin}`));
+  },
+  credentials: true,
+  methods: ['GET','POST','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization'],
+};
+
+app.use(morgan('dev'));
+app.use(cors(corsOptions));
+
+app.post("/chat", async (req, res) => {
+  try {
+    const { message } = req.body || {};
+    if (!message) return res.status(400).json({ error: 'message required' });
+    // TODO: replace this with your actual chat handler call
+    // For now, echo to verify transport works in prod:
+    return res.status(200).json({ reply: `Zed says: ${message}` });
+  } catch (e: any) {
+    console.error('Chat error:', e?.message || e);
+    return res.status(500).json({ error: 'Internal error' });
+  }
+});
+
 (async () => {
   try {
     // Try database connection, but don't fail if it's not available
@@ -100,7 +133,13 @@ app.post("/api/conversations/:id/messages", authMiddleware, (req, res) => {
       serveStatic(app);
     }
 
-    const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
+    // Always use process.env.PORT || 3001 for HTTP
+    let PORT: number;
+    if (process.env.NODE_ENV === "production") {
+      PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
+    } else {
+      PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
+    }
     const HOST = "0.0.0.0";
     httpServer.listen(PORT, HOST, () => {
       log(`🚀 HTTP server listening on http://${HOST}:${PORT}`);
@@ -125,7 +164,7 @@ app.post("/api/conversations/:id/messages", authMiddleware, (req, res) => {
       routes.forEach(r => log(`${r.method} ${r.path}`));
     });
 
-    // Optional HTTPS server on 5001 if certs are present and in production
+    // Only start HTTPS on 5001 if in production and certs are present
     if (process.env.NODE_ENV === "production" && process.env.SSL_KEY && process.env.SSL_CERT) {
       const https = await import("https");
       const fs = await import("fs");
