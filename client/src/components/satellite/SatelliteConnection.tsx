@@ -27,7 +27,7 @@ export default function SatelliteConnection({ isCollapsed = false }: SatelliteCo
   const [bandwidth, setBandwidth] = useState(0);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+  let interval: number;
     
     if (status === 'connected') {
       interval = setInterval(() => {

@@ -12,7 +12,7 @@ export function useAuth() {
   });
 
   // Debug logging for authentication state
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.MODE === 'development') {
     console.log('Auth State:', { user, isLoading, error: error?.message, isAuthenticated: !!user && !error });
   }
 

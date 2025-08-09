@@ -16,39 +16,39 @@ import express, { type Request, type Response, type NextFunction } from "express
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import session from "express-session";
-import cors, { type CorsOptions } from "cors";
-import { corsAllowlist } from "./corsAllowlist";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
-import { checkDatabaseConnection } from "./db";
-import { runMigrations } from "./migrations";
-import authRoutes from "./routes/auth";
-import authMiddleware from "./middleware/auth";
+import cors from "cors";
+import { corsAllowlist } from "./corsAllowlist.js";
+import { registerRoutes } from "./routes.js";
+import { log } from "./vite.js";
+import { checkDatabaseConnection } from "./db.js";
+import { runMigrations } from "./migrations.js";
+import authRoutes from "./routes/auth.js";
+import authMiddleware from "./middleware/auth.js";
 
 
 const app = express();
 
 // --- GUARANTEED ENDPOINTS FOR FRONTEND ---
+// These must be registered BEFORE static/frontend serving so they always return JSON
+app.use(express.json());
 app.get("/health", (_req: Request, res: Response) => {
-  // Always return 200 for health checks
   res.status(200).json({ ok: true, service: "zed-backend", time: new Date().toISOString() });
 });
 app.post("/chat", (req: Request, res: Response) => {
-  // Always echo the message for transport verification
+  console.log("/chat req.body:", req.body);
   const { message } = req.body || {};
-  if (!message) return res.status(400).json({ error: "message required" });
+  if (!message) {
+    console.log("/chat missing message, body was:", req.body);
+    return res.status(400).json({ error: "message required" });
+  }
   return res.status(200).json({ reply: `Zed says: ${message}` });
 });
 
-
-
 // CORS + CSP FIRST!
-app.use(corsAllowlist);
+app.use(cors());
 app.get("/", (req: Request, res: Response) => {
   res.type("text/plain").send("zed-backend online");
 });
-
-app.use(express.json());
 app.use(cookieParser());
 app.use(session({
   secret: process.env.SESSION_SECRET || "fallback_secret_key_for_development",
@@ -107,8 +107,9 @@ app.post("/api/conversations/:id/messages", authMiddleware, (req, res) => {
 // CORS configuration
 const allowed = (process.env.CORS_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
 
+import type { CorsOptions } from "cors";
 const corsOptions: CorsOptions = {
-  origin: (origin, cb) => {
+  origin: (origin: string | undefined, cb: (err: Error | null, allow?: boolean) => void) => {
     if (!origin) return cb(null, true); // allow server-to-server and curl
     if (allowed.length === 0) return cb(null, true); // wide open if not configured
     if (allowed.includes(origin)) return cb(null, true);
@@ -141,9 +142,9 @@ app.use(cors(corsOptions));
 
     // Setup Vite/static serving AFTER API routes
     if (process.env.NODE_ENV === "development") {
-      await setupVite(app);
+  // setupVite(app); // Disabled: API-only backend
     } else {
-      serveStatic(app);
+      // serveStatic(app); // Disabled: API-only backend, no frontend build required
     }
 
     // Always use process.env.PORT || 3001 for HTTP
