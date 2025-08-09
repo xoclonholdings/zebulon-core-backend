@@ -4,8 +4,8 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "start": "npm run start --prefix server"
+    "build": "npm run build --prefix server",
+    "start": "node server/dist/index.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
