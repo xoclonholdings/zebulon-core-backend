@@ -13,8 +13,19 @@ import authMiddleware from "./middleware/auth";
 const app = express();
 
 // CORS FIRST!
+const allowedOrigins = [
+  "https://zed-ai.online",
+  "http://localhost:5173",
+  "http://localhost:5000",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:5000"
+];
 app.use(cors({
-  origin: "http://localhost:5001",
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error("Not allowed by CORS"), false);
+  },
   credentials: true,
   exposedHeaders: ["Set-Cookie"],
 }));
@@ -22,14 +33,14 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 app.use(session({
-  secret: "your_secret",
+  secret: process.env.SESSION_SECRET || "fallback_secret_key_for_development",
   resave: false,
   saveUninitialized: false,
-  name: "zed_session", // Explicitly set session name
+  name: "zed_session",
   cookie: {
     httpOnly: true,
     sameSite: "lax",
-    secure: false, // true in production
+    secure: process.env.NODE_ENV === "production",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   },
 }));
@@ -98,9 +109,14 @@ app.post("/api/conversations/:id/messages", authMiddleware, (req, res) => {
     }
 
     const PORT = process.env.PORT ? parseInt(process.env.PORT) : 5001;
+    const HOST = "0.0.0.0";
+    httpServer.listen(PORT, HOST, () => {
+      log(`🚀 Server listening on http://${HOST}:${PORT}`);
+    });
 
-    httpServer.listen(PORT, () => {
-      log(`🚀 Server listening on http://localhost:${PORT}`);
+    // Ensure /api/chat returns JSON
+    app.post("/api/chat", (req: Request, res: Response) => {
+      res.json({ message: "Chat endpoint working" });
     });
 
   } catch (error) {

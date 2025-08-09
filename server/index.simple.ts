@@ -9,8 +9,19 @@ import authRoutes from "./routes/auth";
 const app = express();
 
 // CORS configuration
+const allowedOrigins = [
+  "https://zed-ai.online",
+  "http://localhost:5173",
+  "http://localhost:5000",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:5000"
+];
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:5000"],
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error("Not allowed by CORS"), false);
+  },
   credentials: true,
   exposedHeaders: ["Set-Cookie"],
 }));
@@ -27,8 +38,8 @@ app.use(session({
   cookie: {
     httpOnly: true,
     sameSite: "lax",
-    secure: false, // Set to true in production
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   },
 }));
 
@@ -102,12 +113,17 @@ app.get("/api/health", (req: Request, res: Response) => {
     }
 
     const PORT = process.env.PORT ? parseInt(process.env.PORT) : 5000;
-
-    app.listen(PORT, () => {
-      log(`🚀 ZED AI Assistant server listening on http://localhost:${PORT}`);
+    const HOST = "0.0.0.0";
+    app.listen(PORT, HOST, () => {
+      log(`🚀 ZED AI Assistant server listening on http://${HOST}:${PORT}`);
       log("📝 Login credentials: Admin / Zed2025");
       log("🔒 Authentication endpoint ready at /api/login");
       log("💬 Chat endpoint ready at /api/ask");
+    });
+
+    // Ensure /api/chat returns JSON
+    app.post("/api/chat", (req: Request, res: Response) => {
+      res.json({ message: "Chat endpoint working" });
     });
 
   } catch (error) {

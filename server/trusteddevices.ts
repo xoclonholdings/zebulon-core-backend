@@ -18,8 +18,14 @@ const app = express();
 // CORS FIRST!
 app.use(
   cors({
-    origin: "http://localhost:5000", // or "*" for local testing
-    credentials: true,
+    origin: [
+      "https://zed-ai.online",
+      "http://localhost:5173",
+      "http://localhost:5000",
+      "http://127.0.0.1:5173",
+      "http://127.0.0.1:5000"
+    ],
+  credentials: true,
     exposedHeaders: ["Set-Cookie"],
   })
 );
@@ -121,8 +127,9 @@ app.post("/api/login", (req, res) => {
         requiresSecondaryAuth: true,
       });
     }
+  } else {
+    return res.status(401).json({ error: "Invalid credentials" });
   }
-  res.status(401).json({ error: "Invalid credentials" });
 });
 
 // Secure phrase verification route
@@ -145,8 +152,9 @@ app.post("/api/verify", (req, res) => {
       success: true,
       message: "Secondary authentication passed. Device trusted.",
     });
+  } else {
+    return res.status(401).json({ error: "Secondary authentication failed" });
   }
-  res.status(401).json({ error: "Secondary authentication failed" });
 });
 
 // Example protected route (use this logic for your /api/conversations/:id/messages route)
@@ -160,8 +168,9 @@ app.post("/api/conversations/:id/messages", (req, res) => {
   ) {
     // ...handle message logic...
     return res.json({ message: "Message received." });
+  } else {
+    return res.status(401).json({ message: "Unauthorized" });
   }
-  res.status(401).json({ message: "Unauthorized" });
 });
 
 // Example protected GET route
@@ -174,8 +183,9 @@ app.get("/api/protected", (req, res) => {
     !req.session.securePhraseRequired
   ) {
     return res.json({ message: "Access granted to protected resource." });
+  } else {
+    return res.status(403).json({ error: "Access denied." });
   }
-  res.status(403).json({ error: "Access denied." });
 });
 
 export default app;
