@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import SatelliteConnection from "../satellite/SatelliteConnection";
-import PhoneLink from "../phone/PhoneLink";
+
 import { 
   X, 
   FileText, 
@@ -83,7 +83,7 @@ export default function SessionPanel({ conversation, files, session }: SessionPa
       {/* Connectivity Panel */}
       <div className="p-4 border-b border-white/10 relative z-10 space-y-4">
         <SatelliteConnection />
-        <PhoneLink />
+
       </div>
 
       {/* Session Stats */}
