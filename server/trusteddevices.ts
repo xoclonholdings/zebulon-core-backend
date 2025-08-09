@@ -16,23 +16,12 @@ declare module "express-session" {
 const app = express();
 
 // CORS FIRST!
-const allowedOrigins = [
-  "https://zed-ai.online",
-  "http://localhost:5173",
-  "http://localhost:5000",
-  "http://127.0.0.1:5173",
-  "http://127.0.0.1:5000"
-];
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like server-to-server, test scripts)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error("Not allowed by CORS"), false);
-    },
+    origin: ["https://zed-ai.online", "http://localhost:5173"],
+    methods: "GET,POST,OPTIONS",
+    allowedHeaders: "Content-Type,Authorization",
     credentials: true,
-    exposedHeaders: ["Set-Cookie"],
   })
 );
 

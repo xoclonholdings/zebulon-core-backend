@@ -13,23 +13,26 @@ import authMiddleware from "./middleware/auth";
 const app = express();
 
 // CORS FIRST!
-const allowedOrigins = [
-  "https://zed-ai.online",
-  "http://localhost:5173",
-  "http://localhost:5000",
-  "http://127.0.0.1:5173",
-  "http://127.0.0.1:5000"
-];
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like server-to-server, test scripts)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error("Not allowed by CORS"), false);
-  },
-  credentials: true,
-  exposedHeaders: ["Set-Cookie"],
+  origin: ["https://zed-ai.online", "http://localhost:5173"],
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: false
 }));
+app.options('*', cors());
+// Health and status routes
+app.get("/health", (req: Request, res: Response) => {
+  res.status(200).json({ ok: true, service: 'zed-backend' });
+});
+app.get("/healthz", (req: Request, res: Response) => {
+  res.status(200).json({ ok: true, service: 'zed-backend' });
+});
+app.get("/status", (req: Request, res: Response) => {
+  res.status(200).json({ ok: true, service: 'zed-backend' });
+});
+app.get("/", (req: Request, res: Response) => {
+  res.type('text/plain').send('zed-backend online');
+});
 
 app.use(express.json());
 app.use(cookieParser());
@@ -113,11 +116,43 @@ app.post("/api/conversations/:id/messages", authMiddleware, (req, res) => {
     const HOST = "0.0.0.0";
     httpServer.listen(PORT, HOST, () => {
       log(`🚀 Server listening on http://${HOST}:${PORT}`);
+      // Print all registered routes
+      const routes: { method: string, path: string }[] = [];
+      app._router.stack.forEach((middleware: any) => {
+        if (middleware.route) {
+          // routes registered directly on the app
+          const methods = Object.keys(middleware.route.methods).map(m => m.toUpperCase());
+          methods.forEach(method => routes.push({ method, path: middleware.route.path }));
+        } else if (middleware.name === 'router' && middleware.handle.stack) {
+          // router middleware
+          middleware.handle.stack.forEach((handler: any) => {
+            if (handler.route) {
+              const methods = Object.keys(handler.route.methods).map(m => m.toUpperCase());
+              methods.forEach(method => routes.push({ method, path: handler.route.path }));
+            }
+          });
+        }
+      });
+      log('Registered routes:');
+      routes.forEach(r => log(`${r.method} ${r.path}`));
     });
 
-    // Ensure /api/chat returns JSON
+    // Ensure /api/ask and /api/chat return JSON and handle missing messages
+    app.post("/api/ask", (req: Request, res: Response) => {
+      const { messages } = req.body;
+      if (!messages || !Array.isArray(messages)) {
+        return res.status(200).json({ ok: true, error: 'No messages provided', service: 'zed-backend' });
+      } else {
+        return res.status(200).json({ ok: true, service: 'zed-backend', echo: messages });
+      }
+    });
     app.post("/api/chat", (req: Request, res: Response) => {
-      res.json({ message: "Chat endpoint working" });
+      const { messages } = req.body;
+      if (!messages || !Array.isArray(messages)) {
+        return res.status(200).json({ ok: true, error: 'No messages provided', service: 'zed-backend' });
+      } else {
+        return res.status(200).json({ ok: true, service: 'zed-backend', echo: messages });
+      }
     });
 
   } catch (error) {

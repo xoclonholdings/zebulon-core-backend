@@ -9,23 +9,16 @@ import authRoutes from "./routes/auth";
 const app = express();
 
 // CORS configuration
-const allowedOrigins = [
-  "https://zed-ai.online",
-  "http://localhost:5173",
-  "http://localhost:5000",
-  "http://127.0.0.1:5173",
-  "http://127.0.0.1:5000"
-];
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like server-to-server, test scripts)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error("Not allowed by CORS"), false);
-  },
+  origin: ["https://zed-ai.online", "http://localhost:5173"],
+  methods: "GET,POST,OPTIONS",
+  allowedHeaders: "Content-Type,Authorization",
   credentials: true,
-  exposedHeaders: ["Set-Cookie"],
 }));
+// Explicit health check route
+app.get("/health", (req: Request, res: Response) => {
+  res.json({ ok: true });
+});
 
 app.use(express.json());
 app.use(cookieParser());
@@ -122,9 +115,13 @@ app.get("/api/health", (req: Request, res: Response) => {
       log("💬 Chat endpoint ready at /api/ask");
     });
 
-    // Ensure /api/chat returns JSON
+    // Ensure /api/chat returns JSON and does not crash if messages is missing
     app.post("/api/chat", (req: Request, res: Response) => {
-      res.json({ message: "Chat endpoint working" });
+      const { messages } = req.body;
+      if (!messages || !Array.isArray(messages)) {
+        return res.json({ message: "No messages provided", ok: true });
+      }
+      res.json({ message: "Chat endpoint working", ok: true });
     });
 
   } catch (error) {
