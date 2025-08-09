@@ -2,7 +2,8 @@
 const testAuth = async () => {
   try {
     // Login first
-    const loginResponse = await fetch('/api/login', {
+  const baseUrl = process.env.API_URL || 'http://localhost:5001';
+  const loginResponse = await fetch(`${baseUrl}/api/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: 'Admin', password: 'Zed2025' }),
@@ -14,7 +15,7 @@ const testAuth = async () => {
     
     // Wait a moment then check auth
     setTimeout(async () => {
-      const authResponse = await fetch('/api/auth/user', {
+  const authResponse = await fetch(`${baseUrl}/api/auth/user`, {
         credentials: 'include'
       });
       
