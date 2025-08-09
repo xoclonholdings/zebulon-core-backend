@@ -14,21 +14,25 @@ const router = Router();
 router.post("/api/login", (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
-    return res.status(400).json({ error: "Username and password required" });
+    res.status(400).json({ error: "Username and password required" });
+    return;
   }
   // Demo: accept any username/password
   req.session.user = { username };
   setZedCoreData({ userName: username });
   res.status(200).json({ ok: true, username });
+  return;
 });
 
 // GET /api/user - return current user profile/core data
 router.get("/api/user", (req, res) => {
   if (!req.session.user) {
-    return res.status(401).json({ error: "Not authenticated" });
+    res.status(401).json({ error: "Not authenticated" });
+    return;
   }
   const coreData = getZedCoreData();
   res.status(200).json({ user: req.session.user, coreData });
+  return;
 });
 
 export default router;

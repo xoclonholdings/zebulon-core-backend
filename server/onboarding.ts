@@ -7,10 +7,12 @@ const router = Router();
 router.post("/onboarding", (req, res) => {
   const data = req.body;
   if (!data || typeof data !== "object") {
-    return res.status(400).json({ error: "Invalid onboarding data" });
+    res.status(400).json({ error: "Invalid onboarding data" });
+    return;
   }
   setZedCoreData(data);
   res.status(200).json({ ok: true });
+  return;
 });
 
 export default router;
