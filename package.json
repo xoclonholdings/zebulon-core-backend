@@ -11,7 +11,8 @@
     "db:push": "drizzle-kit push",
     "clean": "rm -rf dist node_modules/.cache .vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "test": "vitest"
+  "test": "vitest",
+  "postinstall": "npm run build"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
