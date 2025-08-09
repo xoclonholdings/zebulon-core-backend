@@ -28,4 +28,9 @@ app.options('*', buildCors());
 
 app.listen(PORT, () => {
   console.log(`[server] listening on :${PORT}`);
+  if (process.env.PORT) {
+    console.log(`[server] PORT from process.env.PORT: ${process.env.PORT}`);
+  } else {
+    console.log(`[server] PORT defaulted to 3001`);
+  }
 });
