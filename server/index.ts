@@ -2,7 +2,7 @@ import "dotenv/config";
 import express, { type Request, type Response, type NextFunction } from "express";
 import cookieParser from "cookie-parser";
 import session from "express-session";
-import cors from "cors";
+import { corsAllowlist } from "./corsAllowlist";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { checkDatabaseConnection } from "./db";
@@ -12,23 +12,11 @@ import authMiddleware from "./middleware/auth";
 
 const app = express();
 
-// CORS FIRST!
-app.use(cors({
-  origin: ["https://zed-ai.online", "http://localhost:5173"],
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: false
-}));
-app.options('*', cors());
+// CORS + CSP FIRST!
+app.use(corsAllowlist);
 // Health and status routes
 app.get("/health", (req: Request, res: Response) => {
-  res.status(200).json({ ok: true, service: 'zed-backend' });
-});
-app.get("/healthz", (req: Request, res: Response) => {
-  res.status(200).json({ ok: true, service: 'zed-backend' });
-});
-app.get("/status", (req: Request, res: Response) => {
-  res.status(200).json({ ok: true, service: 'zed-backend' });
+  res.status(200).json({ ok: true });
 });
 app.get("/", (req: Request, res: Response) => {
   res.type('text/plain').send('zed-backend online');
@@ -112,10 +100,10 @@ app.post("/api/conversations/:id/messages", authMiddleware, (req, res) => {
       serveStatic(app);
     }
 
-    const PORT = process.env.PORT ? parseInt(process.env.PORT) : 5001;
+    const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
     const HOST = "0.0.0.0";
     httpServer.listen(PORT, HOST, () => {
-      log(`🚀 Server listening on http://${HOST}:${PORT}`);
+      log(`🚀 HTTP server listening on http://${HOST}:${PORT}`);
       // Print all registered routes
       const routes: { method: string, path: string }[] = [];
       app._router.stack.forEach((middleware: any) => {
@@ -136,6 +124,21 @@ app.post("/api/conversations/:id/messages", authMiddleware, (req, res) => {
       log('Registered routes:');
       routes.forEach(r => log(`${r.method} ${r.path}`));
     });
+
+    // Optional HTTPS server on 5001 if certs are present and in production
+    if (process.env.NODE_ENV === "production" && process.env.SSL_KEY && process.env.SSL_CERT) {
+      const https = await import("https");
+      const fs = await import("fs");
+      let key: string | Buffer = process.env.SSL_KEY;
+      let cert: string | Buffer = process.env.SSL_CERT;
+      // If values look like file paths, read them
+      if (key.length < 100 && fs.existsSync(key)) key = fs.readFileSync(key);
+      if (cert.length < 100 && fs.existsSync(cert)) cert = fs.readFileSync(cert);
+      const httpsServer = https.createServer({ key, cert }, app);
+      httpsServer.listen(5001, HOST, () => {
+        log(`🚀 HTTPS server listening on https://${HOST}:5001`);
+      });
+    }
 
     // --- Start simple chat server on port 3001 in production ---
     if (process.env.NODE_ENV === "production") {

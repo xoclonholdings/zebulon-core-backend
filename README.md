@@ -1,3 +1,40 @@
+# How to run locally
+
+1. Install dependencies:
+     ```bash
+     npm install
+     ```
+2. Copy `.env.example` to `.env` and fill in secrets as needed.
+3. Start the backend:
+     ```bash
+     npm run dev
+     # or for production build
+     npm run build && npm start
+     ```
+4. The backend will listen on `http://localhost:3001` by default.
+
+# Railway deployment
+
+Set these environment variables in Railway:
+
+- `PORT=3001` (Railway will set this automatically)
+- `SSL_KEY` and `SSL_CERT` (PEM string or file path, for HTTPS on 5001)
+- `ALLOWED_ORIGINS=http://localhost:5173,https://zed-ai.online,https://*.netlify.app`
+
+# Vite frontend config
+
+In your Vite app, set:
+
+- `VITE_API_BASE=http://localhost:3001` (for local dev)
+- `VITE_API_BASE=https://<your-railway-domain>:5001` (for production, HTTPS)
+
+The backend CORS allow-list is:
+
+- `http://localhost:5173`
+- `https://zed-ai.online`
+- `https://*.netlify.app`
+
+The backend exposes `Authorization` and `Content-Type` headers for frontend access.
 # ZED AI Assistant
 
 ZED is an advanced AI assistant with comprehensive file processing capabilities, multi-tier memory system, and enterprise-grade security features designed for XOCLON HOLDINGS INC.

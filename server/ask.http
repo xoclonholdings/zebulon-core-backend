@@ -1,3 +1,31 @@
+### Preflight OPTIONS from allowed origin
+OPTIONS http://localhost:3001/api/health
+Origin: https://zed-ai.online
+
+### GET from denied origin
+GET http://localhost:3001/api/health
+Origin: https://evil.example
+
+### POST /api/chat from allowed origin
+POST http://localhost:3001/api/chat
+Origin: https://zed-ai.online
+Content-Type: application/json
+
+{
+   "messages": ["hello"]
+}
+### Preflight OPTIONS from allowed origin
+OPTIONS http://localhost:3001/api/health
+Origin: https://zed-ai.online
+
+### GET from allowed origin
+GET http://localhost:3001/api/health
+Origin: https://zed-ai.online
+
+### GET from denied origin
+GET http://localhost:3001/api/health
+Origin: https://evil.example
+
 POST {{API_URL}}/api/ask
 Content-Type: application/json
 
