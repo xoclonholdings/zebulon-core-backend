@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -26,45 +26,50 @@ export default function SatelliteConnection({ isCollapsed = false }: SatelliteCo
   const [latency, setLatency] = useState(0);
   const [bandwidth, setBandwidth] = useState(0);
 
-  useEffect(() => {
-  let interval: number;
-    
-    if (status === 'connected') {
-      interval = setInterval(() => {
-        // Simulate realistic satellite connection metrics
-        setSignalStrength(Math.floor(Math.random() * 20) + 80); // 80-100%
-        setLatency(Math.floor(Math.random() * 100) + 200); // 200-300ms
-        setBandwidth(Math.floor(Math.random() * 50) + 100); // 100-150 Mbps
-      }, 2000);
+  // Fetch satellite status from backend
+  const fetchStatus = useCallback(async () => {
+    try {
+      const res = await fetch('/satellite/status');
+      const data = await res.json();
+      if (data.connected) {
+        setStatus('connected');
+        setSignalStrength(85); // TODO: Replace with real metrics if available
+        setLatency(250);
+        setBandwidth(125);
+      } else {
+        setStatus('disconnected');
+        setSignalStrength(0);
+        setLatency(0);
+        setBandwidth(0);
+      }
+    } catch {
+      setStatus('error');
     }
+  }, []);
 
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [status]);
+  useEffect(() => {
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 5000); // Poll every 5s
+    return () => clearInterval(interval);
+  }, [fetchStatus]);
 
   const handleConnect = async () => {
     if (status === 'connected') {
-      setStatus('disconnected');
-      setSignalStrength(0);
-      setLatency(0);
-      setBandwidth(0);
+      setStatus('connecting');
+      try {
+        await fetch('/satellite/disconnect', { method: 'POST' });
+        await fetchStatus();
+      } catch {
+        setStatus('error');
+      }
       return;
     }
-
     setStatus('connecting');
-    
-    // Simulate connection process
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    if (Math.random() > 0.1) { // 90% success rate
-      setStatus('connected');
-      setSignalStrength(85);
-      setLatency(250);
-      setBandwidth(125);
-    } else {
+    try {
+      await fetch('/satellite/connect', { method: 'POST' });
+      await fetchStatus();
+    } catch {
       setStatus('error');
-      setTimeout(() => setStatus('disconnected'), 3000);
     }
   };
 
