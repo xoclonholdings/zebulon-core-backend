@@ -27,6 +27,16 @@ import authMiddleware from "./middleware/auth.js";
 
 
 const app = express();
+console.log('ZED: Starting backend server...');
+process.on('uncaughtException', (err) => {
+  console.error('ZED: Uncaught Exception:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('ZED: Unhandled Rejection at:', promise, 'reason:', reason);
+});
+console.log('ZED: Registering routes...');
+console.log('ZED: Starting HTTP server...');
+  log('ZED: HTTP server started and listening.');
 
 // --- GUARANTEED ENDPOINTS FOR FRONTEND ---
 // These must be registered BEFORE static/frontend serving so they always return JSON
@@ -34,24 +44,8 @@ app.use(express.json());
 app.get("/health", (_req: Request, res: Response) => {
   res.status(200).json({ ok: true, service: "zed-backend", time: new Date().toISOString() });
 });
-// Register /chat endpoint directly for production fallback (Railway fix)
 import { registerRoutes } from "./routes.js";
-app.post("/chat", async (req: Request, res: Response) => {
-  try {
-    // Try to use the main chat logic from registerRoutes if available
-    if (typeof registerRoutes === "function") {
-      // This will re-register /chat, but that's ok (Express will use the last one)
-      registerRoutes(app);
-    }
-  } catch (e) {
-    // fallback: simple echo
-    const { message } = req.body || {};
-    if (!message) {
-      return res.status(400).json({ error: "message required" });
-    }
-    return res.status(200).json({ reply: `Zed says: ${message}` });
-  }
-});
+registerRoutes(app);
 
 // CORS + CSP FIRST!
 app.use(cors());
@@ -134,79 +128,41 @@ app.use(cors(corsOptions));
 
 
 
+
+// Try database connection, but don't fail if it's not available
 (async () => {
   try {
-    // Try database connection, but don't fail if it's not available
-    try {
-      await checkDatabaseConnection();
-      await runMigrations();
-      log("✅ Database connected and migrations completed");
-    } catch (dbError) {
-      log("⚠️ Database connection failed - running in offline mode:", String(dbError));
-      // Continue server startup without database
-    }
-
-    // Register all API routes FIRST before Vite setup
-    const httpServer = await registerRoutes(app);
-
-    // Setup Vite/static serving AFTER API routes
-    if (process.env.NODE_ENV === "development") {
-  // setupVite(app); // Disabled: API-only backend
-    } else {
-      // serveStatic(app); // Disabled: API-only backend, no frontend build required
-    }
-
-    // Always use process.env.PORT || 3001 for HTTP
-    let PORT: number;
-    if (process.env.NODE_ENV === "production") {
-      PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
-    } else {
-      PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
-    }
-    const HOST = "0.0.0.0";
-    httpServer.listen(PORT, HOST, () => {
-      log(`🚀 HTTP server listening on http://${HOST}:${PORT}`);
-      // Print all registered routes
-      const routes: { method: string, path: string }[] = [];
-      app._router.stack.forEach((middleware: any) => {
-        if (middleware.route) {
-          // routes registered directly on the app
-          const methods = Object.keys(middleware.route.methods).map(m => m.toUpperCase());
-          methods.forEach(method => routes.push({ method, path: middleware.route.path }));
-        } else if (middleware.name === 'router' && middleware.handle.stack) {
-          // router middleware
-          middleware.handle.stack.forEach((handler: any) => {
-            if (handler.route) {
-              const methods = Object.keys(handler.route.methods).map(m => m.toUpperCase());
-              methods.forEach(method => routes.push({ method, path: handler.route.path }));
-            }
-          });
-        }
-      });
-      log('Registered routes:');
-      routes.forEach(r => log(`${r.method} ${r.path}`));
-    });
-
-    // Only start HTTPS on 5001 if in production and certs are present
-    if (process.env.NODE_ENV === "production" && process.env.SSL_KEY && process.env.SSL_CERT) {
-      const https = await import("https");
-      const fs = await import("fs");
-      let key: string | Buffer = process.env.SSL_KEY;
-      let cert: string | Buffer = process.env.SSL_CERT;
-      // If values look like file paths, read them
-      if (key.length < 100 && fs.existsSync(key)) key = fs.readFileSync(key);
-      if (cert.length < 100 && fs.existsSync(cert)) cert = fs.readFileSync(cert);
-      const httpsServer = https.createServer({ key, cert }, app);
-      httpsServer.listen(5001, HOST, () => {
-        log(`🚀 HTTPS server listening on https://${HOST}:5001`);
-      });
-    }
-
-
-
-
-  } catch (error) {
-    log("❌ Failed to start server: " + String(error));
-    process.exit(1);
+    await checkDatabaseConnection();
+    await runMigrations();
+    log("✅ Database connected and migrations completed");
+  } catch (dbError: any) {
+    log("⚠️ Database connection failed - running in offline mode:", String(dbError));
+    // Continue server startup without database
   }
 })();
+
+// Always use process.env.PORT || 3001 for HTTP
+const PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 3001;
+const HOST = "0.0.0.0";
+app.listen(PORT, HOST, () => {
+  log(`🚀 HTTP server listening on http://${HOST}:${PORT}`);
+  // Print all registered routes
+  const routes: { method: string, path: string }[] = [];
+  app._router.stack.forEach((middleware: any) => {
+    if (middleware.route) {
+      // routes registered directly on the app
+      const methods = Object.keys(middleware.route.methods).map(m => m.toUpperCase());
+      methods.forEach(method => routes.push({ method, path: middleware.route.path }));
+    } else if (middleware.name === 'router' && middleware.handle.stack) {
+      // router middleware
+      middleware.handle.stack.forEach((handler: any) => {
+        if (handler.route) {
+          const methods = Object.keys(handler.route.methods).map(m => m.toUpperCase());
+          methods.forEach(method => routes.push({ method, path: handler.route.path }));
+        }
+      });
+    }
+  });
+  log('Registered routes:');
+  routes.forEach(r => log(`${r.method} ${r.path}`));
+});
