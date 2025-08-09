@@ -137,7 +137,31 @@ app.post("/api/conversations/:id/messages", authMiddleware, (req, res) => {
       routes.forEach(r => log(`${r.method} ${r.path}`));
     });
 
-    // Ensure /api/ask and /api/chat return JSON and handle missing messages
+    // --- Start simple chat server on port 3001 in production ---
+    if (process.env.NODE_ENV === "production") {
+      const express = await import("express");
+      const simpleApp = express.default();
+      simpleApp.use(express.json());
+      simpleApp.get("/health", (req, res) => {
+        res.json({ ok: true, service: "zed-backend", time: new Date().toISOString() });
+      });
+      simpleApp.get("/", (req, res) => {
+        res.type("text/plain").send("zed-backend alive");
+      });
+      simpleApp.post("/api/chat", (req, res) => {
+        const { message } = req.body;
+        if (!message || typeof message !== "string") {
+          return res.status(400).json({ error: "Missing or invalid 'message' in request body" });
+        }
+        if (!process.env.OPENAI_API_KEY) {
+          return res.status(501).json({ error: "Model API key not set. Cannot process request." });
+        }
+        return res.json({ reply: "pong", ok: true });
+      });
+      simpleApp.listen(3001, HOST, () => {
+        log(`🚀 Simple chat server listening on http://${HOST}:3001`);
+      });
+    }
     app.post("/api/ask", (req: Request, res: Response) => {
       const { messages } = req.body;
       if (!messages || !Array.isArray(messages)) {

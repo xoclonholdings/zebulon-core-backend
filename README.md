@@ -19,7 +19,23 @@ cp .env.example .env
 npm run dev
 ```
 
-**Application runs on:** http://localhost:5001
+**Production API Base URL:** https://zed-backend-production.up.railway.app
+## Public API Endpoints
+
+**Health and Diagnostics:**
+
+- `GET /` → plain text: `zed-backend online`
+- `GET /health`, `GET /healthz`, `GET /status` → `{ ok: true, service: 'zed-backend' }`
+
+**Chat API:**
+
+- `POST /api/ask` → `{ ok: true, service: 'zed-backend', echo: [messages] }` (always returns JSON, handles missing body)
+
+**CORS:**
+
+- Allowed origins: `https://zed-ai.online`, `http://localhost:5173`
+- Allowed methods: `GET, POST, OPTIONS`
+- Allowed headers: `Content-Type, Authorization`
 
 ## Features
 
@@ -184,33 +200,8 @@ Admin users have access to:
 - Trusted device tracking
 - Activity-based session extension
 
-## API Endpoints
 
-### Authentication
-
-- `POST /api/login` - Primary authentication
-- `POST /api/login/secondary` - Secondary verification
-- `GET /api/logout` - Session termination
-
-### Conversations
-
-- `GET /api/conversations` - List user conversations
-- `POST /api/conversations` - Create new conversation
-- `GET /api/conversations/:id/messages` - Get messages
-- `POST /api/conversations/:id/messages` - Send message
-
-### Files
-
-- `POST /api/conversations/:id/upload` - Upload files
-- `GET /api/conversations/:id/files` - List files
-- `GET /api/files/:id/download` - Download file
-
-### Admin (Admin Only)
-
-- `GET /api/admin/users` - List all users
-- `POST /api/admin/users` - Create user
-- `PUT /api/admin/users/:id` - Update user
-- `DELETE /api/admin/users/:id` - Delete user
+## Legacy/Advanced API Endpoints
 
 ## Memory System
 

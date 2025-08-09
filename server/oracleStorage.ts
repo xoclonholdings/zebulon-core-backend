@@ -185,24 +185,31 @@ export class PostgreSQLStorage {
   }
 
   async getProjectMemory(userId: string, key: string): Promise<any> {
-    // Composite key must match your schema, e.g. { userId, key }
+    // Use id as the unique identifier (concatenate userId and key)
+    const id = `${userId}:${key}`;
     const memory = await prisma.projectMemory.findUnique({
-      where: { user_id_key: { user_id: userId, key: key } }, // Use the actual composite unique field name from your schema.prisma
+      where: { id },
     });
     return memory ? JSON.parse(memory.content) : undefined;
   }
 
   async setProjectMemory(userId: string, key: string, content: any): Promise<void> {
+    const id = `${userId}:${key}`;
     await prisma.projectMemory.upsert({
-      where: { user_id_key: { user_id: userId, key: key } }, // Use the actual composite unique field name from your schema.prisma
+      where: { id },
       update: {
         content: JSON.stringify(content),
         updated_at: new Date(),
       },
       create: {
-        user_id: userId, // Use the actual field name from your Prisma schema
-        key: key, // Use the actual field name from your Prisma schema
-        value: JSON.stringify(content),
+        id,
+        user_id: userId,
+        name: key,
+        content: JSON.stringify(content),
+        type: 'context',
+        is_active: true,
+        created_at: new Date(),
+        updated_at: new Date(),
       },
     });
   }

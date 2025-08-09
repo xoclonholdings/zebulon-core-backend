@@ -8,16 +8,47 @@ import authRoutes from "./routes/auth";
 
 const app = express();
 
-// CORS configuration
+
+// CORS configuration for production and dev
+const allowedOrigins = [
+  "https://zed-ai.online",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173"
+];
+const netlifyPreviewRegex = /^https:\/\/[a-z0-9-]+\.netlify\.app$/;
 app.use(cors({
-  origin: ["https://zed-ai.online", "http://localhost:5173"],
-  methods: "GET,POST,OPTIONS",
-  allowedHeaders: "Content-Type,Authorization",
-  credentials: true,
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin) || netlifyPreviewRegex.test(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error("Not allowed by CORS"));
+  },
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: false,
 }));
-// Explicit health check route
+app.options("*", cors());
+
+// Force HTTPS in production except for health checks
+app.use((req, res, next) => {
+  if (
+    process.env.NODE_ENV === "production" &&
+    req.headers["x-forwarded-proto"] === "http" &&
+    !req.path.startsWith("/health") &&
+    !req.path.startsWith("/api/health")
+  ) {
+    return res.redirect(301, `https://${req.headers.host}${req.url}`);
+  }
+  next();
+});
+
+// Health and root routes (must be first)
 app.get("/health", (req: Request, res: Response) => {
-  res.json({ ok: true });
+  res.json({ ok: true, service: "zed-backend", time: new Date().toISOString() });
+});
+app.get("/", (req: Request, res: Response) => {
+  res.type("text/plain").send("zed-backend alive");
 });
 
 app.use(express.json());
@@ -72,26 +103,24 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 // Authentication routes
 app.use(authRoutes);
 
-// Simple AI chat endpoint for testing
+
+// POST /api/ask endpoint
 app.post("/api/ask", (req: Request, res: Response) => {
   const { message } = req.body;
-  log(`Received message: ${message}`);
-  
-  // Simple mock response
-  res.json({
-    message: `ZED: I received your message "${message}". The server is working correctly!`,
-    timestamp: new Date().toISOString(),
-    source: "ZED_MOCK"
-  });
+  if (!message || typeof message !== "string") {
+    return res.status(400).json({ error: "Missing or invalid 'message' in request body" });
+  }
+  if (!process.env.OPENAI_API_KEY) {
+    return res.status(501).json({ error: "Model API key not set. Cannot process request." });
+  }
+  // Dummy response for now
+  return res.json({ reply: "pong", ok: true });
 });
 
-// Health check endpoint
+
+// Health check endpoint (legacy)
 app.get("/api/health", (req: Request, res: Response) => {
-  res.json({ 
-    status: "healthy", 
-    timestamp: new Date().toISOString(),
-    server: "ZED AI Assistant"
-  });
+  res.json({ ok: true, service: "zed-backend", time: new Date().toISOString() });
 });
 
 // Start server
@@ -106,7 +135,8 @@ app.get("/api/health", (req: Request, res: Response) => {
       serveStatic(app);
     }
 
-    const PORT = process.env.PORT ? parseInt(process.env.PORT) : 5000;
+  // Always use 3001 for simple chat in production
+  const PORT = process.env.NODE_ENV === "production" ? 3001 : (process.env.PORT ? parseInt(process.env.PORT) : 3001);
     const HOST = "0.0.0.0";
     app.listen(PORT, HOST, () => {
       log(`🚀 ZED AI Assistant server listening on http://${HOST}:${PORT}`);
@@ -115,13 +145,17 @@ app.get("/api/health", (req: Request, res: Response) => {
       log("💬 Chat endpoint ready at /api/ask");
     });
 
-    // Ensure /api/chat returns JSON and does not crash if messages is missing
+
+    // POST /api/chat endpoint
     app.post("/api/chat", (req: Request, res: Response) => {
-      const { messages } = req.body;
-      if (!messages || !Array.isArray(messages)) {
-        return res.json({ message: "No messages provided", ok: true });
+      const { message } = req.body;
+      if (!message || typeof message !== "string") {
+        return res.status(400).json({ error: "Missing or invalid 'message' in request body" });
       }
-      res.json({ message: "Chat endpoint working", ok: true });
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(501).json({ error: "Model API key not set. Cannot process request." });
+      }
+      return res.json({ reply: "pong", ok: true });
     });
 
   } catch (error) {

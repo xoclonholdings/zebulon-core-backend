@@ -195,12 +195,12 @@ export class PrismaChatService {
         prisma.conversation.count({ where: { userId } }),
         prisma.message.count({
           where: {
-            conversation: { userId }
+            conversations: { userId }
           }
         }),
         prisma.file.count({
           where: {
-            conversation: { userId }
+            conversations: { userId }
           }
         }),
       ]);

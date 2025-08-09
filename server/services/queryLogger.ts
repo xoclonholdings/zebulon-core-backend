@@ -220,8 +220,10 @@ export class QueryLogger {
       });
 
       return logs.map(log => ({
-        query: log.event_data?.query || '',
-        response_preview: log.event_data?.response?.substring(0, 100) + '...',
+        query: typeof log.event_data === 'object' && log.event_data !== null && 'query' in log.event_data ? (log.event_data.query as string) : '',
+        response_preview: typeof log.event_data === 'object' && log.event_data !== null && 'response' in log.event_data && typeof log.event_data.response === 'string'
+          ? log.event_data.response.substring(0, 100) + '...'
+          : '',
         user_email: log.users.email,
         duration: log.duration,
         timestamp: log.created_at
