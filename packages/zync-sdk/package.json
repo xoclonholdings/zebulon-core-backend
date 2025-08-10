@@ -1,0 +1,11 @@
+{
+  "name": "@zebulon/zync-sdk",
+  "version": "0.1.0",
+  "main": "src/index.ts",
+  "type": "module",
+  "dependencies": {
+    "@zebulon/ui": "workspace:*",
+    "@zebulon/auth": "workspace:*",
+    "@zebulon/utils": "workspace:*"
+  }
+}
