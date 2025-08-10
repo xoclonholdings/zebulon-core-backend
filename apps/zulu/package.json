@@ -4,6 +4,7 @@
   "main": "src/index.tsx",
   "type": "module",
   "dependencies": {
+  "@zebulon/memory-ui": "workspace:*",
     "@zebulon/zulu-sdk": "workspace:*",
     "@zebulon/ui": "workspace:*",
     "@zebulon/auth": "workspace:*",

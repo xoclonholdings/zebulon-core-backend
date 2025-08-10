@@ -8,6 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Shield, ChevronDown, ChevronUp, Activity, Lock, AlertTriangle, Users, Settings, Menu, RefreshCw, Brain, Zap, Plug, Command, HelpCircle, BookOpen, Globe, Cloud, Code, Workflow } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ZebulonCoreButton, ZebulonCorePanel } from '@zebulon/memory-ui';
 import logoImage from "@assets/fantasma-firewall-logo.svg";
 import zetaLogo from "@assets/zeta-logo.svg";
 
@@ -283,6 +284,21 @@ export default function Dashboard() {
           </div>
           
           <div className="flex items-center space-x-2">
+            {/* Zebulon Core Button and Panel */}
+            {(() => {
+              const [open, setOpen] = useState(false);
+              return <>
+                <ZebulonCoreButton onOpen={() => setOpen(true)} />
+                {open && <ZebulonCorePanel
+                  appName="Zeta"
+                  entity={{ kind: 'user', id: '' }}
+                  clientOpts={{
+                    baseUrl: process.env.NEXT_PUBLIC_MEMORY_API || 'http://localhost:5000/api/memory',
+                    tokenProvider: async () => localStorage.getItem('jwt') || ''
+                  }}
+                />}
+              </>;
+            })()}
             <div className="flex items-center space-x-1 mr-2">
               <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-cyber-green animate-pulse' : 'bg-red-500'}`}></div>
               <span className={`text-xs font-medium ${isConnected ? 'cyber-green' : 'text-red-400'}`}>

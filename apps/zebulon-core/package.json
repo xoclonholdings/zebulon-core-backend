@@ -6,6 +6,7 @@
     "dev:core": "ts-node-dev --respawn --transpile-only server.ts"
   },
   "dependencies": {
+  "@zebulon/memory-ui": "workspace:*",
     "express": "^4.18.2",
     "cors": "^2.8.5"
   }

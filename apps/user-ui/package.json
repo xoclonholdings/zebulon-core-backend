@@ -2,5 +2,8 @@
   "name": "@zebulon/user-ui",
   "version": "0.1.0",
   "main": "index.tsx",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@zebulon/memory-ui": "workspace:*"
+  }
 }
