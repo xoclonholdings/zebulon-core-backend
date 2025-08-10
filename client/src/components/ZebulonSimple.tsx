@@ -10,7 +10,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
-import zebulonLogoPath from '@assets/Zed-ai-logo_1753441894358.png';
+const zebulonLogoPath = "/Zed-ai-logo_1753441894358.png";
 import OracleDatabase from './OracleDatabase';
 import ModuleSettings from './ModuleSettings';
 import ModuleIntegrationComponent from './ModuleIntegration';
