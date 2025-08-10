@@ -2,7 +2,8 @@ import * as express from 'express';
 import type { Request, Response } from 'express';
 import multer from 'multer';
 import parseGedcom from 'parse-gedcom';
-import { PrismaClient } from '@prisma/client';
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 import path from 'path';
 import fs from 'fs';
 

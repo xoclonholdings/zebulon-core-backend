@@ -1,11 +1,12 @@
 import React from "react";
-import { useRouter } from "next/router";
+import { useLocation } from "wouter";
 import { APP_LINKS } from "@/config/appLinks";
 
 const AppPage: React.FC = () => {
-  const router = useRouter();
-  const { id } = router.query;
-  const appId = typeof id === "string" ? id : Array.isArray(id) ? id[0] : "";
+  const [location] = useLocation();
+  // Expecting route: /app/:id
+  const match = location.match(/^\/app\/([^/]+)/);
+  const appId = match ? match[1] : "";
   const external = APP_LINKS[appId];
 
   return (
