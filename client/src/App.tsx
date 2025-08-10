@@ -3,10 +3,11 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { AuthProvider } from "@/context/AuthContext";
 import Dashboard from "@/pages/dashboard";
 import NotFound from "@/pages/not-found";
-import LoginScreen from "@/components/LoginScreen";
+import AppPage from "@/components/AppPage";
+
 
 function Router() {
   // Always show the main dashboard, bypassing login
@@ -14,6 +15,7 @@ function Router() {
     <div className="mobile-viewport mobile-container bg-black overflow-hidden">
       <Switch>
         <Route path="/" component={Dashboard} />
+        <Route path="/app/:id" component={AppPage} />
         <Route component={NotFound} />
       </Switch>
     </div>

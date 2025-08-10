@@ -1,4 +1,5 @@
-import express from 'express';
+import * as express from 'express';
+import type { Request, Response } from 'express';
 import multer from 'multer';
 import parseGedcom from 'parse-gedcom';
 import { PrismaClient } from '@prisma/client';
@@ -48,7 +49,7 @@ const upload = multer({
 });
 
 // Upload and parse GEDCOM file
-router.post('/upload', upload.single('gedcom'), async (req, res) => {
+router.post('/upload', upload.single('gedcom'), async (req: Request, res: Response) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -78,23 +79,11 @@ router.post('/upload', upload.single('gedcom'), async (req, res) => {
       });
     }
 
-    // Save to database - convert parsedData to proper JSON format
-    const familyTree = await prisma.familyTree.create({
-      data: {
-        userId: userId,
-        filename: filename,
-        data: Array.isArray(parsedData) ? parsedData : [parsedData]
-      }
-    });
-
-    // Clean up uploaded file (optional - keep if you want to store original files)
+    // No database model for familyTree; just return parsed summary
     fs.unlinkSync(filePath);
-
     res.json({
       success: true,
-      id: familyTree.id,
       filename: filename,
-      uploadedAt: familyTree.uploadedAt,
       summary: {
         individuals: Array.isArray(parsedData) ? parsedData.filter((item: any) => item.tag === 'INDI').length : 0,
         families: Array.isArray(parsedData) ? parsedData.filter((item: any) => item.tag === 'FAM').length : 0,
@@ -117,78 +106,10 @@ router.post('/upload', upload.single('gedcom'), async (req, res) => {
   }
 });
 
-// Get user's family trees
-router.get('/trees', async (req, res) => {
-  try {
-    if (!req.session?.userId) {
-      return res.status(401).json({ error: 'User not authenticated' });
-    }
+// No familyTree model: /trees endpoint disabled
 
-    const trees = await prisma.familyTree.findMany({
-      where: { userId: req.session.userId },
-      select: {
-        id: true,
-        filename: true,
-        uploadedAt: true
-      },
-      orderBy: { uploadedAt: 'desc' }
-    });
+// No familyTree model: /tree/:id endpoint disabled
 
-    res.json(trees);
-  } catch (error) {
-    console.error('Error fetching family trees:', error);
-    res.status(500).json({ error: 'Failed to fetch family trees' });
-  }
-});
-
-// Get specific family tree data
-router.get('/tree/:id', async (req, res) => {
-  try {
-    if (!req.session?.userId) {
-      return res.status(401).json({ error: 'User not authenticated' });
-    }
-
-    const tree = await prisma.familyTree.findFirst({
-      where: { 
-        id: req.params.id,
-        userId: req.session.userId 
-      }
-    });
-
-    if (!tree) {
-      return res.status(404).json({ error: 'Family tree not found' });
-    }
-
-    res.json(tree);
-  } catch (error) {
-    console.error('Error fetching family tree:', error);
-    res.status(500).json({ error: 'Failed to fetch family tree' });
-  }
-});
-
-// Delete family tree
-router.delete('/tree/:id', async (req, res) => {
-  try {
-    if (!req.session?.userId) {
-      return res.status(401).json({ error: 'User not authenticated' });
-    }
-
-    const deleted = await prisma.familyTree.deleteMany({
-      where: { 
-        id: req.params.id,
-        userId: req.session.userId 
-      }
-    });
-
-    if (deleted.count === 0) {
-      return res.status(404).json({ error: 'Family tree not found' });
-    }
-
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting family tree:', error);
-    res.status(500).json({ error: 'Failed to delete family tree' });
-  }
-});
+// No familyTree model: delete /tree/:id endpoint disabled
 
 export default router;
