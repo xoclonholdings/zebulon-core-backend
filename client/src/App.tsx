@@ -8,7 +8,6 @@ import Dashboard from "@/pages/dashboard";
 import NotFound from "@/pages/not-found";
 import AppPage from "@/components/AppPage";
 
-
 function Router() {
   // Always show the main dashboard, bypassing login
   return (
@@ -25,14 +24,15 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
+      <TooltipProvider>
+        <Toaster />
+        <AuthProvider>
           <Router />
-        </TooltipProvider>
-      </AuthProvider>
+        </AuthProvider>
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }
 
 export default App;
+

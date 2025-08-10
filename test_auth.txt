@@ -1,0 +1,6 @@
+Testing authentication and security features.
+This file verifies:
+- Session management
+- Admin verification
+- Multi-factor authentication
+- Security controls

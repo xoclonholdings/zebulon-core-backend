@@ -1,0 +1,13 @@
+{
+"models": [
+{
+"title": "ZED (TinyLlama)",
+"model": "ollama/tinyllama",
+"provider": "ollama",
+"apiBase": "http://localhost:11434",
+"apiKey": ""
+}
+]
+}
+    "models": {}
+}

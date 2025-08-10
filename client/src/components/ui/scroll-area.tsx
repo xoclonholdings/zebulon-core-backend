@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import * as React from "react"
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area"
 
@@ -44,3 +45,19 @@ const ScrollBar = React.forwardRef<
 ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName
 
 export { ScrollArea, ScrollBar }
+=======
+import * as React from "react";
+
+export const ScrollArea = React.forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
+  ({ children, style, ...props }, ref) => (
+    <div
+      ref={ref}
+      style={{ overflowY: "auto", maxHeight: "100%", ...style }}
+      {...props}
+    >
+      {children}
+    </div>
+  )
+);
+ScrollArea.displayName = "ScrollArea";
+>>>>>>> d1a6b5690cb748e3c7d5e957460e093f3d9db20e
