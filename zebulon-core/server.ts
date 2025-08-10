@@ -12,8 +12,9 @@ const allowedOrigins = [
   'https://zebulonhub.xyz',
   'https://www.zebulonhub.xyz'
 ];
-const corsOptions = {
-  origin: function (origin, callback) {
+import type { CorsOptions } from 'cors';
+const corsOptions: CorsOptions = {
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
     // Allow requests with no origin (like mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) {
