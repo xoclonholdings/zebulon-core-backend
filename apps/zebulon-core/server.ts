@@ -34,18 +34,48 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
 });
 
-// Mount Zed backend under /apps/zed
-// (Placeholder import, update path after moving code)
-// import zedBackend from './apps/zed-backend';
-// app.use('/apps/zed', zedBackend);
 
+// Mount Zed backend plugin
+import { ZedAppRouter } from './apps/zed-backend';
+const appsRouter = express.Router();
+appsRouter.use('/zed', ZedAppRouter);
+app.use('/apps', appsRouter);
 
-// --- Port configuration ---
-const PORT = process.env.PORT || 5000;
-
-// --- Startup logging ---
-app.listen(PORT, () => {
-  console.log('Zebulon Core server running on port', PORT);
-  console.log('Allowed origins:', allowedOrigins);
-  console.log('API base URL:', `/apps/zed`);
+// Temporary legacy redirect for old Zed routes
+app.use('/zed', (req, res, next) => {
+  console.warn('Deprecated: /zed/* route accessed. Redirecting to /apps/zed/*');
+  res.redirect(301, `/apps/zed${req.url}`);
 });
+
+
+
+// --- Adaptable Port configuration ---
+import http from 'http';
+const DEFAULT_PORT = parseInt(process.env.PORT || '5000', 10);
+const MAX_PORT = DEFAULT_PORT + 20; // Try up to 20 ports
+
+function startServer(port: number) {
+  const server = http.createServer(app);
+  server.listen(port);
+  server.on('listening', () => {
+    console.log('Zebulon Core server running on port', port);
+    console.log('Allowed origins:', allowedOrigins);
+    console.log('API base URL:', `/apps/zed`);
+  });
+  server.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      if (port < MAX_PORT) {
+        console.warn(`Port ${port} in use, trying port ${port + 1}...`);
+        setTimeout(() => startServer(port + 1), 500);
+      } else {
+        console.error('No available ports found in range. Exiting.');
+        process.exit(1);
+      }
+    } else {
+      console.error('Server error:', err);
+      process.exit(1);
+    }
+  });
+}
+
+startServer(DEFAULT_PORT);
