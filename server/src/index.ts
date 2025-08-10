@@ -1,3 +1,14 @@
+// Add CORS for CodeSandbox (Zed Lite API)
+app.use(cors({
+  origin: [/\.codesandbox\.io$/, "https://codesandbox.io"],
+  methods: ["GET", "POST", "OPTIONS"],
+}));
+
+// Global OPTIONS preflight for CodeSandbox
+app.options("*", cors({
+  origin: [/\.codesandbox\.io$/, "https://codesandbox.io"],
+  methods: ["GET", "POST", "OPTIONS"],
+}));
 /**
  * ZED BACKEND ENTRYPOINT
  *
@@ -27,6 +38,18 @@ import authMiddleware from "./middleware/auth";
 
 
 const app = express();
+
+// Add CORS for CodeSandbox (Zed Lite API)
+app.use(cors({
+  origin: [/\.codesandbox\.io$/, "https://codesandbox.io"],
+  methods: ["GET", "POST", "OPTIONS"],
+}));
+
+// Global OPTIONS preflight for CodeSandbox
+app.options("*", cors({
+  origin: [/\.codesandbox\.io$/, "https://codesandbox.io"],
+  methods: ["GET", "POST", "OPTIONS"],
+}));
 console.log('ZED: Starting backend server...');
 process.on('uncaughtException', (err) => {
   console.error('ZED: Uncaught Exception:', err);
