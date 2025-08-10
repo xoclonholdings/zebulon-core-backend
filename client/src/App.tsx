@@ -9,23 +9,7 @@ import NotFound from "@/pages/not-found";
 import LoginScreen from "@/components/LoginScreen";
 
 function Router() {
-  const { user, isLoading, login } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-center">
-          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p>Loading Zebulon AI System...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <LoginScreen onLoginSuccess={login} />;
-  }
-
+  // Always show the main dashboard, bypassing login
   return (
     <div className="mobile-viewport mobile-container bg-black overflow-hidden">
       <Switch>
