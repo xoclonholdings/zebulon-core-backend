@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Removed Tailwind directives because build tool does not support them */
-
 :root {
   --background: hsl(245, 15%, 6%);
   --foreground: hsl(240, 10%, 95%);

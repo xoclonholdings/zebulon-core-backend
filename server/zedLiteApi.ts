@@ -10,9 +10,9 @@ import { v4 as uuidv4 } from "uuid";
 
 const zedLiteRouter = Router();
 
-// CORS for CodeSandbox only for this route
+// CORS for CodeSandbox and zed-ai.online only for this route
 const codesandboxCors = cors({
-  origin: [/\.codesandbox\.io$/, "https://codesandbox.io"],
+  origin: [/\.codesandbox\.io$/, "https://codesandbox.io", "https://zed-ai.online"],
   methods: ["GET", "POST", "OPTIONS"],
 });
 

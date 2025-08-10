@@ -239,7 +239,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
               </Card>
             </div>
           ) : (
-            <div className="max-w-4xl mx-auto space-y-2 md:space-y-3">
+            <div className="max-w-4xl mx-auto space-y-2 md:space-y-3" data-testid="chat-log">
               {messages.length > 0 ? (
                 messages.map((message) => (
                   <ChatMessage key={message.id} message={message} />
@@ -365,7 +365,7 @@ export default function ChatArea({ conversation, messages, files, conversationId
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
                       onKeyDown={handleKeyDown}
-                      placeholder={`Message ZED in ${currentMode} mode...`}
+                      placeholder="Ask Zed…"
                       className="flex-1 bg-transparent border-0 resize-none min-h-[40px] text-sm px-3 py-2 pr-16 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                       rows={1}
                       disabled={isStreaming}
@@ -393,10 +393,12 @@ export default function ChatArea({ conversation, messages, files, conversationId
                       <Button
                         onClick={handleSend}
                         size="sm"
+                        aria-label="Send"
                         className="zed-gradient hover:shadow-md hover:shadow-purple-500/25 zed-button rounded-lg h-6 w-6 p-0 transition-all duration-200 hover:scale-105"
                         disabled={!inputValue.trim() || isStreaming}
                       >
                         <Send size={12} />
+                        <span className="sr-only">Send</span>
                       </Button>
                     </div>
                   </div>

@@ -23,7 +23,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
 
   if (isUser) {
     return (
-      <div className="flex items-start space-x-4 flex-row-reverse max-w-4xl mx-auto">
+      <div className="flex items-start space-x-4 flex-row-reverse max-w-4xl mx-auto" data-testid="user-msg">
         <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-700 rounded-2xl flex items-center justify-center flex-shrink-0">
           <User className="text-white" size={18} />
         </div>
@@ -55,7 +55,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
   }
 
   return (
-    <div className="flex items-start space-x-4 max-w-4xl mx-auto">
+    <div className="flex items-start space-x-4 max-w-4xl mx-auto" data-testid="assistant-msg">
       <div className="flex-1">
         <Card className="zed-message p-6 ml-4">
           <div className="flex items-center space-x-2 mb-4">
