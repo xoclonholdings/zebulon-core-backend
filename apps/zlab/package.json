@@ -1,0 +1,12 @@
+{
+  "name": "@zebulon/zlab-app",
+  "version": "0.1.0",
+  "main": "src/index.tsx",
+  "type": "module",
+  "dependencies": {
+    "@zebulon/zlab-sdk": "workspace:*",
+    "@zebulon/ui": "workspace:*",
+    "@zebulon/auth": "workspace:*",
+    "@zebulon/utils": "workspace:*"
+  }
+}
