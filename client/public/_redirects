@@ -1,0 +1,2 @@
+/api/*  https://zed-backend-production.up.railway.app/:splat  200
+/*      /index.html  200
