@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.4",
@@ -60,13 +61,6 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@types/react": "^18.3.23",
-    "@types/react-dom": "^18.3.7",
-    "@vitejs/plugin-react": "^4.3.2",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.47",
-    "tailwindcss": "^3.4.17",
-    "typescript": "^5.6.3",
-    "vite": "^6.3.5"
+    "turbo": "^2.5.5"
   }
 }

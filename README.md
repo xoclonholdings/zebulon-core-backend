@@ -1,5 +1,70 @@
 <<<<<<< HEAD
-# Zebulon
+# Zebulon™ — The Creator’s Suite
+
+## Philosophy
+
+“Not a feed. Not a store. Not a stage someone else owns.
+Zebulon is the independent launch system for people who refuse to wait for permission —
+creation over consumption, imprinting your own signature on life.”
+
+Every part of the system serves one of three purposes:
+- **Create** — Directly produce something new.
+- **Protect** — Safeguard what’s been created.
+- **Fuel** — Provide the resources to keep creating.
+
+## Tiles & Roles
+
+- **Zed** — AI Core (Standalone Tile)
+- **ZYNC** — Build Engine
+- **ZLab** — Collaboration Hub
+- **ZWAP** — Resource Utility (includes SUPPLY)
+- **Zeta** — Security & Firewall
+- **Zulu** — System Diagnostics & Repair
+- **Zed Lite** — Roaming AI Bubble (Omnipresent Companion)
+
+## Monorepo Structure
+
+```
+apps/
+     zebulon-core  # Homeview shell + tile launcher
+     zed           # Full AI core
+     zync          # Build Engine
+     zwap          # Resource Utility (includes SUPPLY)
+packages/
+     ui            # Shared UI components
+     auth          # Shared authentication logic
+     utils         # Shared helpers and system utilities
+     zed-lite      # Roaming AI Co-Pilot SDK/service
+```
+
+## Architecture Diagram
+
+Zed Lite sits at the center, accessible from all apps.
+
+```
+                    +---------+
+                    |  Zed    |
+                    +---------+
+                               |
++--------+  |  +--------+
+|  ZYNC  |--+--|  ZLab  |
++--------+     +--------+
+           |             |
++--------+     +--------+
+|  ZWAP  |     | Zeta   |
++--------+     +--------+
+           |             |
+      +-------------------+
+      |     Zed Lite      |
+      +-------------------+
+```
+
+## Implementation Rules
+- SUPPLY stays inside ZWAP.
+- Zed is a standalone tile + app.
+- Zed Lite is separate and always accessible.
+- All UI/UX copy reinforces creation over consumption.
+- No placeholder code — wire real logic and API calls.
 =======
 # How to run locally
 
