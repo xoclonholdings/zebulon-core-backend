@@ -41,24 +41,5 @@ app.post('/api/memory/core', (req, res) => {
   res.json({ ok: true });
 });
 
-const DEFAULT_PORT = parseInt(process.env.PORT || '5800', 10);
-const MAX_PORT = DEFAULT_PORT + 20;
-function tryListen(port) {
-  app.listen(port, () => {
-    console.log(`Memory API running on port ${port}`);
-  }).on('error', (err) => {
-  if ((err as any).code === 'EADDRINUSE') {
-      if (port < MAX_PORT) {
-        console.warn(`Port ${port} in use, trying port ${port + 1}...`);
-        setTimeout(() => tryListen(port + 1), 500);
-      } else {
-        console.error('No available ports found in range. Exiting.');
-        process.exit(1);
-      }
-    } else {
-      console.error('Server error:', err);
-      process.exit(1);
-    }
-  });
-}
-tryListen(DEFAULT_PORT);
+const port = process.env.PORT || 4001;
+app.listen(port, () => console.log(`Memory API running on port ${port}`));

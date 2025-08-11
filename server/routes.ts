@@ -3,8 +3,6 @@ import { appendMessage, getHistory } from "./chatContext";
 import { getUserMemory, appendUserMemory } from "./coreMemory";
 import onboardingRouter from "./onboarding";
 import apiAuthRouter from "./apiAuth";
-
-import zuluRouter from './routes/zulu';
 import { getZedCoreData } from "./zedCoreData";
 import { ollamaChat } from "./ollamaClient";
 import { agentChat } from "./agentOpenAIClient";
@@ -14,10 +12,8 @@ export function registerRoutes(app: any) {
 	app.use(onboardingRouter);
 	// Register authentication routes
 	app.use(apiAuthRouter);
-	// Register Zulu system/diagnostics API
-	app.use('/api/zulu', zuluRouter);
-	// Register Zed Lite API route (isolated, CORS for CodeSandbox)
-	app.use(zedLiteApi);
+		// Register Zed Lite API route (isolated, CORS for CodeSandbox)
+		app.use(zedLiteApi);
 			// Register the /chat endpoint
 			app.post("/chat", async (req: any, res: any) => {
 				const { message, mode } = req.body;

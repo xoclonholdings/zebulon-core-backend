@@ -11,8 +11,6 @@ import { ShieldIcon } from './icons/Shield';
 import { DollarSignIcon } from './icons/DollarSign';
 import { FolderTreeIcon } from './icons/FolderTree';
 import { SettingsIcon } from './icons/Settings';
-import { SystemCarousel } from '@/components/carousel/SystemCarousel';
-import ZuluCarouselCard from '@/features/zulu/components/ZuluCarouselCard';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -173,7 +171,7 @@ const ZebulonSimple: React.FC = () => {
 
       <div className="flex-1 flex flex-row min-h-0">
         {/* Main dashboard grid: 6 modules */}
-  <main className="flex-1 p-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <main className="flex-1 p-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {/* ZED — AI Assistant */}
           <Card className="bg-gradient-to-br from-purple-900 to-purple-700 border-purple-700 hover:shadow-lg transition cursor-pointer"
             onClick={() => setActiveTile('zed')}>
@@ -225,12 +223,16 @@ const ZebulonSimple: React.FC = () => {
               <Badge className="bg-cyan-700">Ready</Badge>
             </CardContent>
           </Card>
-          {/* System Carousel replaces Zulu tile */}
-          <div className="col-span-1">
-            <SystemCarousel>
-              <ZuluCarouselCard />
-            </SystemCarousel>
-          </div>
+          {/* ZULU — System Diagnostics & Dashboard */}
+          <Card className="bg-gradient-to-br from-gray-900 to-gray-700 border-gray-700 hover:shadow-lg transition cursor-pointer"
+            onClick={() => setActiveTile('zulu')}>
+            <CardContent className="flex flex-col items-center py-8">
+              <SettingsIcon className="h-10 w-10 text-gray-300 mb-2" />
+              <div className="font-semibold text-lg mb-1">ZULU — System Diagnostics & Dashboard</div>
+              <div className="text-xs text-gray-200 mb-2">Diagnostics & system overview</div>
+              <Badge className="bg-gray-700">Configurable</Badge>
+            </CardContent>
+          </Card>
         </main>
 
         {/* Tile Modal: Shows data from backend partition for each tile */}

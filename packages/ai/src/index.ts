@@ -1,4 +1,4 @@
-import { OllamaProvider } from './ollama.js';
+import { OllamaProvider } from './ollama';
 import { AIProvider } from './types';
 import { ChatMessage } from '@shared/zed';
 
@@ -8,4 +8,4 @@ export function getAI(): AIProvider {
 	throw new Error(`Unknown AI_PROVIDER: ${provider}`);
 }
 
-export * from './types.js';
+export * from './types';

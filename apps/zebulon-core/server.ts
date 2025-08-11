@@ -34,13 +34,34 @@ app.get('/health', (req, res) => {
 });
 
 
+// Mount Zed backend plugin
+let ZedAppRouter;
+try {
+  // Use JS output if running from dist, else use TS for dev
+  if (__dirname.endsWith('dist')) {
+    ZedAppRouter = require('./apps/zed-backend/index.js').ZedAppRouter;
+  } else {
+    ZedAppRouter = require('./apps/zed-backend/index.ts').ZedAppRouter;
+  }
+} catch (e) {
+  console.error('Failed to load ZedAppRouter:', e);
+  process.exit(1);
+}
+const appsRouter = express.Router();
+appsRouter.use('/zed', ZedAppRouter);
+app.use('/apps', appsRouter);
 
+// Temporary legacy redirect for old Zed routes
+app.use('/zed', (req, res, next) => {
+  console.warn('Deprecated: /zed/* route accessed. Redirecting to /apps/zed/*');
+  res.redirect(301, `/apps/zed${req.url}`);
+});
 
 
 
 // --- Adaptable Port configuration ---
 import http from 'http';
-const DEFAULT_PORT = parseInt(process.env.PORT || '5001', 10);
+const DEFAULT_PORT = parseInt(process.env.PORT || '5000', 10);
 const MAX_PORT = DEFAULT_PORT + 20; // Try up to 20 ports
 
 function startServer(port: number) {

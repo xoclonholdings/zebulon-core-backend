@@ -56,31 +56,16 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Adaptive port logic: default 5200, retry up to 20 ports
-  const DEFAULT_PORT = parseInt(process.env.PORT || '5200', 10);
-  const MAX_PORT = DEFAULT_PORT + 20;
-  function tryListen(port: number) {
-    server.listen({
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    }, () => {
-      log(`serving on port ${port}`);
-    });
-    server.on('error', (err: any) => {
-      if (err.code === 'EADDRINUSE') {
-        if (port < MAX_PORT) {
-          log(`Port ${port} in use, trying port ${port + 1}...`);
-          setTimeout(() => tryListen(port + 1), 500);
-        } else {
-          log('No available ports found in range. Exiting.');
-          process.exit(1);
-        }
-      } else {
-        log('Server error: ' + err.message);
-        process.exit(1);
-      }
-    });
-  }
-  tryListen(DEFAULT_PORT);
+  // ALWAYS serve the app on the port specified in the environment variable PORT
+  // Other ports are firewalled. Default to 5000 if not specified.
+  // this serves both the API and the client.
+  // It is the only port that is not firewalled.
+  const port = parseInt(process.env.PORT || '5000', 10);
+  server.listen({
+    port,
+    host: "0.0.0.0",
+    reusePort: true,
+  }, () => {
+    log(`serving on port ${port}`);
+  });
 })();

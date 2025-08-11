@@ -7,8 +7,11 @@ import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const Dialog = DialogPrimitive.Root
+
 const DialogTrigger = DialogPrimitive.Trigger
+
 const DialogPortal = DialogPrimitive.Portal
+
 const DialogClose = DialogPrimitive.Close
 
 const DialogOverlay = React.forwardRef<
@@ -116,4 +119,8 @@ export {
   DialogFooter,
   DialogTitle,
   DialogDescription,
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> d1a6b5690cb748e3c7d5e957460e093f3d9db20e

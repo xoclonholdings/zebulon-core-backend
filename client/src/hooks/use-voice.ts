@@ -1,11 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-
-// Minimal local type for voice recognition result
-type VoiceRecognitionResult = {
-  transcript: string;
-  confidence?: number;
-  error?: string;
-};
+import { VoiceRecognitionResult } from '@/lib/types';
 
 export function useVoice() {
   const [isRecording, setIsRecording] = useState(false);
@@ -106,9 +100,9 @@ export function useVoice() {
     } catch (error) {
       console.error('Voice processing error:', error);
       const errorResult: VoiceRecognitionResult = {
-        transcript: '',
+        recognized: false,
         confidence: 0,
-        error: `Processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        message: `Processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
       
       if (onResult) {
@@ -139,9 +133,9 @@ export function useVoice() {
       console.error('Record and process error:', error);
       if (onResult) {
         onResult({
-          transcript: '',
+          recognized: false,
           confidence: 0,
-          error: `Recording failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+          message: `Recording failed: ${error instanceof Error ? error.message : 'Unknown error'}`
         });
       }
     }
