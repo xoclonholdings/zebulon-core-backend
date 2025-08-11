@@ -99,6 +99,18 @@ async function executeWithFailover<T>(operation: () => Promise<T>): Promise<T> {
 }
 
 // Initialize the database connection
+
+// Keep-alive ping to prevent database timeout (every 4 minutes)
+setInterval(async () => {
+  if (!db) return;
+  try {
+    await db.$queryRaw`SELECT 1`;
+    // Optionally log: console.log('DB keep-alive ping successful');
+  } catch (err) {
+    console.warn('DB keep-alive ping failed:', err);
+  }
+}, 4 * 60 * 1000); // 4 minutes
+
 initializeDatabase().catch(console.error);
 
 export { db, executeWithFailover, activeConnection };
