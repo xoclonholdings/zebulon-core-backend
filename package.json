@@ -63,6 +63,7 @@
     "fdir": "^6.4.6",
     "get-port": "^7.1.0",
     "input-otp": "^1.4.2",
+    "libsodium-wrappers": "^0.7.15",
     "lucide-react": "^0.453.0",
     "memoizee": "^0.4.17",
     "multer": "^2.0.2",
@@ -93,6 +94,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.54.2",
+    "@types/libsodium-wrappers": "^0.7.14",
     "node-fetch": "^3.3.2",
     "playwright": "^1.54.2",
     "turbo": "^2.5.5"

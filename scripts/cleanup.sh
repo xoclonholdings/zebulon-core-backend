@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# ZED Project Cleanup and Optimization Script
+# Zebulon Project Cleanup and Optimization Script
 # This script optimizes storage and cleans up the project
 
-echo "🧹 Starting ZED Project Cleanup..."
+echo "🧹 Starting Zebulon Project Cleanup..."
 
 # Clean npm cache
 echo "Cleaning npm cache..."

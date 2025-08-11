@@ -5,7 +5,6 @@ export interface ZedCoreData {
   onboardingComplete?: boolean;
   [key: string]: any;
 }
-
 // In-memory store for demo; replace with DB or persistent store in production
 let coreData: ZedCoreData = {};
 

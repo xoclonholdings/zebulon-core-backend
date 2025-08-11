@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# ZED Project Health Check
+# Zebulon Project Health Check
 # This script verifies project integrity and configuration
 
-echo "🔍 ZED Project Health Check"
+echo "🔍 Zebulon Project Health Check"
 echo "=========================="
 
 # Check Node.js version

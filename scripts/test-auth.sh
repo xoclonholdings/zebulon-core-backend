@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Test script to verify authentication is working
-echo "🧪 Testing ZED Authentication..."
+echo "🧪 Testing Zebulon Authentication..."
 
 # Test if server is running
 echo "1. Testing server health..."
@@ -23,11 +23,11 @@ else
 fi
 
 # Test login endpoint
-echo "3. Testing login with Admin/Zed2025..."
+echo "3. Testing login with Admin/Zebulon2025..."
 LOGIN_RESPONSE=$(curl -s -w "%{http_code}" -c /tmp/cookies.txt -o /tmp/login_test.json \
     -X POST \
     -H "Content-Type: application/json" \
-    -d '{"username":"Admin","password":"Zed2025"}' \
+    -d '{"username":"Admin","password":"Zebulon2025"}' \
     http://localhost:5001/api/login)
 
 if [ "$LOGIN_RESPONSE" = "200" ]; then

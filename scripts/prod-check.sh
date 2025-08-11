@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-API_BASE="${1:-https://zed-backend-production.up.railway.app}"
+API_BASE="${1:-https://zebulon-backend-production.up.railway.app}"
 
 echo "==> GET $API_BASE/health"
 HEALTH_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/health" || true)
 echo "Health HTTP: $HEALTH_CODE"
 
 echo "==> POST $API_BASE/chat"
-CHAT_OUT=$(curl -s -i "$API_BASE/chat" -H "Content-Type: application/json" -d '{"message":"Hello Zed"}' || true)
+CHAT_OUT=$(curl -s -i "$API_BASE/chat" -H "Content-Type: application/json" -d '{"message":"Hello Zebulon"}' || true)
 echo "---- /chat response ----"
 echo "$CHAT_OUT"
 echo "------------------------"
