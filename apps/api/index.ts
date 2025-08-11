@@ -11,7 +11,24 @@ app.get('/version', (req, res) => {
   res.json({ version: '0.1.0', git: null });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Zebulon Core API running on port ${PORT}`);
-});
+const DEFAULT_PORT = parseInt(process.env.PORT || '5700', 10);
+const MAX_PORT = DEFAULT_PORT + 20;
+function tryListen(port) {
+  app.listen(port, () => {
+    console.log(`Zebulon Core API running on port ${port}`);
+  }).on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      if (port < MAX_PORT) {
+        console.warn(`Port ${port} in use, trying port ${port + 1}...`);
+        setTimeout(() => tryListen(port + 1), 500);
+      } else {
+        console.error('No available ports found in range. Exiting.');
+        process.exit(1);
+      }
+    } else {
+      console.error('Server error:', err);
+      process.exit(1);
+    }
+  });
+}
+tryListen(DEFAULT_PORT);

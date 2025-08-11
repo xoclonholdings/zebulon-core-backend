@@ -24,9 +24,9 @@ router.post('/chat/stream', async (req, res) => {
     const { messages, options } = req.body;
     const ai = getAI();
     await ai.chatStream!(messages, { ...options, stream: true }, {
-      onToken: (token) => res.write(`data: ${JSON.stringify(token)}\n\n`),
+  onToken: (token: string) => res.write(`data: ${JSON.stringify(token)}\n\n`),
       onEnd: () => res.end(),
-      onError: (err) => {
+  onError: (err: Error) => {
         res.write(`event: error\ndata: ${JSON.stringify(err.message)}\n\n`);
         res.end();
       },

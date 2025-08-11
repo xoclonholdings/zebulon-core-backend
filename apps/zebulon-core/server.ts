@@ -12,8 +12,7 @@ const allowedOrigins = [
   'https://zebulonhub.xyz',
   'https://www.zebulonhub.xyz'
 ];
-import type { CorsOptions } from 'cors';
-const corsOptions: CorsOptions = {
+const corsOptions = {
   origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
     // Allow requests with no origin (like mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
@@ -35,23 +34,13 @@ app.get('/health', (req, res) => {
 });
 
 
-// Mount Zed backend plugin
-import { ZedAppRouter } from './apps/zed-backend';
-const appsRouter = express.Router();
-appsRouter.use('/zed', ZedAppRouter);
-app.use('/apps', appsRouter);
 
-// Temporary legacy redirect for old Zed routes
-app.use('/zed', (req, res, next) => {
-  console.warn('Deprecated: /zed/* route accessed. Redirecting to /apps/zed/*');
-  res.redirect(301, `/apps/zed${req.url}`);
-});
 
 
 
 // --- Adaptable Port configuration ---
 import http from 'http';
-const DEFAULT_PORT = parseInt(process.env.PORT || '5000', 10);
+const DEFAULT_PORT = parseInt(process.env.PORT || '5001', 10);
 const MAX_PORT = DEFAULT_PORT + 20; // Try up to 20 ports
 
 function startServer(port: number) {
@@ -77,5 +66,20 @@ function startServer(port: number) {
     }
   });
 }
+
+
+
+// --- Global error handler for pretty printing errors ---
+app.use((err: any, req: any, res: any, next: any) => {
+  console.error('--- ZEBULON ERROR ---');
+  if (err.code === 'ENOENT') {
+    console.error('File not found:', err.path);
+  }
+  console.error('Message:', err.message);
+  if (err.stack) console.error('Stack:', err.stack);
+  if (err.cause) console.error('Cause:', err.cause);
+  console.error('--- END ERROR ---');
+  res.status(500).json({ error: err.message, code: err.code, path: err.path });
+});
 
 startServer(DEFAULT_PORT);

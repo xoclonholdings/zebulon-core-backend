@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import React from 'react';
 import type { EntityRef, MemoryClientOpts } from '@zebulon/memory-sdk';
 export type MemoryPanelProps = {
@@ -34,7 +35,8 @@ export function ZebulonCorePanel(props: MemoryPanelProps) {
         .then(r => r.ok ? r.json() : Promise.reject(r))
         .then(data => {
           setStatus('Connected');
-          setMemories(Array.isArray(data.items) ? data.items : []);
+          const d = data as { items?: any[] };
+          setMemories(Array.isArray(d.items) ? d.items : []);
         })
         .catch(() => {
           setStatus('Unable to connect to Zebulon Core memory.');
@@ -62,7 +64,7 @@ export function ZebulonCorePanel(props: MemoryPanelProps) {
           headers: { 'Authorization': 'Bearer ' + jwt }
         })
           .then(r => r.ok ? r.json() : Promise.reject(r))
-          .then(data => setMemories(Array.isArray(data.items) ? data.items : []));
+          .then((data: any) => setMemories(Array.isArray(data.items) ? data.items : []));
       })
       .catch(() => setStatus('Failed to add memory.'))
       .finally(() => setLoading(false));
@@ -89,11 +91,11 @@ export function ZebulonCorePanel(props: MemoryPanelProps) {
           )) : <span style={{opacity:0.6}}>No persistent memory.</span>}
         </div>
         <form onSubmit={addMemory} style={{display:'flex',gap:4,marginBottom:8}}>
-          <input value={input} onChange={e=>setInput(e.target.value)} type="text" placeholder="Add memory..." style={{flex:1,padding:'4px 8px',borderRadius:4,border:'1px solid #2323ff',background:'#23234a',color:'#fff'}} />
+          <input value={input} onChange={e=>setInput((e.target as HTMLInputElement).value)} type="text" placeholder="Add memory..." style={{flex:1,padding:'4px 8px',borderRadius:4,border:'1px solid #2323ff',background:'#23234a',color:'#fff'}} />
           <button type="submit" style={{background:'#3fdfff',color:'#181a2a',border:'none',borderRadius:4,padding:'4px 12px',fontWeight:'bold'}} disabled={loading}>Add</button>
         </form>
         <button onClick={logout} style={{width:'100%',background:'#2323ff',color:'#fff',border:'none',borderRadius:4,padding:'6px 0',fontSize:13}}>Logout</button>
-        <button style={{marginTop:16,background:'#333',color:'#fff',border:'none',borderRadius:4,padding:'6px 0',width:'100%'}} onClick={()=>window.dispatchEvent(new CustomEvent('close-memory-panel'))}>Close</button>
+  <button style={{marginTop:16,background:'#333',color:'#fff',border:'none',borderRadius:4,padding:'6px 0',width:'100%'}} onClick={()=>typeof globalThis.window !== 'undefined' && globalThis.window.dispatchEvent(new CustomEvent('close-memory-panel'))}>Close</button>
       </div>
     </div>
   );

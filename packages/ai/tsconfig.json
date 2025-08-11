@@ -1,9 +1,22 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["./**/*"],
+  "include": ["src/**/*"],
   "compilerOptions": {
     "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "dist-types"
+    "composite": true,
+    "tsBuildInfoFile": "./dist-types/.tsbuildinfo",
+    "outDir": "dist",
+    "rootDir": "src",
+    "baseUrl": "../..",
+    "paths": {
+      "@shared/*": ["packages/shared/src/*"]
+    },
+    "noEmit": false,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true
   }
+  ,"references": [
+    { "path": "../shared" }
+  ]
 }

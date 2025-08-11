@@ -1,3 +1,26 @@
+
+model ZuluTask {
+  id          String    @id @default(cuid())
+  key         String   @unique
+  name        String
+  description String
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  runs        ZuluRun[] @relation("TaskRuns")
+}
+
+model ZuluRun {
+  id         String   @id @default(cuid())
+  taskKey    String
+  status     String   // "queued" | "running" | "ok" | "warn" | "error"
+  startedAt  DateTime @default(now())
+  finishedAt DateTime?
+  meta       Json?
+  logs       Json?
+  task       ZuluTask? @relation(fields: [taskKey], references: [key], name: "TaskRuns")
+  @@index([taskKey])
+}
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,16 +30,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model User {
-<<<<<<< HEAD
-  id           Int          @id @default(autoincrement())
-  username     String       @unique
-  passwordHash String       @map("password_hash")
-  role         String       @default("user")
-  createdAt    DateTime     @default(now()) @map("created_at")
-  updatedAt    DateTime     @updatedAt @map("updated_at")
-  familyTrees  FamilyTree[]
-=======
   id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
   email             String?            @unique(map: "users_email_unique") @db.VarChar
   firstName         String?            @map("first_name") @db.VarChar
@@ -31,64 +46,11 @@ model User {
   knowledge_base    knowledge_base[]
   project_memory    ProjectMemory[]
   scratchpad_memory ScratchpadMemory[]
->>>>>>> d1a6b5690cb748e3c7d5e957460e093f3d9db20e
 
   @@map("users")
 }
 
-<<<<<<< HEAD
-model SystemStatus {
-  id           Int      @id @default(autoincrement())
-  component    String   @unique
-  status       String
-  lastChecked  DateTime @default(now()) @map("last_checked")
-  details      String?
-  responseTime Int?     @map("response_time")
-
-  @@map("system_status")
-}
-
-model OracleMemory {
-  id           Int      @id @default(autoincrement())
-  label        String   @unique
-  description  String
-  content      String
-  memoryType   String   @map("memory_type")
-  status       String   @default("active")
-  createdBy    String   @map("created_by")
-  createdAt    DateTime @default(now()) @map("created_at")
-  lastModified DateTime @updatedAt @map("last_modified")
-
-  @@map("oracle_memory")
-}
-
-model ModuleIntegration {
-  id                String   @id @default(cuid())
-  moduleName        String   @unique @map("module_name")
-  displayName       String   @map("display_name")
-  isConnected       Boolean  @default(false) @map("is_connected")
-  integrationType   String?  @map("integration_type")
-  integrationUrl    String?  @map("integration_url")
-  integrationScript String?  @map("integration_script")
-  integrationEmbed  String?  @map("integration_embed")
-  integrationConfig Json?    @map("integration_config")
-  connectedAppName  String?  @map("connected_app_name")
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
-
-  @@map("module_integrations")
-}
-
-model FamilyTree {
-  id         String   @id @default(cuid())
-  userId     Int      @map("user_id")
-  filename   String
-  data       Json
-  uploadedAt DateTime @default(now()) @map("uploaded_at")
-  user       User     @relation(fields: [userId], references: [id])
-
-  @@map("family_trees")
-=======
+// (removed HEAD/=======/>>>>>> markers and duplicate/legacy models)
 model Conversation {
   id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
   userId            String             @map("user_id") @db.VarChar
@@ -306,5 +268,5 @@ model memory_index {
   @@index([conversation_id], map: "idx_memory_conv_id")
   @@index([importance], map: "idx_memory_importance")
   @@index([last_accessed], map: "idx_memory_last_accessed")
->>>>>>> d1a6b5690cb748e3c7d5e957460e093f3d9db20e
+
 }

@@ -1,0 +1,9 @@
+{
+  "name": "@shared/zed",
+  "version": "1.0.0",
+  "main": "src/zed.ts",
+  "types": "src/zed.ts",
+  "exports": {
+    ".": "./src/zed.ts"
+  }
+}
