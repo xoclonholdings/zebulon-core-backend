@@ -3,13 +3,11 @@ console.log('[server] NODE_ENV:', process.env.NODE_ENV);
 console.log('[server] PORT:', process.env.PORT);
 console.log('[server] CWD:', process.cwd());
 import express from 'express';
-import morgan from 'morgan';
 import { buildCors } from './cors';
 
 const app = express();
 const PORT = Number(process.env.PORT || 3001); // Railway injects PORT at runtime
 
-app.use(morgan('dev'));
 app.use(express.json());
 app.use(buildCors());
 

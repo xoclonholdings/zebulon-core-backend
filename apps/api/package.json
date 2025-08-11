@@ -2,5 +2,15 @@
   "name": "@zebulon/api",
   "version": "0.1.0",
   "main": "index.js",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@prisma/client": "^6.13.0",
+    "prisma": "^6.13.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/supertest": "^6.0.3",
+    "pg": "^8.16.3",
+    "supertest": "^7.1.4"
+  }
 }

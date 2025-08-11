@@ -10,6 +10,145 @@ model ZuluTask {
   runs        ZuluRun[] @relation("TaskRuns")
 }
 
+// --- ZLab Models ---
+
+model Workspace {
+  id           String   @id @default(cuid())
+  name         String
+  members      WorkspaceMember[]
+  projects     Project[]
+  notes        NotePage[]
+  folders      Folder[]
+  meetings     Meeting[]
+  activities   Activity[]
+  files        File[] // Uses existing File model
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model WorkspaceMember {
+  id          String   @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  userId      String
+  role        Role
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@unique([workspaceId, userId])
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+model Project {
+  id           String   @id @default(cuid())
+  workspaceId  String
+  workspace    Workspace @relation(fields: [workspaceId], references: [id])
+  name         String
+  description  String?
+  columns      Column[]
+  tasks        Task[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Column {
+  id         String  @id @default(cuid())
+  projectId  String
+  project    Project @relation(fields: [projectId], references: [id])
+  title      String
+  order      Int
+  tasks      Task[]
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project @relation(fields: [projectId], references: [id])
+  title       String
+  description String?
+  assigneeId  String?
+  statusColId String?
+  statusCol   Column? @relation(fields: [statusColId], references: [id])
+  dueAt       DateTime?
+  labels      String[] @default([])
+  order       Int      @default(0)
+  comments    Comment[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  taskId    String
+  task      Task @relation(fields: [taskId], references: [id])
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model Meeting {
+  id           String   @id @default(cuid())
+  workspaceId  String
+  workspace    Workspace @relation(fields: [workspaceId], references: [id])
+  title        String
+  startsAt     DateTime?
+  endsAt       DateTime?
+  roomCode     String   @unique
+  recordings   Recording[]
+  createdAt    DateTime @default(now())
+}
+
+model Recording {
+  id         String   @id @default(cuid())
+  meetingId  String
+  meeting    Meeting @relation(fields: [meetingId], references: [id])
+  url        String
+  durationMs Int
+  createdAt  DateTime @default(now())
+}
+
+model NotePage {
+  id           String   @id @default(cuid())
+  workspaceId  String
+  workspace    Workspace @relation(fields: [workspaceId], references: [id])
+  title        String
+  slug         String   @unique
+  snapshot     String
+  updatedBy    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Folder {
+  id           String   @id @default(cuid())
+  workspaceId  String
+  workspace    Workspace @relation(fields: [workspaceId], references: [id])
+  name         String
+  parentId     String?
+  parent       Folder? @relation("FolderToFolder", fields: [parentId], references: [id])
+  children     Folder[] @relation("FolderToFolder")
+  files        File[] // Uses existing File model
+  createdAt    DateTime @default(now())
+}
+
+// File model already exists in Core schema; ZLab relations use that model
+
+model Activity {
+  id           String   @id @default(cuid())
+  workspaceId  String
+  workspace    Workspace @relation(fields: [workspaceId], references: [id])
+  actorId      String
+  kind         String
+  refId        String?
+  message      String
+  createdAt    DateTime @default(now())
+}
+
 model ZuluRun {
   id         String   @id @default(cuid())
   taskKey    String
@@ -86,17 +225,23 @@ model Message {
 
 model File {
   id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
-  conversationId   String         @map("conversation_id") @db.VarChar
-  fileName         String         @map("file_name")
-  originalName     String         @map("original_name")
-  mimeType         String         @map("mime_type")
-  size             Int
-  status           String         @default("processing")
+  conversationId   String?        @map("conversation_id") @db.VarChar
+  fileName         String?        @map("file_name")
+  originalName     String?        @map("original_name")
+  mimeType         String?        @map("mime_type")
+  size             Int?
+  status           String?        @default("processing")
   extractedContent String?        @map("extracted_content")
   analysis         Json?
   createdAt        DateTime?      @default(now()) @map("created_at") @db.Timestamp(6)
   file_storage     file_storage[]
-  conversations    Conversation   @relation(fields: [conversationId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "files_conversation_id_conversations_id_fk")
+  conversations    Conversation?  @relation(fields: [conversationId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "files_conversation_id_conversations_id_fk")
+
+  // ZLab relations
+  workspaceId      String?
+  workspace        Workspace?     @relation(fields: [workspaceId], references: [id])
+  folderId         String?
+  folder           Folder?        @relation(fields: [folderId], references: [id])
 
   @@map("files")
 }

@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process';
-import { readRecentZuluLogLines } from '../../lib/logger';
+import { readRecentZuluLogLines } from './logger';
 import { getHealth } from './zulu.service';
 
 function checkNpmOutdated(): { total: number; critical: number; updates: Record<string, any> } | null {

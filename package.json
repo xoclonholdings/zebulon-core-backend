@@ -52,6 +52,7 @@
     "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^5.0.0",
     "@zebulon/ai": "link:packages/ai",
+    "bcrypt": "^6.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -69,6 +70,7 @@
     "multer": "^2.0.2",
     "nanoid": "^5.1.5",
     "openai": "^5.10.2",
+    "pg": "^8.16.3",
     "picomatch": "^4.0.3",
     "prisma": "^6.13.0",
     "react": "^18.3.1",
@@ -80,6 +82,7 @@
     "react-router-dom": "^7.8.0",
     "recharts": "^2.15.2",
     "rollup": "^4.46.2",
+    "supertest": "^7.1.4",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "tinyglobby": "^0.2.14",
@@ -95,8 +98,11 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.54.2",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.0.5",
     "node-fetch": "^3.3.2",
     "playwright": "^1.54.2",
+    "ts-jest": "^29.4.1",
     "turbo": "^2.5.5"
   }
 }

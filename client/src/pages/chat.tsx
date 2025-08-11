@@ -6,7 +6,7 @@ import ChatArea from "@/components/chat/ChatArea";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import zLogoPath from "@assets/IMG_2227_1753477194826.png";
-import type { Conversation, Message, File as DBFile } from "@shared/schema";
+
 
 export default function Chat() {
   const { id: conversationId } = useParams<{ id?: string }>();
@@ -28,26 +28,26 @@ export default function Chat() {
   }, []);
 
   // Fetch conversations for sidebar
-  const { data: conversations = [] } = useQuery<Conversation[]>({
+  const { data: conversations = [] } = useQuery<any[]>({
     queryKey: ["/api/conversations"],
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // Fetch current conversation if ID provided
-  const { data: currentConversation } = useQuery<Conversation>({
+  const { data: currentConversation } = useQuery<any>({
     queryKey: ["/api/conversations", conversationId],
     enabled: !!conversationId,
   });
 
   // Fetch messages for current conversation
-  const { data: messages = [], isLoading: messagesLoading, error: messagesError } = useQuery<Message[]>({
+  const { data: messages = [], isLoading: messagesLoading, error: messagesError } = useQuery<any[]>({
     queryKey: ["/api/conversations", conversationId, "messages"],
     enabled: !!conversationId,
     refetchInterval: 5000, // Refresh every 5 seconds when active
   });
 
   // Fetch files for current conversation
-  const { data: files = [] } = useQuery<DBFile[]>({
+  const { data: files = [] } = useQuery<any[]>({
     queryKey: ["/api/conversations", conversationId, "files"],
     enabled: !!conversationId,
   });
@@ -61,12 +61,7 @@ export default function Chat() {
         transition-transform duration-200 ease-in-out
         bg-gray-900 border-r border-gray-800
       `}>
-        <ChatSidebar 
-          conversations={conversations} 
-          onClose={() => setIsSidebarOpen(false)}
-          isMobile={isMobile}
-          onMenuClick={() => setIsSidebarOpen(true)}
-        />
+  <ChatSidebar />
       </div>
       
       {/* Mobile Backdrop */}
@@ -81,14 +76,7 @@ export default function Chat() {
       <div className="flex-1 flex flex-col min-h-0">
         {/* Main Chat Area */}
         <div className="flex-1 min-h-0">
-          <ChatArea 
-            conversation={currentConversation}
-            messages={messages}
-            files={files}
-            conversationId={conversationId}
-            isMobile={isMobile}
-            onOpenSidebar={() => setIsSidebarOpen(true)}
-          />
+          <ChatArea />
         </div>
       </div>
     </div>
