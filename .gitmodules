@@ -1,0 +1,11 @@
+[submodule "apps/zed"]
+	path = apps/zed
+	url = https://github.com/xoclonholdings/zebulon-zed.git
+
+[submodule "apps/zwap"]
+	path = apps/zwap
+	url = https://github.com/xoclonholdings/zebulon-zwap.git
+
+[submodule "apps/zync"]
+	path = apps/zync
+	url = https://github.com/xoclonholdings/zebulon-zync.git
