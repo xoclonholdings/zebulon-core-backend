@@ -10,7 +10,6 @@ import {
   Rss
 } from "lucide-react";
 import zLogoPath from "@assets/IMG_2227_1753477194826.png";
-
 export default function Landing() {
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden relative">
