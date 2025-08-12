@@ -1,3 +1,18 @@
+model Turn {
+  id             String   @id @default(cuid())
+  conversationId String
+  idx            Int
+  role           String
+  content        String
+  toolName       String?
+  toolArgs       Json?
+  toolResult     Json?
+  createdAt      DateTime @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([createdAt])
+}
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,15 +23,6 @@ datasource db {
 }
 
 model User {
-<<<<<<< HEAD
-  id           Int          @id @default(autoincrement())
-  username     String       @unique
-  passwordHash String       @map("password_hash")
-  role         String       @default("user")
-  createdAt    DateTime     @default(now()) @map("created_at")
-  updatedAt    DateTime     @updatedAt @map("updated_at")
-  familyTrees  FamilyTree[]
-=======
   id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
   email             String?            @unique(map: "users_email_unique") @db.VarChar
   firstName         String?            @map("first_name") @db.VarChar
@@ -31,12 +37,11 @@ model User {
   knowledge_base    knowledge_base[]
   project_memory    ProjectMemory[]
   scratchpad_memory ScratchpadMemory[]
->>>>>>> d1a6b5690cb748e3c7d5e957460e093f3d9db20e
+  familyTrees       FamilyTree[]
 
   @@map("users")
 }
 
-<<<<<<< HEAD
 model SystemStatus {
   id           Int      @id @default(autoincrement())
   component    String   @unique
@@ -81,14 +86,14 @@ model ModuleIntegration {
 
 model FamilyTree {
   id         String   @id @default(cuid())
-  userId     Int      @map("user_id")
+  userId     String  @map("user_id")
   filename   String
   data       Json
   uploadedAt DateTime @default(now()) @map("uploaded_at")
   user       User     @relation(fields: [userId], references: [id])
 
   @@map("family_trees")
-=======
+}
 model Conversation {
   id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
   userId            String             @map("user_id") @db.VarChar
@@ -101,10 +106,12 @@ model Conversation {
   mode              String             @default("chat")
   analytics         analytics[]
   chat_sessions     chat_sessions[]
+
   users             User               @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "conversations_user_id_users_id_fk")
   files             File[]
   memory_index      memory_index[]
   messages          Message[]
+  turns             Turn[]
   scratchpad_memory ScratchpadMemory[]
 
   @@map("conversations")
@@ -306,5 +313,4 @@ model memory_index {
   @@index([conversation_id], map: "idx_memory_conv_id")
   @@index([importance], map: "idx_memory_importance")
   @@index([last_accessed], map: "idx_memory_last_accessed")
->>>>>>> d1a6b5690cb748e3c7d5e957460e093f3d9db20e
 }

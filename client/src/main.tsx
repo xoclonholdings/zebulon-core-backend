@@ -1,13 +1,10 @@
+
 import { createRoot } from "react-dom/client";
 import "./index.css";
-
-// Import React for JSX
 import React from "react";
 
-// Lazy load the main App to catch import errors
 const App = React.lazy(() => import("./App"));
 
-// Error boundary component
 function ErrorBoundary({ children }: { children: React.ReactNode }) {
   const [hasError, setHasError] = React.useState(false);
   const [error, setError] = React.useState<Error | null>(null);
@@ -16,8 +13,8 @@ function ErrorBoundary({ children }: { children: React.ReactNode }) {
     const handleError = (event: ErrorEvent) => {
       setHasError(true);
       setError(new Error(event.message));
+      console.error("[Zebulon Debug] Window error:", event.message, event);
     };
-
     window.addEventListener('error', handleError);
     return () => window.removeEventListener('error', handleError);
   }, []);
@@ -34,8 +31,8 @@ function ErrorBoundary({ children }: { children: React.ReactNode }) {
         <h1>🚀 Zebulon AI System</h1>
         <p>Loading issue detected. Troubleshooting...</p>
         <div style={{ marginTop: '20px', padding: '10px', border: '1px solid #333' }}>
-          <p>Node.js: v24.4.0</p>
-          <p>Vite: v6.3.5</p>
+          <p>Node.js: {process.version}</p>
+          <p>Vite: {import.meta.env.VITE_VITE_VERSION || 'unknown'}</p>
           <p>Error: {error?.message || 'Unknown error'}</p>
         </div>
         <button 
@@ -54,12 +51,13 @@ function ErrorBoundary({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-
   return <>{children}</>;
 }
 
-// Loading component
 function Loading() {
+  React.useEffect(() => {
+    console.log('[Zebulon Debug] Loading component mounted');
+  }, []);
   return (
     <div style={{ 
       color: 'white', 
@@ -79,12 +77,15 @@ function Loading() {
 }
 
 const rootElement = document.getElementById("root");
+console.log('[Zebulon Debug] rootElement:', rootElement);
 if (!rootElement) {
+  console.error('[Zebulon Automation] No #root element found. White/black screen likely.');
   throw new Error("Root element not found");
 }
 
 try {
   const root = createRoot(rootElement);
+  console.log('[Zebulon Debug] React root created, rendering...');
   root.render(
     <ErrorBoundary>
       <React.Suspense fallback={<Loading />}>
@@ -92,7 +93,20 @@ try {
       </React.Suspense>
     </ErrorBoundary>
   );
-  // Zebulon UI mounted successfully
+  console.log('[Zebulon Debug] Zebulon UI mounted successfully');
+
+  // Automation: detect white/black screen after mount
+  setTimeout(() => {
+    const bg = window.getComputedStyle(document.body).backgroundColor;
+    const rootContent = rootElement.innerText.trim();
+    if ((bg === 'rgb(0, 0, 0)' || bg === '#000' || bg === 'black') && !rootContent) {
+      console.error('[Zebulon Automation] Black screen detected after mount.');
+    }
+    if ((bg === 'rgb(255, 255, 255)' || bg === '#fff' || bg === 'white') && !rootContent) {
+      console.error('[Zebulon Automation] White screen detected after mount.');
+    }
+  }, 2000);
+
 } catch (error) {
   console.error("❌ Failed to mount Zebulon UI:", error);
   if (rootElement) {
