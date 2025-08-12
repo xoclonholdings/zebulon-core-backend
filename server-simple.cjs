@@ -1,5 +1,6 @@
 // server-simple.cjs
 // CommonJS version of server-simple.js for dev:simple script
+require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
@@ -100,10 +101,13 @@ app.post("/api/ask", async (req, res) => {
   // Dynamically import ESM modules for OpenAI/Ollama
   let answer = '';
   try {
+    const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+    const OLLAMA_API_URL = process.env.OLLAMA_URL ? `${process.env.OLLAMA_URL}/api/generate` : 'http://localhost:11434/api/generate';
+    const OLLAMA_MODEL = process.env.ZED_MODEL || 'llama3';
+    const OLLAMA_AGENT_MODEL = process.env.ZED_AGENT_MODEL || 'llama3-agent';
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
     if (mode === 'agent') {
-      // Hardcoded OpenAI API call (gpt-4o)
-      const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-  const OPENAI_API_KEY = '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'; // <-- HARDCODED FROM .env
+      // Try OpenAI first
       if (!OPENAI_API_KEY || OPENAI_API_KEY === 'sk-REPLACE_WITH_YOUR_KEY') {
         answer = '[ZED Error] OpenAI API key missing.';
       } else {
@@ -127,9 +131,8 @@ app.post("/api/ask", async (req, res) => {
         });
         if (!resp.ok) {
           // Fallback to Ollama agent model if OpenAI fails
-          const OLLAMA_API_URL = 'http://localhost:11434/api/generate';
           const ollamaPayload = {
-            model: 'llama3-agent',
+            model: OLLAMA_AGENT_MODEL,
             messages: [
               { role: 'system', content: 'You are ZED, a helpful AI assistant.' },
               { role: 'user', content: message }
@@ -157,11 +160,9 @@ app.post("/api/ask", async (req, res) => {
         }
       }
     } else {
-      // Hardcoded Ollama API call (llama3)
-      const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-      const OLLAMA_API_URL = 'http://localhost:11434/api/generate';
+      // Default to Ollama chat model
       const payload = {
-        model: 'llama3',
+        model: OLLAMA_MODEL,
         messages: [
           { role: 'user', content: message }
         ],
@@ -180,7 +181,7 @@ app.post("/api/ask", async (req, res) => {
           answer = data?.message?.content || '[ZED Error] No answer from Ollama.';
         }
       } catch (err) {
-        answer = '[ZED Error] Ollama server not reachable.';
+        answer = '[ZED Error] Ollama server not reachable. Please ensure Ollama is running and the model is pulled.';
       }
     }
   } catch (err) {

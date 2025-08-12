@@ -2,7 +2,7 @@ import { ChatMessage } from '@shared/zed';
 import { ChatOptions, AIProvider, ChatStream } from './types';
 
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
-const ZED_MODEL = process.env.ZED_MODEL || 'tinyllama';
+const ZED_MODEL = process.env.ZED_MODEL || 'llama3';
 
 export const OllamaProvider: AIProvider = {
 	async chat(messages: ChatMessage[], options: ChatOptions = {}) {

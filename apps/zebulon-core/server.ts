@@ -70,7 +70,9 @@ function startServer(port: number) {
   server.on('listening', () => {
     console.log('Zebulon Core server running on port', port);
     console.log('Allowed origins:', allowedOrigins);
-    console.log('API base URL:', `/apps/zed`);
+    console.log('Core API base URL: /');
+    console.log('Zed plugin API base URL: /apps/zed');
+    console.log('Note: Use /chat, /memory, /ollama/* for core endpoints. /apps/zed is for Zed plugin-specific routes.');
   });
   server.on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
