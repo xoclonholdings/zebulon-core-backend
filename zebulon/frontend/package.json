@@ -10,11 +10,15 @@
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "lucide-react": "^0.539.0",
     "next": "^13.4.19",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "electron": "^29.4.6"
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "electron": "^29.4.6",
+    "typescript": "^5.9.2"
   }
 }
