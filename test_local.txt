@@ -1,6 +1,0 @@
-Testing local Ollama integration for unlimited chat processing.
-This file tests the complete multi-AI system with:
-- Julius AI for Agent mode
-- OpenAI for content creation  
-- Ollama for unlimited local chat
-- Enhanced local AI as ultimate fallback

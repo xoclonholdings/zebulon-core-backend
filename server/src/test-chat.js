@@ -1,1 +1,1 @@
-// moved from ../test-chat.js
+// /chat endpoint integration

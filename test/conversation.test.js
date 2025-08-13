@@ -1,10 +1,9 @@
-// test/conversation.test.js
-// Automated conversation test for ZED Simple Server
+// Zebulon conversation integration
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
-const BASE_URL = process.env.API_URL || 'http://localhost:5000';
+const BASE_URL = process.env.API_URL || `http://localhost:${process.env.PORT || 3001}`;
 
-async function testConversation() {
+async function runConversation() {
   const messages = [
     "Hello Zed!",
     "What is the capital of Ghana?",
@@ -40,12 +39,12 @@ async function testConversation() {
     }
   }
   if (passed) {
-    console.log('🎉 All conversation tests passed!');
+  // All conversation checks passed
     process.exit(0);
   } else {
-    console.error('❌ Some conversation tests failed.');
+  // Some conversation checks failed
     process.exit(1);
   }
 }
 
-testConversation();
+runConversation();

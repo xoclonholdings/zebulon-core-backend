@@ -25,43 +25,35 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json());
-// ...other core middleware
-
 
 // --- Health check route (must be before auth middleware) ---
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
 });
 
-
-// Mount Zed backend plugin
-let ZedAppRouter;
-try {
-  // Use JS output if running from dist, else use TS for dev
-  if (__dirname.endsWith('dist')) {
-    ZedAppRouter = require('./apps/zed-backend/index.js').ZedAppRouter;
-  } else {
-    ZedAppRouter = require('./apps/zed-backend/index.ts').ZedAppRouter;
-  }
-} catch (e) {
-  console.error('Failed to load ZedAppRouter:', e);
-  process.exit(1);
-}
-const appsRouter = express.Router();
-appsRouter.use('/zed', ZedAppRouter);
-app.use('/apps', appsRouter);
-
-// Temporary legacy redirect for old Zed routes
-app.use('/zed', (req, res, next) => {
-  console.warn('Deprecated: /zed/* route accessed. Redirecting to /apps/zed/*');
-  res.redirect(301, `/apps/zed${req.url}`);
+// --- Serve Zebulon UI from /apps/zebulon-core/zebulon/client ---
+import path from 'path';
+const clientPath = path.resolve(__dirname, 'zebulon', 'client');
+const clientIndex = path.join(clientPath, 'index.html');
+app.use(express.static(path.join(clientPath, 'public')));
+app.get('/', (_req, res) => {
+  res.sendFile(clientIndex);
 });
-
-
+app.get('/index.html', (_req, res) => {
+  res.sendFile(clientIndex);
+});
+// Fallback for client-side routing
+// Catch-all route for client-side routing (only for non-API/non-health requests)
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/health')) {
+    return next();
+  }
+  res.sendFile(clientIndex);
+});
 
 // --- Adaptable Port configuration ---
 import http from 'http';
-const DEFAULT_PORT = parseInt(process.env.PORT || '5000', 10);
+const DEFAULT_PORT = parseInt(process.env.PORT || '3001', 10);
 const MAX_PORT = DEFAULT_PORT + 20; // Try up to 20 ports
 
 function startServer(port: number) {
@@ -71,8 +63,8 @@ function startServer(port: number) {
     console.log('Zebulon Core server running on port', port);
     console.log('Allowed origins:', allowedOrigins);
     console.log('Core API base URL: /');
-    console.log('Zed plugin API base URL: /apps/zed');
-    console.log('Note: Use /chat, /memory, /ollama/* for core endpoints. /apps/zed is for Zed plugin-specific routes.');
+    console.log('Note: Use /chat, /memory, /ollama/* for core endpoints.');
+    console.log('Frontend served from /apps/zebulon-core/zebulon/client');
   });
   server.on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
@@ -89,8 +81,6 @@ function startServer(port: number) {
     }
   });
 }
-
-
 
 // --- Global error handler for pretty printing errors ---
 app.use((err: any, req: any, res: any, next: any) => {

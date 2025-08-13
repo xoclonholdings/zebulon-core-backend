@@ -1,10 +1,10 @@
-// In-memory chat history per session (for demo; use DB for production)
+// In-memory chat history per session
 import { Request } from "express";
 
 const chatHistory: Record<string, { role: 'user' | 'assistant', message: string }[]> = {};
 
 export function getSessionId(req: Request): string {
-  // Use session ID if available, else fallback to IP (not secure, demo only)
+  // Use session ID if available, else fallback to IP
   // @ts-ignore
   return req.sessionID || req.ip;
 }

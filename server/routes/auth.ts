@@ -1,3 +1,3 @@
-// Minimal placeholder for auth routes
+// ...existing code...
 const authRoutes = {};
 export default authRoutes;

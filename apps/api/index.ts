@@ -11,7 +11,7 @@ app.get('/version', (req, res) => {
   res.json({ version: '0.1.0', git: null });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Zebulon Core API running on port ${PORT}`);
 });

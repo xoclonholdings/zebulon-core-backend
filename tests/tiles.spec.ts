@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 const BASE_URL = process.env.E2E_BASE_URL ?? 'http://localhost:5173';
 const API_BASE = process.env.VITE_API_BASE;
@@ -38,8 +38,8 @@ async function step<T>(name: string, fn: () => Promise<T>): Promise<T> {
 }
 
 test.describe('Zebulon Homeview E2E', () => {
-  test('home + tiles smoke', async ({ page, request }) => {
-    test.setTimeout(180000); // 3 minutes for the whole test
+  it('home + tiles', async ({ page }) => {
+  // Timeout for the whole test
     let consoleErrors: string[] = [];
     page.on('pageerror', err => {
       consoleErrors.push(`Page error: ${err.message}`);

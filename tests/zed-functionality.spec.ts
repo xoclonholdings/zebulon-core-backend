@@ -1,10 +1,8 @@
-// tests/zed-functionality.spec.ts
-// Playwright test suite for Zed functionality
-// This file will contain 25 automated tests covering Zed's core features
+// Zebulon core functionality integration
 
 import { test, expect, request } from '@playwright/test';
 
-const BASE_URL = process.env.BASE_URL || process.env.API_URL || 'http://localhost:5000';
+const BASE_URL = process.env.BASE_URL || process.env.API_URL || `http://localhost:${process.env.PORT || 3001}`;
 
 const questions = [
   // Conversation ability

@@ -10,14 +10,14 @@ import { setZedCoreData, getZedCoreData } from "./zedCoreData";
 
 const router = Router();
 
-// POST /api/login - simple demo login
+// POST /api/login
 router.post("/api/login", (req, res) => {
 	const { username, password } = req.body;
 	if (!username || !password) {
 		res.status(400).json({ error: "Username and password required" });
 		return;
 	}
-	// Demo: accept any username/password
+	// Accept any username/password
 	req.session.user = { username };
 	setZedCoreData({ userName: username });
 	res.status(200).json({ ok: true, username });

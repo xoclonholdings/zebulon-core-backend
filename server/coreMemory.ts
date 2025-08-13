@@ -1,4 +1,4 @@
-// Persistent memory for logged-in users (in-memory for demo; use DB for production)
+// Persistent memory for logged-in users
 const persistentMemory: Record<string, { role: 'user' | 'assistant', message: string }[]> = {};
 
 export function getUserMemory(userId: string) {

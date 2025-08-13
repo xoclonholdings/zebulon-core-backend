@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getAI } from '@zebulon/ai';
+import { getAI } from 'zebulon-core-backend/apps/zebulon-core/zebulon/packages/ai/dist';
 
 const router = Router();
 

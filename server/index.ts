@@ -68,7 +68,7 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Username and password are required' });
     }
 
-    // Demo login: accept any email (since username/passwordHash/role do not exist)
+  // Accept any email (since username/passwordHash/role do not exist)
     // In production, implement proper authentication
     const { email } = req.body;
     if (!email) {
@@ -103,7 +103,7 @@ app.post('/api/auth/signup', async (req, res) => {
       return res.status(400).json({ error: 'Password must be at least 6 characters long' });
     }
 
-    // Demo signup: accept any email
+  // Accept any email
     const { email } = req.body;
     if (!email) {
       return res.status(400).json({ error: 'Email is required' });

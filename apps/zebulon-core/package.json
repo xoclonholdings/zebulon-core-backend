@@ -3,13 +3,20 @@
   "version": "0.1.0",
   "main": "server.ts",
   "scripts": {
+    "dev": "tsc --watch & nodemon dist/server.js",
     "dev:core": "tsc --watch & nodemon dist/server.js",
     "build": "tsc",
     "start": "node dist/server.js"
   },
   "dependencies": {
-  "@zebulon/memory-ui": "workspace:*",
-  "@zebulon/ai": "workspace:*",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "drizzle-orm": "^0.44.4",
+    "drizzle-zod": "^0.8.3",
+    "express": "^5.1.0",
+    "zod": "^4.0.17"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "typescript": "^5.9.2"
   }
 }

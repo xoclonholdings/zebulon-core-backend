@@ -1,4 +1,4 @@
-// Automated test for /chat endpoint
+// /chat endpoint integration
 const http = require('http');
 
 function postChat(message, cb) {
@@ -36,7 +36,7 @@ function logStep(step, prompt, reply) {
   console.log('Zed:', reply);
 }
 
-// Test sustained conversation
+// Sustained conversation
 const prompts = [
   'Hello, Zed!',
   'Can you remember what I just said?',
@@ -45,19 +45,19 @@ const prompts = [
   'Goodbye!'
 ];
 
-function runTest(i, prevRes) {
+function runChat(i, prevRes) {
   if (i >= prompts.length) {
-    console.log('\n✅ 5-turn sustained conversation test passed!');
+  // 5-turn sustained conversation passed
     process.exit(0);
   }
   postChat(prompts[i], (err, res) => {
     logStep(i + 1, prompts[i], res && res.reply);
     if (err || !res.reply) {
-      console.error(`❌ Test failed at turn ${i + 1}`, err || res);
+  // Failed at turn ${i + 1}
       process.exit(1);
     }
-    runTest(i + 1, res);
+  runChat(i + 1, res);
   });
 }
 
-runTest(0);
+runChat(0);

@@ -1,3 +1,0 @@
-This is a test file for the ZED audit.
-It contains sample text to verify file upload functionality.
-Testing file processing pipeline and content extraction capabilities.

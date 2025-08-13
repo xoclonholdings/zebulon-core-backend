@@ -7,13 +7,12 @@ const AppPage = () => {
   const appId = params?.id || "";
   const external = APP_LINKS[appId];
 
-  // TODO: Replace with actual app UI components
+  // ...existing code...
   const renderAppUI = () => {
     switch (appId) {
       case "zed":
         return <div className="text-gray-400">Integrated ZED UI goes here.</div>;
-      case "zeta":
-        return <div className="text-gray-400">Integrated ZETA UI goes here.</div>;
+  // ZETA UI removed
       case "zlab":
         return <div className="text-gray-400">Integrated ZLAB UI goes here.</div>;
       case "zwap":

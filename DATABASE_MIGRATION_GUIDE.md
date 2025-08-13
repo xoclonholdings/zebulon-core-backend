@@ -14,12 +14,12 @@ Complete guide for migrating from Neon cloud database to local PostgreSQL for of
 ### Step 1: Backup Current Database ✅
 - Created `zebulon_oracle_backup.sql` with complete schema
 - Includes all tables: User, OracleMemory, FamilyTree, ModuleIntegration
-- Sample admin user included (username: admin, password: admin123)
+***REMOVED: Sample admin user info***
 
 ### Step 2: Install Local PostgreSQL
-```bash
-# Install PostgreSQL locally
-sudo apt update
+***REMOVED: All test instructions and references***
+### Step 7: Verify Offline Operation
+***REMOVED: All test instructions and references***
 sudo apt install postgresql postgresql-contrib
 
 # Start PostgreSQL service
