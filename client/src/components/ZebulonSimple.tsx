@@ -1,24 +1,13 @@
 
-// --- OFFICIAL ZEBULON UI DESIGN (from Zebulon repo, with tile names/order preserved) ---
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import ZebulonLogo from './ZebulonLogo';
-import ZedLiteWelcome from './ZedLiteWelcome';
-git rm .gitmodules
-git commit -m "Remove .gitmodules to fix Netlify deploy"
-git push --force origin main// ...existing code...
-
 import { MessageCircle, Wrench, Shield, DollarSign, Settings } from 'lucide-react';
 
 
 
 const ZebulonSimple: React.FC = () => {
 
-  // PIN lock removed for now; always unlocked
-  const [showZedLite, setShowZedLite] = useState(false);
-  const [showZedPanel, setShowZedPanel] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  // Tile modal state
-  const [activeTile, setActiveTile] = useState<null | 'zed' | 'zeta' | 'zlab' | 'zwap' | 'zync' | 'zulu'>(null);
+  // ...existing code...
   // ...existing code...
   // ...existing code...
   return (
