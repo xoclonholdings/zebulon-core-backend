@@ -1,3 +1,0 @@
-// Place this file in your public assets folder for the frontend
-// File: /workspaces/zebulon-core-backend/client/public/zebulon-logo.png
-// (This is a placeholder instruction. Please manually copy the provided Zebulon logo image to this location.)

@@ -1,0 +1,3 @@
+[submodule "apps/zed"]
+	path = apps/zed
+	url = https://github.com/xoclonholdings/zed.git
