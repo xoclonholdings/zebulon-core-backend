@@ -3,9 +3,9 @@
     "node": "18.x"
   },
   "scripts": {
-  "dev": "ts-node server/index.ts",
-  "build": "tsc",
-  "start": "node dist/server/index.js"
+    "dev": "ts-node server/index.ts",
+    "build": "tsc",
+    "start": "node dist/server/index.js"
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",
