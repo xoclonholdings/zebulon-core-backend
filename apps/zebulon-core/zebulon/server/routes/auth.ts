@@ -1,0 +1,3 @@
+// ...existing code...
+const authRoutes = {};
+export default authRoutes;

@@ -3,7 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import ZebulonLogo from './ZebulonLogo';
 import ZedLiteWelcome from './ZedLiteWelcome';
-// ...existing code...
+git rm .gitmodules
+git commit -m "Remove .gitmodules to fix Netlify deploy"
+git push --force origin main// ...existing code...
 
 import { MessageCircle, Wrench, Shield, DollarSign, Settings } from 'lucide-react';
 

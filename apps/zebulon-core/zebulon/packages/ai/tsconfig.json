@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "declaration": true,
+    "composite": true,
+    "tsBuildInfoFile": "./dist-types/.tsbuildinfo",
+    "outDir": "dist",
+    "rootDir": "src",
+    "baseUrl": "../..",
+    "paths": {
+      "@shared/*": ["packages/shared/src/*"]
+    },
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true
+  }
+  ,"references": [
+    { "path": "../shared" }
+  ]
+}

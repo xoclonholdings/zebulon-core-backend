@@ -1,0 +1,54 @@
+:root{
+  --header-h: 64px;
+  --fg: #eaeef5;
+  --fg-dim: #c6cbd6;
+  --bg: rgba(12,14,22,0.72);
+  --bg-elev: rgba(20,24,36,0.85);
+  --accent: #7aa2ff;
+  --ring: rgba(122,162,255,0.45);
+  --border: rgba(255,255,255,0.08);
+}
+.zeb-header{
+  position: sticky; top: 0; z-index: 50; height: var(--header-h);
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+  background: var(--bg); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border); padding: 0 12px; color: var(--fg);
+}
+.zeb-header-left,.zeb-header-right{ display:flex; align-items:center; gap:10px; }
+.zeb-header-right{ justify-content:flex-end; }
+.zeb-header-center{ display:flex; align-items:center; justify-content:center; pointer-events:none; }
+.zeb-crumb{ font-size:12px; letter-spacing:.08em; text-transform:uppercase; opacity:.8; }
+.zeb-logo-btn{
+  display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border);
+  background:var(--bg-elev); color:var(--fg); height:36px; padding:0 10px; border-radius:10px;
+  cursor:pointer; transition: box-shadow .15s, border-color .15s, transform .05s;
+}
+.zeb-logo-btn:focus-visible{ outline:0; box-shadow:0 0 0 3px var(--ring); border-color:var(--accent); }
+.zeb-logo-btn:active{ transform: translateY(1px); }
+.zeb-logo{
+  width:22px; height:22px; border-radius:6px;
+  background: linear-gradient(135deg, var(--accent), #9ad0ff); color:#0b0e16;
+  font-weight:800; display:grid; place-items:center;
+  box-shadow: 0 1px 0 rgba(255,255,255,.25) inset, 0 6px 16px rgba(122,162,255,.35);
+}
+.zeb-brand-wrap{ display:flex; flex-direction:column; line-height:1.05; }
+.zeb-brand{ font-weight:700; font-size:16px; }
+.zeb-clock{ font-size:11px; color: var(--fg-dim); }
+.zeb-icon-btn{
+  display:inline-flex; align-items:center; gap:8px; height:36px; padding:0 12px;
+  background:var(--bg-elev); color:var(--fg); border:1px solid var(--border); border-radius:10px;
+  cursor:pointer; transition: box-shadow .15s, border-color .15s, transform .05s;
+}
+.zeb-icon-btn:focus-visible{ outline:0; box-shadow:0 0 0 3px var(--ring); border-color:var(--accent); }
+.zeb-icon-btn:active{ transform: translateY(1px); }
+.zeb-icon-label{ font-size:12px; opacity:.9; }
+/* Dropdown */
+.zeb-user-menu{
+  position:absolute; top:calc(var(--header-h) - 6px); left:12px; min-width:220px;
+  background:#0f1320; color:var(--fg); border:1px solid var(--border); border-radius:12px;
+  box-shadow: 0 18px 40px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.06) inset;
+  padding:8px; display:grid; gap:4px; z-index:60;
+}
+.zeb-user-menu button{ background:transparent; border:0; color:var(--fg); text-align:left; padding:10px 12px; border-radius:8px; cursor:pointer; font-size:14px; }
+.zeb-user-menu button:hover,.zeb-user-menu button:focus-visible{ background: rgba(122,162,255,.12); outline:0; }
+.zeb-user-menu hr{ border:0; border-top:1px solid var(--border); margin:6px 0; }
