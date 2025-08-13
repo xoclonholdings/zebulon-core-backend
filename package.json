@@ -3,9 +3,9 @@
     "node": "18.x"
   },
   "scripts": {
-    "dev": "ts-node server/index.ts",
-    "build": "tsc",
-    "start": "node dist/server/index.js"
+    "dev": "ts-node server/index.ts", // Local development with ts-node
+    "build": "tsc", // Compile TypeScript to JS in dist/
+    "start": "node dist/server/index.js" // Production: run compiled JS
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",
