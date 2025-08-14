@@ -1,5 +1,5 @@
-import { db } from "./db";
-import { cache } from "./cache";
+import { db } from "./db.js";
+import { cache } from "./cache.js";
 
 export class PerformanceMonitor {
   private static instance: PerformanceMonitor;

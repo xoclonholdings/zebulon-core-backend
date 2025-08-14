@@ -1,14 +1,14 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
-import { performanceMonitor } from "./performance-monitor";
-import { cache } from "./cache";
-import { zetaCore } from "./services/zeta-core";
-import { firewallService } from "./services/firewall-service";
-import { badActorService } from "./services/bad-actor-service";
-import { setupSocketHandlers } from "./services/socket-handler";
-import { setupWalletAuth } from "./wallet-auth";
-import { setupSocialAuth } from "./social-auth";
+import { storage } from "./storage.js";
+import { performanceMonitor } from "./performance-monitor.js";
+import { cache } from "./cache.js";
+import { zetaCore } from "./services/zeta-core.js";
+import { firewallService } from "./services/firewall-service.js";
+import { badActorService } from "./services/bad-actor-service.js";
+import { setupSocketHandlers } from "./services/socket-handler.js";
+import { setupWalletAuth } from "./wallet-auth.js";
+import { setupSocialAuth } from "./social-auth.js";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {

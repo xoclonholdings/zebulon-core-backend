@@ -4,7 +4,7 @@ import { Strategy as InstagramStrategy } from "passport-instagram-graph";
 import { Strategy as SnapchatStrategy } from "passport-snapchat";
 import { Express } from "express";
 import session from "express-session";
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 import { User as SelectUser } from "@shared/schema";
 
 declare global {
@@ -37,7 +37,7 @@ export function setupSocialAuth(app: Express) {
       consumerKey: process.env.TWITTER_CONSUMER_KEY,
       consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
       callbackURL: "/api/auth/twitter/callback"
-    }, async (token, tokenSecret, profile, done) => {
+  }, async (token: string, tokenSecret: string, profile: any, done: (err: any, user?: any, info?: any) => void) => {
       try {
         let user = await storage.getUserBySocialId('twitter', profile.id);
         
@@ -66,7 +66,7 @@ export function setupSocialAuth(app: Express) {
       clientID: process.env.INSTAGRAM_CLIENT_ID,
       clientSecret: process.env.INSTAGRAM_CLIENT_SECRET,
       callbackURL: "/api/auth/instagram/callback"
-    }, async (accessToken, refreshToken, profile, done) => {
+  }, async (accessToken: string, refreshToken: string, profile: any, done: (err: any, user?: any, info?: any) => void) => {
       try {
         let user = await storage.getUserBySocialId('instagram', profile.id);
         
@@ -94,7 +94,7 @@ export function setupSocialAuth(app: Express) {
       clientID: process.env.SNAPCHAT_CLIENT_ID,
       clientSecret: process.env.SNAPCHAT_CLIENT_SECRET,
       callbackURL: "/api/auth/snapchat/callback"
-    }, async (accessToken, refreshToken, profile, done) => {
+  }, async (accessToken: string, refreshToken: string, profile: any, done: (err: any, user?: any, info?: any) => void) => {
       try {
         let user = await storage.getUserBySocialId('snapchat', profile.id);
         
@@ -116,8 +116,8 @@ export function setupSocialAuth(app: Express) {
     }));
   }
 
-  passport.serializeUser((user, done) => done(null, user.id));
-  passport.deserializeUser(async (id: number, done) => {
+  passport.serializeUser((user: any, done: (err: any, id?: number) => void) => done(null, user.id));
+  passport.deserializeUser(async (id: number, done: (err: any, user?: any) => void) => {
     try {
       const user = await storage.getUser(id);
       done(null, user || null);
@@ -172,7 +172,7 @@ export function setupSocialAuth(app: Express) {
         await storage.updateUserLastLogin(user.id);
       }
 
-      req.login(user, (err) => {
+      req.login?.(user, (err: any) => {
         if (err) {
           return res.status(500).json({ message: "Login error" });
         }
@@ -184,14 +184,14 @@ export function setupSocialAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated() || !req.user) {
+  if (!req.isAuthenticated?.() || !req.user) {
       return res.status(401).json({ message: "Not authenticated" });
     }
     res.json(req.user);
   });
 
   app.post("/api/logout", (req, res, next) => {
-    req.logout((err) => {
+    req.logout?.((err: any) => {
       if (err) return next(err);
       res.json({ message: "Logged out successfully" });
     });

@@ -1,6 +1,7 @@
 import { pgTable, text, integer, boolean, timestamp, jsonb, varchar, index, serial } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import type { Table } from "drizzle-orm";
 
 // Session storage table.
 // (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
@@ -174,19 +175,19 @@ export const howToGuides = pgTable("how_to_guides", {
 export type User = typeof users.$inferSelect;
 
 // Insert schemas without problematic omits
-export const insertUserSchema = createInsertSchema(users);
-export const insertSecurityEventSchema = createInsertSchema(securityEvents);
-export const insertThreatPatternSchema = createInsertSchema(threatPatterns);
-export const insertSystemMetricSchema = createInsertSchema(systemMetrics);
-export const insertZwapProtectionSchema = createInsertSchema(zwapProtection);
-export const insertEncryptionLayerSchema = createInsertSchema(encryptionLayers);
-export const insertNetworkNodeSchema = createInsertSchema(networkNodes);
-export const insertBadActorSchema = createInsertSchema(badActors);
-export const insertDataDeprecationSchema = createInsertSchema(dataDeprecation);
-export const insertQuantumProtocolSchema = createInsertSchema(quantumProtocols);
-export const insertFaqCategorySchema = createInsertSchema(faqCategories);
-export const insertFaqItemSchema = createInsertSchema(faqItems);
-export const insertHowToGuideSchema = createInsertSchema(howToGuides);
+export const insertUserSchema = createInsertSchema(users as Table<any>);
+export const insertSecurityEventSchema = createInsertSchema(securityEvents as Table<any>);
+export const insertThreatPatternSchema = createInsertSchema(threatPatterns as Table<any>);
+export const insertSystemMetricSchema = createInsertSchema(systemMetrics as Table<any>);
+export const insertZwapProtectionSchema = createInsertSchema(zwapProtection as Table<any>);
+export const insertEncryptionLayerSchema = createInsertSchema(encryptionLayers as Table<any>);
+export const insertNetworkNodeSchema = createInsertSchema(networkNodes as Table<any>);
+export const insertBadActorSchema = createInsertSchema(badActors as Table<any>);
+export const insertDataDeprecationSchema = createInsertSchema(dataDeprecation as Table<any>);
+export const insertQuantumProtocolSchema = createInsertSchema(quantumProtocols as Table<any>);
+export const insertFaqCategorySchema = createInsertSchema(faqCategories as Table<any>);
+export const insertFaqItemSchema = createInsertSchema(faqItems as Table<any>);
+export const insertHowToGuideSchema = createInsertSchema(howToGuides as Table<any>);
 
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;

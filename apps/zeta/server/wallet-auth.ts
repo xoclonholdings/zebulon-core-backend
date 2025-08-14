@@ -1,13 +1,40 @@
+export interface User {
+  id: number;
+  walletAddress: string | null;
+  username: string | null;
+  email: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  lastLoginAt: Date | null;
+  twitterId: string | null;
+  instagramId: string | null;
+  snapchatId: string | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+}
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Express } from "express";
 import session from "express-session";
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 import { User as SelectUser } from "@shared/schema";
 
 declare global {
   namespace Express {
-    interface User extends SelectUser {}
+      id: number;
+      walletAddress: string | null;
+      username: string | null;
+      email: string | null;
+      firstName: string | null;
+      lastName: string | null;
+      lastLoginAt: Date | null;
+      twitterId: string | null;
+      instagramId: string | null;
+      snapchatId: string | null;
+      createdAt: Date | null;
+      updatedAt: Date | null;
+    }
+    }
   }
 }
 
@@ -16,7 +43,7 @@ export function setupWalletAuth(app: Express) {
     secret: process.env.SESSION_SECRET || "fallback-secret-key",
     resave: false,
     saveUninitialized: false,
-    store: storage.sessionStore,
+  store: storage.sessionStore as any,
     cookie: {
       secure: false, // Set to true in production with HTTPS
       httpOnly: true,
@@ -35,7 +62,7 @@ export function setupWalletAuth(app: Express) {
         usernameField: 'walletAddress',
         passwordField: 'walletAddress', // Use wallet address as both username and password
       },
-      async (walletAddress, _, done) => {
+  async (walletAddress: string, _: any, done: (err: any, user?: any) => void) => {
         try {
           const user = await storage.getUserByWallet(walletAddress);
           if (user) {
@@ -56,8 +83,8 @@ export function setupWalletAuth(app: Express) {
     )
   );
 
-  passport.serializeUser((user, done) => done(null, user.id));
-  passport.deserializeUser(async (id: number, done) => {
+  passport.serializeUser((user: any, done: (err: any, id?: number) => void) => done(null, user.id));
+  passport.deserializeUser(async (id: number, done: (err: any, user?: any) => void) => {
     try {
       const user = await storage.getUser(id);
       done(null, user || null);
@@ -87,7 +114,7 @@ export function setupWalletAuth(app: Express) {
         return res.status(401).json({ message: "Authentication failed" });
       }
 
-      req.login(user, (loginErr) => {
+  req.login?.(user, (loginErr) => {
         if (loginErr) {
           return res.status(500).json({ message: "Login error" });
         }
@@ -97,14 +124,14 @@ export function setupWalletAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated() || !req.user) {
+  if (!req.isAuthenticated?.() || !req.user) {
       return res.status(401).json({ message: "Not authenticated" });
     }
     res.json(req.user);
   });
 
   app.post("/api/logout", (req, res, next) => {
-    req.logout((err) => {
+  req.logout?.((err) => {
       if (err) return next(err);
       res.json({ message: "Logged out successfully" });
     });

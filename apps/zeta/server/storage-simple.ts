@@ -10,11 +10,11 @@ import {
   type FaqCategory, type InsertFaqCategory, type FaqItem, type InsertFaqItem,
   type HowToGuide, type InsertHowToGuide
 } from "@shared/schema";
-import { db } from "./db";
+import { db } from "./db.js";
 import { eq, desc, and, gte, lt } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
-import { cache } from "./cache";
+import { cache } from "./cache.js";
 
 // Disabled PostgresSessionStore to prevent IDX_session_expire error
 // const PostgresSessionStore = connectPg(session);

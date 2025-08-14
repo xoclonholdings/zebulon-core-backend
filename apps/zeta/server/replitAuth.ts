@@ -6,7 +6,7 @@ import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 
 if (!process.env.REPLIT_DOMAINS) {
   throw new Error("Environment variable REPLIT_DOMAINS not provided");
@@ -116,7 +116,7 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/logout", (req, res) => {
-    req.logout(() => {
+  req.logout?.(() => {
       res.redirect(
         client.buildEndSessionUrl(config, {
           client_id: process.env.REPL_ID!,
@@ -130,7 +130,7 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
-  if (!req.isAuthenticated() || !user.expires_at) {
+  if (!req.isAuthenticated?.() || !user.expires_at) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 

@@ -1,10 +1,10 @@
 // Zlab App Placeholder
-import { ZebulonApp } from '../../packages/sdk-core';
+import { ZebulonApp } from '../../packages/sdk-core.js';
 
 const zlabApp: ZebulonApp = {
   id: 'zlab',
   name: 'Zlab',
-  routes: (router, ctx) => {
+  routes: (router: any, ctx: any) => {
     // TODO: Add Zlab routes here
   },
   ui: {

@@ -4,7 +4,7 @@ import { Express } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 import { User as SelectUser } from "@shared/schema";
 
 declare global {
@@ -92,7 +92,7 @@ export function setupStandaloneAuth(app: Express) {
         lastName
       });
 
-      req.login(user, (err) => {
+  req.login?.(user, (err) => {
         if (err) return next(err);
         res.status(201).json({
           id: user.id,
@@ -118,7 +118,7 @@ export function setupStandaloneAuth(app: Express) {
         return res.status(401).json({ message: info?.message || "Invalid credentials" });
       }
       
-      req.login(user, (err) => {
+  req.login?.(user, (err) => {
         if (err) {
           return res.status(500).json({ message: "Login failed" });
         }
@@ -135,7 +135,7 @@ export function setupStandaloneAuth(app: Express) {
 
   // Logout user
   app.post("/api/logout", (req, res, next) => {
-    req.logout((err) => {
+  req.logout?.((err) => {
       if (err) return next(err);
       res.json({ message: "Logged out successfully" });
     });
@@ -143,7 +143,7 @@ export function setupStandaloneAuth(app: Express) {
 
   // Get current user
   app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) {
+  if (!req.isAuthenticated?.()) {
       return res.status(401).json({ message: "Not authenticated" });
     }
     
