@@ -5,7 +5,17 @@
     "composite": true,
     "outDir": "dist-types",
     "tsBuildInfoFile": "./dist-types/.tsbuildinfo",
-    "noEmit": false
+    "noEmit": false,
+    "module": "esnext",
+    "target": "es2020",
+    "downlevelIteration": true,
+    "jsx": "react-jsx",
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["*"],
+      "@shared/*": ["*"],
+      "@/components/*": ["components/*"]
+    }
   },
   "include": ["src/**/*"]
 }

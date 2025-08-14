@@ -7,13 +7,18 @@
     "tsBuildInfoFile": "./dist-types/.tsbuildinfo",
     "outDir": "dist",
     "rootDir": "src",
-    "baseUrl": "../..",
+    "module": "esnext",
+    "target": "es2020",
+    "downlevelIteration": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "baseUrl": "src",
     "paths": {
-      "@shared/*": ["packages/shared/src/*"]
-    },
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "esModuleInterop": true
+      "@/*": ["*"],
+      "@shared/*": ["../shared/*"],
+      "@/components/*": ["components/*"]
+    }
   }
   ,"references": [
     { "path": "../shared" }

@@ -1,9 +1,16 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-  "module": "ES2020",
+  "target": "es2020",
+  "module": "esnext",
   "downlevelIteration": true,
-    "moduleResolution": "Node",
+  "moduleResolution": "node",
+    "jsx": "react-jsx",
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["*"],
+      "@shared/*": ["../shared/*"],
+      "@/components/*": ["components/*"]
+    },
     "outDir": "dist",
     "rootDir": "src",
     "strict": true,
