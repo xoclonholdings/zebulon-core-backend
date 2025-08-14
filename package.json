@@ -32,7 +32,7 @@
     "cookie-parser": "^1.4.6",
     "better-sqlite3": "^9.0.0",
     "memoizee": "^0.4.15",
-    "@neondatabase/serverless": "^0.8.0",
+  "@neondatabase/serverless": "^0.10.4",
     "drizzle-kit": "^0.20.16"
   },
   "devDependencies": {
