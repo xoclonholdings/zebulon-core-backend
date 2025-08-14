@@ -1,11 +1,10 @@
 // Extend express-session types for user property
 declare module 'express-session' {
   interface SessionData {
-    user?: { username: string };
   }
 }
 import { Router } from "express";
-import session from "express-session";
+import * as session from "express-session";
 import { setZedCoreData, getZedCoreData } from "./zedCoreData";
 
 const router = Router();

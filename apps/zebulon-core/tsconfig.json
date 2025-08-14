@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "CommonJS",
+  "module": "ES2020",
+  "downlevelIteration": true,
     "outDir": "dist",
     "rootDir": ".",
     "esModuleInterop": true,
@@ -11,10 +12,19 @@
     "paths": {
       "@shared/*": ["packages/shared/src/*"]
     },
-    "composite": true
+    "composite": true,
+    "jsx": "react-jsx",
+    "moduleResolution": "node"
   },
-  "include": ["./**/*.ts"]
-  ,"references": [
+  "include": ["./**/*.ts", "./**/*.tsx"],
+  "exclude": [
+  "../../node_modules/drizzle-orm/mysql-core/**",
+  "../../node_modules/drizzle-orm/singlestore-core/**",
+  "../../node_modules/drizzle-orm/sqlite-core/**",
+  "../../node_modules/drizzle-orm/neon-serverless/**",
+  "../../node_modules/drizzle-orm/gel-core/**"
+  ],
+  "references": [
     { "path": "../../packages/ai" },
     { "path": "../../packages/shared" }
   ]

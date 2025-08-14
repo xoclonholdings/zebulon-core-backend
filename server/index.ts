@@ -1,7 +1,7 @@
-import express, { Request, Response, NextFunction } from 'express';
-import session from 'express-session';
-import bcrypt from 'bcrypt';
-import path from 'path';
+import * as express from 'express';
+import * as session from 'express-session';
+import * as bcrypt from 'bcrypt';
+import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { storage } from './storage-prisma.js';
 import gedcomRoutes from './routes/gedcom.js';
