@@ -1,0 +1,45 @@
+# Node
+node_modules/
+
+# Build output
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+*.swp
+*.swo
+
+# Next.js
+.next/
+
+# TypeScript
+*.tsbuildinfo
+
+# Playwright
+playwright-report/
+
+# Ignore binaries
+*.node
+
+# Ignore package lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Ignore coverage
+coverage/
+
+# Ignore environment files
+.env
+.env.*
