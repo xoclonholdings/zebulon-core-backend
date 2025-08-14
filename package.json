@@ -34,7 +34,8 @@
     "better-sqlite3": "^9.0.0",
     "memoizee": "^0.4.15",
   "@neondatabase/serverless": "^0.10.4",
-    "drizzle-kit": "^0.20.16"
+  "drizzle-kit": "^0.20.16",
+  "ws": "8.18.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.54.2",
