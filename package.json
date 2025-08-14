@@ -1,5 +1,6 @@
 {
   "name": "zebulon-backend",
+  "_deployTrigger": "2025-08-14",
   "version": "1.0.0",
   "main": "dist/server/index.js",
   "type": "module",
