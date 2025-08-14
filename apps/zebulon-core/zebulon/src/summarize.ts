@@ -2,7 +2,7 @@
 // Conversation summarization for Zed AI persistent memory/feedback
 // Uses OpenAI or Ollama for summarization, depending on provider
 
-import type { Message } from './memory';
+import type { Message } from './memory.js';
 
 export interface SummarizerOptions {
   provider: 'openai' | 'ollama';

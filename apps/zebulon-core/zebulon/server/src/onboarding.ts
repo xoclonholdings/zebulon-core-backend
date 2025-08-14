@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { setZedCoreData } from "./zedCoreData";
+import { setZedCoreData } from "./zedCoreData.js";
 
 const router = Router();
 

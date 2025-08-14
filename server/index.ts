@@ -4,8 +4,8 @@ import bcrypt from 'bcrypt';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { storage } from './storage-prisma.js';
-import gedcomRoutes from './routes/gedcom.js';
-import { getActiveConnection } from './db-dual.js';
+// import gedcomRoutes from './routes/gedcom.js';
+// import { getActiveConnection } from './db-dual.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -175,15 +175,15 @@ app.get('/api/system/status', async (req, res) => {
 
 
 // GEDCOM routes
-app.use('/api/gedcom', gedcomRoutes);
+// app.use('/api/gedcom', gedcomRoutes);
 
 // API health check with database status
 app.get('/api/health', (req, res) => {
-  const dbStatus = getActiveConnection();
+  // const dbStatus = getActiveConnection();
   res.json({ 
     status: 'ok', 
     message: 'Zebulon Oracle System is running with Prisma',
-    database: dbStatus
+  // database: dbStatus
   });
 });
 

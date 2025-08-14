@@ -1,6 +1,6 @@
-import { appendMessage, getHistory } from "./chatContext";
-import { getUserMemory, appendUserMemory } from "./coreMemory";
-import onboardingRouter from "./onboarding";
+import { appendMessage, getHistory } from "./chatContext.js";
+import { getUserMemory, appendUserMemory } from "./coreMemory.js";
+import onboardingRouter from "./onboarding.js";
 import apiAuthRouter from "./apiAuth";
 import { getZedCoreData } from "./zedCoreData";
 import { ollamaChat } from "./ollamaClient";

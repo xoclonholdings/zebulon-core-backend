@@ -1,7 +1,7 @@
 
-import { OllamaProvider } from './ollama';
-import { LocalAIProvider } from './localai';
-import { AIProvider } from './types';
+import { OllamaProvider } from './ollama.js';
+import { LocalAIProvider } from './localai.js';
+import { AIProvider } from './types.js';
 
 export function getAI(): AIProvider {
 	// Prefer LocalAI if LOCALAI_URL is set, else fallback to Ollama
@@ -9,4 +9,4 @@ export function getAI(): AIProvider {
 	return OllamaProvider;
 }
 
-export * from './types';
+export * from './types.js';

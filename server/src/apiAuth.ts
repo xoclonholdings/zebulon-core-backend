@@ -5,7 +5,7 @@ declare module 'express-session' {
 }
 import { Router } from "express";
 import * as session from "express-session";
-import { setZedCoreData, getZedCoreData } from "./zedCoreData.js";
+import { setZedCoreData, getZedCoreData } from "../../apps/zebulon-core/zebulon/server/src/zedCoreData.js";
 
 const router = Router();
 

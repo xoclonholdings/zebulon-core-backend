@@ -8,7 +8,7 @@ import { firewallService } from "./services/firewall-service.js";
 import { badActorService } from "./services/bad-actor-service.js";
 import { setupSocketHandlers } from "./services/socket-handler.js";
 // ...existing code...
-import { setupSocialAuth } from "./social-auth.js";
+// import { setupSocialAuth } from "./social-auth.js";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -16,7 +16,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Remove all authentication middleware to prevent MetaMask errors
   // ...existing code...
-  // setupSocialAuth(app);
+  // setupSocialAuth(app); // Disabled for Railway build
   
   // Serve React app for main route
   app.get("/", (req, res, next) => {
@@ -369,7 +369,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup WebSocket handlers
   setupSocketHandlers(httpServer);
 
-  // Auth routes are handled by standalone-auth.ts
+  // Auth routes are handled by standalone-auth.ts (disabled)
 
   // Dashboard data endpoints (remove authentication requirement)
   app.get("/api/dashboard/status", async (req, res) => {

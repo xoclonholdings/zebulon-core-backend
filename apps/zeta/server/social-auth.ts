@@ -152,36 +152,36 @@ export function setupSocialAuth(app: Express) {
   );
 
   // ...existing code...
-  app.post("/api/social-auth", async (req, res) => {
-    const { provider, socialId, username, profileImage, email } = req.body;
-    
-    if (!provider || !socialId) {
-      return res.status(400).json({ message: "Provider and social ID are required" });
-    }
-
-    try {
-      let user = await storage.getUserBySocialId(provider, socialId);
-      
-      if (!user) {
-        const userData: any = { username, profileImageUrl: profileImage, email };
-        userData[`${provider}Id`] = socialId;
-        userData[`${provider}Username`] = username;
-        
-        user = await storage.createSocialUser(userData);
-      } else {
-        await storage.updateUserLastLogin(user.id);
-      }
-
-      req.login?.(user, (err: any) => {
-        if (err) {
-          return res.status(500).json({ message: "Login error" });
-        }
-        res.json(user);
-      });
-    } catch (error) {
-      res.status(500).json({ message: "Authentication error" });
-    }
-  });
+  // app.post("/api/social-auth", async (req, res) => {
+  //   const { provider, socialId, username, profileImage, email } = req.body;
+  //   
+  //   if (!provider || !socialId) {
+  //     return res.status(400).json({ message: "Provider and social ID are required" });
+  //   }
+  //
+  //   try {
+  //     let user = await storage.getUserBySocialId(provider, socialId);
+  //     
+  //     if (!user) {
+  //       const userData: any = { username, profileImageUrl: profileImage, email };
+  //       userData[`${provider}Id`] = socialId;
+  //       userData[`${provider}Username`] = username;
+  //       
+  //       user = await storage.createSocialUser(userData);
+  //     } else {
+  //       await storage.updateUserLastLogin(user.id);
+  //     }
+  //
+  //     req.login?.(user, (err: any) => {
+  //       if (err) {
+  //         return res.status(500).json({ message: "Login error" });
+  //       }
+  //       res.json(user);
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({ message: "Authentication error" });
+  //   }
+  // });
 
   app.get("/api/user", (req, res) => {
   if (!req.isAuthenticated?.() || !req.user) {

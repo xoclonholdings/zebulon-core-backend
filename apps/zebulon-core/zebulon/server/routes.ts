@@ -1,11 +1,11 @@
-import zedLiteApi from "./zedLiteApi";
-import { appendMessage, getHistory } from "./chatContext";
-import { getUserMemory, appendUserMemory } from "./coreMemory";
-import onboardingRouter from "./onboarding";
-import apiAuthRouter from "./apiAuth";
-import { getZedCoreData } from "./zedCoreData";
-import { ollamaChat } from "./ollamaClient";
-import { agentChat } from "./agentOpenAIClient";
+import zedLiteApi from "./zedLiteApi.js";
+import { appendMessage, getHistory } from "./chatContext.js";
+import { getUserMemory, appendUserMemory } from "./coreMemory.js";
+import onboardingRouter from "./onboarding.js";
+import apiAuthRouter from "./apiAuth.js";
+import { getZedCoreData } from "./zedCoreData.js";
+import { ollamaChat } from "./ollamaClient.js";
+import { agentChat } from "./agentOpenAIClient.js";
 
 export function registerRoutes(app: any) {
 	// Register onboarding route

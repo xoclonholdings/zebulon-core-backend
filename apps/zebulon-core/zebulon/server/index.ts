@@ -7,8 +7,8 @@ import { storage } from './storage-prisma.js';
 import gedcomRoutes from './routes/gedcom.js';
 import { getActiveConnection } from './db-dual.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Use CommonJS __filename if available, otherwise fallback
+// In CommonJS, __filename and __dirname are available globally
 
 const app = express();
 const PORT = process.env.PORT || 5000;

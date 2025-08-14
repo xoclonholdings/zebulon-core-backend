@@ -1,7 +1,7 @@
 // agentOpenAIClient.ts
 // OpenAI API client for ZED Agent Mode (with fallback)
 import OpenAI from 'openai';
-import { ollamaChat } from './ollamaClient';
+import { ollamaChat } from './ollamaClient.js';
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const openai = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null;

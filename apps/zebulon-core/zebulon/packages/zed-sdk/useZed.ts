@@ -1,6 +1,6 @@
 // useZed: React hook for Zed chat integration
 import { useState } from 'react';
-import { ZedClient } from './zed-client';
+import { ZedClient } from './zed-client.js';
 
 export function useZed(client: ZedClient) {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);

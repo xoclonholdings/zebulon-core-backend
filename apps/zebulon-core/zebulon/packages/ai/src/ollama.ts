@@ -1,5 +1,5 @@
 import { ChatMessage } from '@shared/zed';
-import { ChatOptions, AIProvider, ChatStream } from './types';
+import { ChatOptions, AIProvider, ChatStream } from './types.js';
 
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
 const ZED_MODEL = process.env.ZED_MODEL || 'llama3';

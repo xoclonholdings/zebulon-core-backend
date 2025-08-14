@@ -1,1 +1,1 @@
-export * from './CoreMemoryButton';
+export * from './CoreMemoryButton.js';

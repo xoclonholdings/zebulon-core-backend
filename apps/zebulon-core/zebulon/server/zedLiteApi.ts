@@ -1,9 +1,9 @@
 
 import { Router } from "express";
 import cors from "cors";
-import { appendMessage, getHistory } from "./chatContext";
-import { ollamaChat } from "./ollamaClient";
-import { agentChat } from "./agentOpenAIClient";
+import { appendMessage, getHistory } from "./chatContext.js";
+import { ollamaChat } from "./ollamaClient.js";
+import { agentChat } from "./agentOpenAIClient.js";
 import fs from "fs";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
