@@ -7,7 +7,7 @@ import { zetaCore } from "./services/zeta-core.js";
 import { firewallService } from "./services/firewall-service.js";
 import { badActorService } from "./services/bad-actor-service.js";
 import { setupSocketHandlers } from "./services/socket-handler.js";
-import { setupWalletAuth } from "./wallet-auth.js";
+// ...existing code...
 import { setupSocialAuth } from "./social-auth.js";
 import { z } from "zod";
 
@@ -15,7 +15,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   
   // Remove all authentication middleware to prevent MetaMask errors
-  // setupWalletAuth(app);
+  // ...existing code...
   // setupSocialAuth(app);
   
   // Serve React app for main route
@@ -350,10 +350,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Simple admin password check
     if (password === "admin123" || password === "firewall2025") {
       // Get or create admin user
-      let adminUser = await storage.getUserByWallet("admin");
+  // ...existing code...
       if (!adminUser) {
         adminUser = await storage.createUser({
-          walletAddress: "admin",
+          // ...existing code...
           email: "admin@fantasmafirewall.com"
         });
       }

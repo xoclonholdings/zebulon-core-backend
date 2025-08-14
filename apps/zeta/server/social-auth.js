@@ -211,7 +211,7 @@ function setupSocialAuth(app) {
     app.get('/api/auth/snapchat/callback', passport_1.default.authenticate('snapchat', { failureRedirect: '/auth?error=snapchat' }), function (req, res) {
         res.redirect('/?social=snapchat');
     });
-    // Combined auth endpoint that works with existing wallet auth
+    // ...existing code...
     app.post("/api/social-auth", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
         var _a, provider, socialId, username, profileImage, email, user_1, userData, error_5;
         return __generator(this, function (_b) {

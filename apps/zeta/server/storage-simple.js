@@ -469,36 +469,6 @@ var DatabaseStorage = /** @class */ (function () {
                     case 0: return [4 /*yield*/, db_1.db.update(schema_1.zwapProtection).set({ status: status, integrityScore: integrityScore }).where((0, drizzle_orm_1.eq)(schema_1.zwapProtection.id, id)).returning()];
                     case 1:
                         updated = (_a.sent())[0];
-                        return [2 /*return*/, updated || undefined];
-                }
-            });
-        });
-    };
-    // Encryption layers
-    DatabaseStorage.prototype.getEncryptionLayers = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var layers;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, db_1.db.select().from(schema_1.encryptionLayers).orderBy(schema_1.encryptionLayers.layerNumber)];
-                    case 1:
-                        layers = _a.sent();
-                        return [2 /*return*/, layers];
-                }
-            });
-        });
-    };
-    DatabaseStorage.prototype.updateEncryptionLayer = function (id, status) {
-        return __awaiter(this, void 0, void 0, function () {
-            var updated;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, db_1.db.update(schema_1.encryptionLayers).set({ status: status }).where((0, drizzle_orm_1.eq)(schema_1.encryptionLayers.id, id)).returning()];
-                    case 1:
-                        updated = (_a.sent())[0];
-                        return [2 /*return*/, updated || undefined];
-                }
-            });
         });
     };
     // Network nodes

@@ -259,7 +259,7 @@ export class BadActorService {
       },
       {
         identifier: `0x${Math.random().toString(16).substring(2, 42)}`,
-        identifierType: "WALLET",
+  // ...existing code...
         indicators: { dataExfiltration: true, unauthorizedAttempts: Math.floor(Math.random() * 3) + 3 }
       },
       {

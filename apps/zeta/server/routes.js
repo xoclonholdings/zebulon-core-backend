@@ -53,7 +53,7 @@ function registerRoutes(app) {
         return __generator(this, function (_a) {
             httpServer = (0, http_1.createServer)(app);
             // Remove all authentication middleware to prevent MetaMask errors
-            // setupWalletAuth(app);
+            // ...existing code...
             // setupSocialAuth(app);
             // Serve React app for main route
             app.get("/", function (req, res, next) {
@@ -76,12 +76,12 @@ function registerRoutes(app) {
                         case 0:
                             password = req.body.password;
                             if (!(password === "admin123" || password === "firewall2025")) return [3 /*break*/, 4];
-                            return [4 /*yield*/, storage_1.storage.getUserByWallet("admin")];
+                            // ...existing code...
                         case 1:
                             adminUser = _a.sent();
                             if (!!adminUser) return [3 /*break*/, 3];
                             return [4 /*yield*/, storage_1.storage.createUser({
-                                    walletAddress: "admin",
+                                    // ...existing code...
                                     email: "admin@fantasmafirewall.com"
                                 })];
                         case 2:

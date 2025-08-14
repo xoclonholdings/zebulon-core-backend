@@ -25,10 +25,8 @@ export interface IStorage {
   // User management
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
-  getUserByWallet(walletAddress: string): Promise<User | undefined>;
   getUserBySocialId(provider: string, socialId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  createUserWithWallet(userData: { walletAddress: string; lastLoginAt?: Date }): Promise<User>;
   createSocialUser(userData: any): Promise<User>;
   updateUserLastLogin(userId: number): Promise<void>;
 
@@ -125,18 +123,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async getUserByWallet(walletAddress: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.walletAddress, walletAddress));
-    return user;
-  }
 
-  async createUserWithWallet(userData: { walletAddress: string; lastLoginAt?: Date }): Promise<User> {
-    const [user] = await db.insert(users).values({
-      walletAddress: userData.walletAddress,
-      lastLoginAt: userData.lastLoginAt || new Date(),
-    }).returning();
-    return user;
-  }
 
   async updateUserLastLogin(userId: number): Promise<void> {
     await db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, userId));

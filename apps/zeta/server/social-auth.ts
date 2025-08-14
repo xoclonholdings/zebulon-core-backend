@@ -151,7 +151,7 @@ export function setupSocialAuth(app: Express) {
     }
   );
 
-  // Combined auth endpoint that works with existing wallet auth
+  // ...existing code...
   app.post("/api/social-auth", async (req, res) => {
     const { provider, socialId, username, profileImage, email } = req.body;
     
