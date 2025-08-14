@@ -1,6 +1,4 @@
-export interface User {
   id: number;
-  walletAddress: string | null;
   username: string | null;
   email: string | null;
   firstName: string | null;
@@ -12,6 +10,7 @@ export interface User {
   createdAt: Date | null;
   updatedAt: Date | null;
 }
+}
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Express } from "express";
@@ -19,24 +18,7 @@ import session from "express-session";
 import { storage } from "./storage.js";
 import { User as SelectUser } from "@shared/schema";
 
-declare global {
-  namespace Express {
-      id: number;
-      walletAddress: string | null;
-      username: string | null;
-      email: string | null;
-      firstName: string | null;
-      lastName: string | null;
-      lastLoginAt: Date | null;
-      twitterId: string | null;
-      instagramId: string | null;
-      snapchatId: string | null;
-      createdAt: Date | null;
-      updatedAt: Date | null;
-    }
-    }
-  }
-}
+// ...existing code...
 
 export function setupWalletAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
