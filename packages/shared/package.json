@@ -14,5 +14,8 @@
       "require": "./schema.js",
       "types": "./schema.d.ts"
     }
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
   }
 }
