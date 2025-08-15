@@ -14,7 +14,7 @@ declare module 'express-session' {
 	}
 }
 
-import { User as SelectUser } from "apps/zeta/server/social-auth.js";
+// import { User as SelectUser } from "apps/zeta/server/social-auth.js"; // Removed: Zeta module deleted
 import { Request } from "express";
 
 declare global {
