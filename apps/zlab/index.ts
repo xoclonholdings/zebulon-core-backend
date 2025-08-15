@@ -1,5 +1,9 @@
 // Zlab App Placeholder
 import { ZebulonApp } from '../../packages/sdk-core.js';
+import { sdk } from '../../packages/sdk-core.js';
+
+// Stub example if missing
+// export const sdk = {};
 
 const zlabApp: ZebulonApp = {
   id: 'zlab',

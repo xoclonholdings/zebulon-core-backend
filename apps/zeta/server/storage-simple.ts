@@ -28,7 +28,9 @@ export interface IStorage {
   getUserBySocialId(provider: string, socialId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   createSocialUser(userData: any): Promise<User>;
-  updateUserLastLogin(userId: number): Promise<void>;
+import { eq } from 'drizzle-orm';
+import { myTable } from '../shared/schema.js'; // notice .js for Node16 ESM
+
 
   // Security events
   getSecurityEvents(limit?: number, offset?: number): Promise<SecurityEvent[]>;
