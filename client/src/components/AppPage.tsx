@@ -1,6 +1,6 @@
 import { useRoute } from "wouter";
-import { APP_LINKS } from "@/config/appLinks";
-import { Button } from "@/components/ui/button";
+import { APP_LINKS } from "../config/appLinks";
+import { Button } from "./ui/button";
 
 const AppPage = () => {
   const [match, params] = useRoute("/app/:id");
