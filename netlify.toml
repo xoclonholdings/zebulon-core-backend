@@ -1,0 +1,8 @@
+[build]
+  base = "client"
+  command = "npm run build"
+  publish = "client/.next"
+
+# Uncomment below if you use SSR/ISR with Next.js
+#[[plugins]]
+#  package = "@netlify/plugin-nextjs"
