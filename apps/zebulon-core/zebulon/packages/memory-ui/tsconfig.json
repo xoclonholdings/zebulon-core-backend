@@ -1,8 +1,0 @@
-{
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "lib": ["dom", "esnext"],
-    "jsx": "react-jsx"
-  },
-  "include": ["src"]
-}

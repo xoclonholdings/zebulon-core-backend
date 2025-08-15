@@ -1,6 +1,0 @@
-{
-  "priority": ["trusted_wifi", "cellular", "open_wifi", "satellite"],
-  "trusted_ssids": [],
-  "banned_open_ssids": ["xfinitywifi", "attwifi", "Boingo Hotspot"],
-  "satellite": { "enabled": false, "relayUrl": "", "authHeader": "", "heartbeatMs": 60000 }
-}

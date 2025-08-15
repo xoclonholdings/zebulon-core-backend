@@ -5,7 +5,7 @@ declare module 'express-session' {
 }
 import { Router } from "express";
 import * as session from "express-session";
-import { setZedCoreData, getZedCoreData } from "../../apps/zebulon-core/zebulon/server/src/zedCoreData.js";
+// import { setZedCoreData, getZedCoreData } from "../../apps/zebulon-core/zebulon/server/src/zedCoreData.js";
 
 const router = Router();
 
@@ -18,7 +18,7 @@ router.post("/api/login", (req, res) => {
 	}
 	// Accept any username/password
 	req.session.user = { username };
-	setZedCoreData({ userName: username });
+	// setZedCoreData({ userName: username });
 	res.status(200).json({ ok: true, username });
 	return;
 });
@@ -29,7 +29,7 @@ router.get("/api/user", (req, res) => {
 		res.status(401).json({ error: "Not authenticated" });
 		return;
 	}
-	const coreData = getZedCoreData();
+	const coreData = {}; // getZedCoreData stubbed
 	res.status(200).json({ user: req.session.user, coreData });
 	return;
 });
