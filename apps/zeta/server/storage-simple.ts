@@ -49,6 +49,57 @@ export async function getRowById(db: DB, id: number): Promise<MyRow | null> {
     return null;
   }
 }
+import { eq } from 'drizzle-orm';
+import { myTable } from '../shared/schema.js'; // Node16 ESM: explicit .js extension
+
+// Example DB type (replace with your actual DB type)
+export type DB = {
+  select: () => {
+    from: (table: any) => {
+      where: (condition: any) => Promise<any[]>;
+    };
+  };
+};
+
+export type MyRow = {
+  id: number;
+  name: string;
+  isActive: boolean;
+  displayOrder: number;
+  createdAt: Date;
+};
+
+/**
+ * Fetch all active rows, sorted by displayOrder.
+ */
+export async function getActiveRows(db: DB): Promise<MyRow[]> {
+  try {
+    const rows: MyRow[] = await db
+      .select()
+      .from(myTable)
+      .where(eq(myTable.isActive, true));
+    return rows.sort((a, b) => a.displayOrder - b.displayOrder);
+  } catch (error) {
+    console.error('Error in getActiveRows:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch a single row by id.
+ */
+export async function getRowById(db: DB, id: number): Promise<MyRow | null> {
+  try {
+    const rows: MyRow[] = await db
+      .select()
+      .from(myTable)
+      .where(eq(myTable.id, id));
+    return rows.length > 0 ? rows[0] : null;
+  } catch (error) {
+    console.error('Error in getRowById:', error);
+    return null;
+  }
+}
 import { 
   users, securityEvents, threatPatterns, systemMetrics, zwapProtection, 
   encryptionLayers, networkNodes, badActors, dataDeprecation, quantumProtocols,
