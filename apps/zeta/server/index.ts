@@ -70,3 +70,8 @@ app.use((req, res, next) => {
     log(`serving on port ${port}`);
   });
 })();
+
+// Stubbed index.ts
+export async function getZetaStatus(): Promise<string> {
+  return 'stub';
+}

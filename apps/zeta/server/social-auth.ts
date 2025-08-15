@@ -151,7 +151,10 @@ export function setupSocialAuth(app: Express) {
     }
   );
 
-  // ...existing code...
+  // Stubbed social-auth.ts
+  export async function getSocialAuthStatus(): Promise<string> {
+    return 'stub';
+  }
   // app.post("/api/social-auth", async (req, res) => {
   //   const { provider, socialId, username, profileImage, email } = req.body;
   //   

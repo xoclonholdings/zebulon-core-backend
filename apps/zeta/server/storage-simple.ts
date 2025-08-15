@@ -1,13 +1,15 @@
-/**
- * Temporary stub for Zeta StorageSimple module.
- * This allows the backend to build and run while Zeta is disabled.
- */
+// Stubbed storage-simple.ts
+export async function getStorage(key: string): Promise<any> {
+  return null; // placeholder
+}
 
-export const StorageSimple = {
-  get: async (...args: any[]): Promise<null> => null,
-  set: async (...args: any[]): Promise<void> => {},
-  delete: async (...args: any[]): Promise<void> => {},
-};
+export async function setStorage(key: string, value: any): Promise<void> {
+  // no-op
+}
+
+export async function deleteStorage(key: string): Promise<void> {
+  // no-op
+}
 
 // Example usage: create a storage for user sessions
 export type SessionData = {

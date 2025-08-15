@@ -1,3 +1,7 @@
+// Stubbed vite.ts
+export async function getViteConfig(): Promise<object> {
+  return {};
+}
 import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";

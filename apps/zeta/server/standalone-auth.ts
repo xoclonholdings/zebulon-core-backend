@@ -156,4 +156,8 @@ export function setupStandaloneAuth(app: Express) {
       lastName: user.lastName
     });
   });
+  // Stubbed standalone-auth.ts
+  export async function authenticateStandalone(): Promise<boolean> {
+    return false;
+  }
 }

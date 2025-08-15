@@ -7,7 +7,10 @@ import { zetaCore } from "./services/zeta-core.js";
 import { firewallService } from "./services/firewall-service.js";
 import { badActorService } from "./services/bad-actor-service.js";
 import { setupSocketHandlers } from "./services/socket-handler.js";
-// ...existing code...
+// Stubbed routes.ts
+export async function getRoutes(): Promise<any[]> {
+  return [];
+}
 // import { setupSocialAuth } from "./social-auth.js";
 import { z } from "zod";
 
