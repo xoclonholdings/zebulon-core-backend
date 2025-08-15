@@ -1,3 +1,3 @@
 export const storage: any = {
-  getUser: async (emailOrId: string) => ({ id: emailOrId, email: emailOrId }),
+  getUser: (emailOrId: string) => ({ id: emailOrId, email: emailOrId }),
 };

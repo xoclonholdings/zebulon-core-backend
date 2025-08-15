@@ -1,7 +1,9 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 
-ReactDOM.render(
-  <div>Zebulon Core UI</div>,
-  document.getElementById("root")
-);
+const App = () => {
+  return <div>Zebulon Core UI</div>;
+};
+
+const root = ReactDOM.createRoot(document.getElementById("root")!);
+root.render(<App />);
