@@ -15,7 +15,7 @@
 		"moduleResolution": "nodenext",
 		"baseUrl": "."
 	},
-		"include": ["server/**/*.ts", "apps/**/*.ts", "packages/**/*.ts", "types/**/*.d.ts", "drizzle-orm.d.ts"],
+			"include": ["server/**/*.ts", "apps/**/*.ts", "packages/**/*.ts", "types/**/*.d.ts", "drizzle-orm.d.ts", "global.d.ts"],
 			"exclude": [
 				"node_modules/drizzle-orm/mysql-core/**/*",
 				"node_modules/drizzle-orm/singlestore-core/**/*",
