@@ -1,0 +1,26 @@
+export declare const pgTable: () => {};
+export declare const text: () => {};
+export declare const integer: () => {};
+export declare const boolean: () => {};
+export declare const timestamp: () => {};
+export declare const jsonb: () => {};
+export declare const varchar: () => {};
+export declare const index: () => {};
+export declare const serial: () => {};
+export type Table<T = any> = any;
+export declare const sessions: {};
+export declare const users: {};
+export declare const securityEvents: {};
+export declare const threatPatterns: {};
+export declare const systemMetrics: {};
+export declare const zwapProtection: {};
+export declare const encryptionLayers: {};
+export declare const networkNodes: {};
+export declare const badActors: {};
+export declare const dataDeprecation: {};
+export declare const quantumProtocols: {};
+export declare const faqCategories: {};
+export declare const faqItems: {};
+export declare const howToGuides: {};
+export type User = any;
+//# sourceMappingURL=schema.d.ts.map
