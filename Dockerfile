@@ -6,8 +6,7 @@ ENV NODE_ENV=production
 # ---- deps ----
 FROM base AS deps
 COPY package*.json ./
-# Copy client package manifest if present
-COPY client/package*.json ./client/ 2>/dev/null || true
+### If client exists, copy its package manifests manually in a RUN step below
 RUN npm ci
 RUN bash -lc 'if [ -f client/package.json ]; then cd client && npm ci; fi'
 
