@@ -1,5 +1,17 @@
 // Stubbed storage-simple.ts
 export async function getStorage(key: string): Promise<any> {
+  return null;
+}
+
+export async function setStorage(key: string, value: any): Promise<void> {
+  // no-op
+}
+
+export async function deleteStorage(key: string): Promise<void> {
+  // no-op
+}
+// Stubbed storage-simple.ts
+export async function getStorage(key: string): Promise<any> {
   return null; // placeholder
 }
 
@@ -165,7 +177,18 @@ export interface IStorage {
   deleteHowToGuide(id: number): Promise<void>;
 }
 
-// ...existing code...
+// Stubbed storage-simple.ts
+export async function getStorage(key: string): Promise<any> {
+  return null;
+}
+
+export async function setStorage(key: string, value: any): Promise<void> {
+  // no-op
+}
+
+export async function deleteStorage(key: string): Promise<void> {
+  // no-op
+}
 import { eq } from 'drizzle-orm';
 import { myTable } from '../shared/schema.js'; // Node16 ESM: explicit .js extension
 

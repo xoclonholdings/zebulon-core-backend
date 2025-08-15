@@ -1,3 +1,7 @@
+// Stubbed routes.ts
+export async function getRoutes(): Promise<any[]> {
+  return [];
+}
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage.js";
@@ -18,7 +22,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   
   // Remove all authentication middleware to prevent MetaMask errors
-  // ...existing code...
+  // Stubbed routes.ts
+  export async function getRoutes(): Promise<any[]> {
+    return [];
+  }
   // setupSocialAuth(app); // Disabled for Railway build
   
   // Serve React app for main route

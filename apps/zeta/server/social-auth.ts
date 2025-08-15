@@ -1,3 +1,13 @@
+// Stubbed social-auth.ts
+export async function getSocialAuthStatus(): Promise<string> {
+  return 'stub';
+}
+
+
+// Stubbed social-auth.ts
+export async function getSocialAuthStatus(): Promise<string> {
+  return 'stub';
+}
 import passport from "passport";
 import { Strategy as TwitterStrategy } from "passport-twitter";
 import { Strategy as InstagramStrategy } from "passport-instagram-graph";

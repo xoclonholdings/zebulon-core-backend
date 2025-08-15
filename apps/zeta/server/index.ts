@@ -1,3 +1,7 @@
+// Stubbed index.ts
+export async function getZetaStatus(): Promise<string> {
+  return 'stub';
+}
 import 'dotenv/config';
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes.js";

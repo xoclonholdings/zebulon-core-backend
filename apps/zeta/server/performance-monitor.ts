@@ -1,3 +1,12 @@
+// Stubbed performance-monitor.ts
+export async function getPerformanceMetrics(): Promise<any[]> {
+  return [];
+}
+
+// Stubbed performance-monitor.ts
+export async function getPerformanceMetrics(): Promise<any[]> {
+  return [];
+}
 import { db } from "./db.js";
 import { cache } from "./cache.js";
 
