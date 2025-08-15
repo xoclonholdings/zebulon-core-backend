@@ -1,3 +1,150 @@
+// apps/zeta/server/storage-simple.ts
+
+// Simple in-memory storage implementation for Zebulon-Core-backend
+
+export interface Storage<T> {
+  get(key: string): T | undefined;
+  set(key: string, value: T): void;
+  remove(key: string): void;
+  getAll(): Record<string, T>;
+  clear(): void;
+}
+
+export class InMemoryStorage<T> implements Storage<T> {
+  private store: Record<string, T> = {};
+
+  get(key: string): T | undefined {
+    return this.store[key];
+  }
+
+  set(key: string, value: T): void {
+    this.store[key] = value;
+  }
+
+  remove(key: string): void {
+    delete this.store[key];
+  }
+
+  getAll(): Record<string, T> {
+    return { ...this.store };
+  }
+
+  clear(): void {
+    this.store = {};
+  }
+}
+
+// Example usage: create a storage for user sessions
+export type SessionData = {
+  userId: number;
+  token: string;
+  expiresAt: Date;
+};
+
+export const sessionStorage = new InMemoryStorage<SessionData>();
+
+// Async persistence example (stubbed for demonstration)
+export async function persistStorage<T>(storage: Storage<T>): Promise<void> {
+  // Replace with actual persistence logic (e.g., write to file/db)
+  return Promise.resolve();
+}
+import { 
+  users, securityEvents, threatPatterns, systemMetrics, zwapProtection, 
+  encryptionLayers, networkNodes, badActors, dataDeprecation, quantumProtocols,
+  faqCategories, faqItems, howToGuides,
+  type User, type InsertUser, type SecurityEvent, type InsertSecurityEvent,
+  type ThreatPattern, type InsertThreatPattern, type SystemMetric, type InsertSystemMetric,
+  type ZwapProtection, type InsertZwapProtection, type EncryptionLayer, type InsertEncryptionLayer,
+  type NetworkNode, type InsertNetworkNode, type BadActor, type InsertBadActor,
+  type DataDeprecation, type InsertDataDeprecation, type QuantumProtocol, type InsertQuantumProtocol,
+  type FaqCategory, type InsertFaqCategory, type FaqItem, type InsertFaqItem,
+  type HowToGuide, type InsertHowToGuide
+} from "../../../packages/shared/index.js";
+import { db } from "./db.js";
+import { eq, desc, and, gte, lt } from "drizzle-orm";
+import session from "express-session";
+import connectPg from "connect-pg-simple";
+import { cache } from "./cache.js";
+
+// Disabled PostgresSessionStore to prevent IDX_session_expire error
+// const PostgresSessionStore = connectPg(session);
+
+export interface IStorage {
+  sessionStore: any;
+
+  // User management
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  getUserBySocialId(provider: string, socialId: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  createSocialUser(userData: any): Promise<User>;
+  updateUserLastLogin(userId: number): Promise<void>;
+  upsertUser(userData: any): Promise<User>;
+
+  // Security events
+  getSecurityEvents(limit?: number, offset?: number): Promise<SecurityEvent[]>;
+  getSecurityEventsByTimeRange(startTime: Date, endTime: Date): Promise<SecurityEvent[]>;
+  getSecurityEventsByType(eventType: string, limit?: number): Promise<SecurityEvent[]>;
+  createSecurityEvent(event: InsertSecurityEvent): Promise<SecurityEvent>;
+  updateSecurityEventStatus(id: number, status: string): Promise<SecurityEvent | undefined>;
+  bulkCreateSecurityEvents(events: InsertSecurityEvent[]): Promise<SecurityEvent[]>;
+
+  // Threat patterns
+  getThreatPatterns(): Promise<ThreatPattern[]>;
+  createThreatPattern(pattern: InsertThreatPattern): Promise<ThreatPattern>;
+  getActiveThreatPatterns(): Promise<ThreatPattern[]>;
+
+  // System metrics
+  getLatestSystemMetrics(): Promise<SystemMetric[]>;
+  getSystemMetricsByType(metricType: string, limit?: number): Promise<SystemMetric[]>;
+  createSystemMetric(metric: InsertSystemMetric): Promise<SystemMetric>;
+  bulkCreateSystemMetrics(metrics: InsertSystemMetric[]): Promise<SystemMetric[]>;
+
+  // ZWAP protection
+  getZwapProtectionStatus(): Promise<ZwapProtection[]>;
+  updateZwapProtection(id: number, status: string, integrityScore: number): Promise<ZwapProtection | undefined>;
+
+  // Encryption layers
+  getEncryptionLayers(): Promise<EncryptionLayer[]>;
+  updateEncryptionLayer(id: number, status: string): Promise<EncryptionLayer | undefined>;
+
+  // Network nodes
+  getNetworkNodes(): Promise<NetworkNode[]>;
+  updateNetworkNode(id: number, status: string): Promise<NetworkNode | undefined>;
+
+  // Bad actor tracking
+  getBadActors(limit?: number): Promise<BadActor[]>;
+  getBadActorsByThreatLevel(minLevel: number): Promise<BadActor[]>;
+  createBadActor(actor: InsertBadActor): Promise<BadActor>;
+  updateBadActor(id: number, updates: Partial<BadActor>): Promise<BadActor | undefined>;
+  escalateBadActor(identifier: string): Promise<BadActor | undefined>;
+
+  // Data deprecation
+  getActiveDeprecations(): Promise<DataDeprecation[]>;
+  createDataDeprecation(deprecation: InsertDataDeprecation): Promise<DataDeprecation>;
+  expireDeprecation(id: number): Promise<DataDeprecation | undefined>;
+
+  // Quantum protocols
+  getQuantumProtocols(): Promise<QuantumProtocol[]>;
+  createQuantumProtocol(protocol: InsertQuantumProtocol): Promise<QuantumProtocol>;
+  activateProtocol(id: number): Promise<QuantumProtocol | undefined>;
+
+  // FAQ management
+  getFaqCategories(): Promise<FaqCategory[]>;
+  getFaqItems(): Promise<FaqItem[]>;
+  createFaqItem(item: InsertFaqItem): Promise<FaqItem>;
+  updateFaqItem(id: number, updates: Partial<InsertFaqItem>): Promise<FaqItem>;
+  deleteFaqItem(id: number): Promise<void>;
+
+  // How-To guides management
+  getHowToGuides(): Promise<HowToGuide[]>;
+  getHowToGuideById(id: number): Promise<HowToGuide | undefined>;
+  createHowToGuide(guide: InsertHowToGuide): Promise<HowToGuide>;
+  updateHowToGuide(id: number, updates: Partial<InsertHowToGuide>): Promise<HowToGuide>;
+  deleteHowToGuide(id: number): Promise<void>;
+}
+
+// ...existing code...
 import { eq } from 'drizzle-orm';
 import { myTable } from '../shared/schema.js'; // Node16 ESM: explicit .js extension
 
