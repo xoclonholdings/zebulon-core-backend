@@ -1,6 +1,6 @@
 
 import { test, expect } from '@playwright/test';
-import { waitForServers } from '../test-setup';
+import { waitForServers } from '../test-setup.js';
 
 test('Zed AI chat page connects to backend and returns a reply', async ({ page }) => {
   await waitForServers();

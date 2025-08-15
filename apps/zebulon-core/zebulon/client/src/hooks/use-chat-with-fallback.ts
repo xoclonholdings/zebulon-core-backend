@@ -1,6 +1,6 @@
-import { useChat } from './use-chat';
-import { useChatMock } from './use-chat-mock';
-import { useChatMinimal } from './use-chat-minimal';
+import { useChat } from './use-chat.js';
+import { useChatMock } from './use-chat-mock.js';
+import { useChatMinimal } from './use-chat-minimal.js';
 
 export function useChatWithFallback(conversationId?: string) {
   const USE_MOCK_MODE = true; // Temporarily enable mock mode while fixing server

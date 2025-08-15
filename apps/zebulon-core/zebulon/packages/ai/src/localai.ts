@@ -1,4 +1,4 @@
-import { ChatMessage } from '@shared/zed';
+import { ChatMessage } from '../../shared/src/zed.js';
 import { ChatOptions, AIProvider, ChatStream } from './types.js';
 
 const LOCALAI_URL = process.env.LOCALAI_URL || 'http://localhost:8080';

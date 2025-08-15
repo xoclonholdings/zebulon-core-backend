@@ -1,6 +1,6 @@
 
 import { test, expect } from '@playwright/test';
-import { waitForServers } from '../test-setup';
+import { waitForServers } from '../test-setup.js';
 
 const tiles = [
   { name: 'ZED', selector: 'text=ZED — AI Assistant', url: '/zed' },

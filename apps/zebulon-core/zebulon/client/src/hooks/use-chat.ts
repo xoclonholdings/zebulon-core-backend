@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useToast } from './use-toast';
-import { useChatMock } from './use-chat-mock';
+import { useToast } from './use-toast.js';
+import { useChatMock } from './use-chat-mock.js';
 
 interface StreamMessage {
   content: string;

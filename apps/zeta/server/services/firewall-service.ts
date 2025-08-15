@@ -1,5 +1,5 @@
-import { storage } from "../storage";
-import type { InsertSecurityEvent, InsertSystemMetric } from "@shared/schema";
+import { storage } from "../storage.js";
+import type { InsertSecurityEvent, InsertSystemMetric } from "../../../packages/shared";
 
 export class FirewallService {
   private threatCounters = {

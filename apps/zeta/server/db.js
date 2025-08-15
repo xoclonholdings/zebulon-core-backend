@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.db = exports.pool = void 0;
 var serverless_1 = require("@neondatabase/serverless");
-var neon_serverless_1 = require("drizzle-orm/neon-serverless");
+// var neon_serverless_1 = require("drizzle-orm/neon-serverless");
 var ws_1 = require("ws");
 var schema = require("@shared/schema");
 serverless_1.neonConfig.webSocketConstructor = ws_1.default;

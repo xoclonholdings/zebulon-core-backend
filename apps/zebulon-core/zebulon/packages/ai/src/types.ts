@@ -1,4 +1,4 @@
-import { ChatMessage } from '@shared/zed';
+import { ChatMessage } from '../../shared/src/zed.js';
 
 export interface ChatOptions {
 	model?: string;

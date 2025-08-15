@@ -5,7 +5,7 @@ import { Strategy as SnapchatStrategy } from "passport-snapchat";
 import { Express } from "express";
 import session from "express-session";
 import { storage } from "./storage.js";
-import { User as SelectUser } from "@shared/schema";
+import { User as SelectUser } from "../../../packages/shared/index.js";
 
 declare global {
   namespace Express {

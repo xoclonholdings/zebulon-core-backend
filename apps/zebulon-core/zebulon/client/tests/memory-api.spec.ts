@@ -1,6 +1,6 @@
 
 import { test, expect } from '@playwright/test';
-import { waitForServers } from '../test-setup';
+import { waitForServers } from '../test-setup.js';
 
 // This test assumes a /api/memory endpoint exists for memory read/write
 

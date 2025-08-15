@@ -1,4 +1,4 @@
-import { api } from '../lib/api';
+import { api } from '../lib/api.js';
 
 export async function zedChat(message: string) {
   const res = await api('/chat', {

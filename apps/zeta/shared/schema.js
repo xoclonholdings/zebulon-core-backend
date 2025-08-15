@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.insertHowToGuideSchema = exports.insertFaqItemSchema = exports.insertFaqCategorySchema = exports.insertQuantumProtocolSchema = exports.insertDataDeprecationSchema = exports.insertBadActorSchema = exports.insertNetworkNodeSchema = exports.insertEncryptionLayerSchema = exports.insertZwapProtectionSchema = exports.insertSystemMetricSchema = exports.insertThreatPatternSchema = exports.insertSecurityEventSchema = exports.insertUserSchema = exports.howToGuides = exports.faqItems = exports.faqCategories = exports.quantumProtocols = exports.dataDeprecation = exports.badActors = exports.networkNodes = exports.encryptionLayers = exports.zwapProtection = exports.systemMetrics = exports.threatPatterns = exports.securityEvents = exports.users = exports.sessions = void 0;
-var pg_core_1 = require("drizzle-orm/pg-core");
+// var pg_core_1 = require("drizzle-orm/pg-core");
 var drizzle_zod_1 = require("drizzle-zod");
 // Session storage table.
 // (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.

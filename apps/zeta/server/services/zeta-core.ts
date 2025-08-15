@@ -1,7 +1,7 @@
-import { storage } from "../storage";
-import { firewallService } from "./firewall-service";
-import { badActorService } from "./bad-actor-service";
-import type { InsertSecurityEvent } from "@shared/schema";
+import { storage } from "../storage.js";
+import { firewallService } from "./firewall-service.js";
+import { badActorService } from "./bad-actor-service.js";
+import type { InsertSecurityEvent } from "../../../packages/shared";
 
 export class ZetaCoreAI {
   private aiConfidence: number = 98.7;

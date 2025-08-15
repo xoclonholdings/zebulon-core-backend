@@ -1,5 +1,5 @@
-import { storage } from "../storage";
-import type { InsertBadActor, InsertDataDeprecation, InsertQuantumProtocol } from "@shared/schema";
+import { storage } from "../storage.js";
+import type { InsertBadActor, InsertDataDeprecation, InsertQuantumProtocol } from "../../../packages/shared";
 
 export class BadActorService {
   private quarantineProtocols = {

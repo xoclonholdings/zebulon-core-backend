@@ -2,20 +2,18 @@
 import { test, expect } from '@playwright/test';
 import fs from 'fs';
 import { execSync } from 'child_process';
-import { waitForServers } from './setup';
+import { waitForServers } from './test-setup.js';
 
 // This will start the app, open the Zebulon UI, and take a screenshot
 
-describe('Zebulon UI loads and screenshot is taken', () => {
-
-
+test('Zebulon UI loads and screenshot is taken', async ({ page }) => {
   // Kill any running servers
   try { execSync('pkill -f vite || true'); } catch {}
   try { execSync('pkill -f node || true'); } catch {}
 
   // Start backend server
-    const { spawn } = require('child_process');
-    const backendProc = spawn('pnpm', ['--dir', './server', 'dev'], { stdio: 'ignore', detached: true });
+  const { spawn } = require('child_process');
+  const backendProc = spawn('pnpm', ['--dir', './server', 'dev'], { stdio: 'ignore', detached: true });
   // Wait for backend to be up
   let backendReady = false;
   // Open UI in Playwright and log URL for user
@@ -49,16 +47,16 @@ describe('Zebulon UI loads and screenshot is taken', () => {
   if (!fs.existsSync(screenshotPath)) {
     throw new Error('Screenshot was not created');
   }
-    // Open screenshot with default image viewer (Linux)
-    try {
-      execSync(`xdg-open ${screenshotPath} &`, { stdio: 'ignore' });
-      console.log('Screenshot opened with default image viewer.');
-    } catch (e) {
-      console.warn('Could not open screenshot automatically:', e);
-    }
+  // Open screenshot with default image viewer (Linux)
+  try {
+    execSync(`xdg-open ${screenshotPath} &`, { stdio: 'ignore' });
+    console.log('Screenshot opened with default image viewer.');
+  } catch (e) {
+    console.warn('Could not open screenshot automatically:', e);
+  }
 
-    // Clean up: kill backend server process
-    try {
+  // Clean up: kill backend server process
+  try {
       process.kill(-backendProc.pid);
       console.log('Backend server process killed.');
     } catch (e) {

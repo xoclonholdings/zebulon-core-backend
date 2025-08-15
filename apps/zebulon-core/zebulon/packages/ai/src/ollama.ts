@@ -1,4 +1,4 @@
-import { ChatMessage } from '@shared/zed';
+import { ChatMessage } from '../../shared/src/zed.js';
 import { ChatOptions, AIProvider, ChatStream } from './types.js';
 
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';

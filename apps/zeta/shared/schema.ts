@@ -1,7 +1,7 @@
-import { pgTable, text, integer, boolean, timestamp, jsonb, varchar, index, serial } from "drizzle-orm/pg-core";
+// import { pgTable, text, integer, boolean, timestamp, jsonb, varchar, index, serial } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import type { Table } from "drizzle-orm";
+// import type { Table } from "drizzle-orm";
 
 // Session storage table.
 // (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
@@ -190,28 +190,29 @@ export const insertFaqItemSchema = createInsertSchema(faqItems as Table<any>);
 export const insertHowToGuideSchema = createInsertSchema(howToGuides as Table<any>);
 
 // Types
-export type InsertUser = z.infer<typeof insertUserSchema>;
+type ZodSchema<T> = T extends z.ZodType<any, any, any> ? T : z.ZodType<any, any, any>;
+export type InsertUser = z.infer<ZodSchema<typeof insertUserSchema>>;
 export type SecurityEvent = typeof securityEvents.$inferSelect;
-export type InsertSecurityEvent = z.infer<typeof insertSecurityEventSchema>;
+export type InsertSecurityEvent = z.infer<ZodSchema<typeof insertSecurityEventSchema>>;
 export type ThreatPattern = typeof threatPatterns.$inferSelect;
-export type InsertThreatPattern = z.infer<typeof insertThreatPatternSchema>;
+export type InsertThreatPattern = z.infer<ZodSchema<typeof insertThreatPatternSchema>>;
 export type SystemMetric = typeof systemMetrics.$inferSelect;
-export type InsertSystemMetric = z.infer<typeof insertSystemMetricSchema>;
+export type InsertSystemMetric = z.infer<ZodSchema<typeof insertSystemMetricSchema>>;
 export type ZwapProtection = typeof zwapProtection.$inferSelect;
-export type InsertZwapProtection = z.infer<typeof insertZwapProtectionSchema>;
+export type InsertZwapProtection = z.infer<ZodSchema<typeof insertZwapProtectionSchema>>;
 export type EncryptionLayer = typeof encryptionLayers.$inferSelect;
-export type InsertEncryptionLayer = z.infer<typeof insertEncryptionLayerSchema>;
+export type InsertEncryptionLayer = z.infer<ZodSchema<typeof insertEncryptionLayerSchema>>;
 export type NetworkNode = typeof networkNodes.$inferSelect;
-export type InsertNetworkNode = z.infer<typeof insertNetworkNodeSchema>;
+export type InsertNetworkNode = z.infer<ZodSchema<typeof insertNetworkNodeSchema>>;
 export type BadActor = typeof badActors.$inferSelect;
-export type InsertBadActor = z.infer<typeof insertBadActorSchema>;
+export type InsertBadActor = z.infer<ZodSchema<typeof insertBadActorSchema>>;
 export type DataDeprecation = typeof dataDeprecation.$inferSelect;
-export type InsertDataDeprecation = z.infer<typeof insertDataDeprecationSchema>;
+export type InsertDataDeprecation = z.infer<ZodSchema<typeof insertDataDeprecationSchema>>;
 export type QuantumProtocol = typeof quantumProtocols.$inferSelect;
-export type InsertQuantumProtocol = z.infer<typeof insertQuantumProtocolSchema>;
+export type InsertQuantumProtocol = z.infer<ZodSchema<typeof insertQuantumProtocolSchema>>;
 export type FaqCategory = typeof faqCategories.$inferSelect;
-export type InsertFaqCategory = z.infer<typeof insertFaqCategorySchema>;
+export type InsertFaqCategory = z.infer<ZodSchema<typeof insertFaqCategorySchema>>;
 export type FaqItem = typeof faqItems.$inferSelect;
-export type InsertFaqItem = z.infer<typeof insertFaqItemSchema>;
+export type InsertFaqItem = z.infer<ZodSchema<typeof insertFaqItemSchema>>;
 export type HowToGuide = typeof howToGuides.$inferSelect;
-export type InsertHowToGuide = z.infer<typeof insertHowToGuideSchema>;
+export type InsertHowToGuide = z.infer<ZodSchema<typeof insertHowToGuideSchema>>;

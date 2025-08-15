@@ -9,9 +9,11 @@
     "node_modules/drizzle-orm/neon-serverless/**"
   ],
   "compilerOptions": {
+  "outDir": "./dist",
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
-    "noEmit": true,
+  "emitDeclarationOnly": true,
+  "declaration": true,
     "module": "esnext",
     "target": "es2020",
     "downlevelIteration": true,

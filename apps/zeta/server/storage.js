@@ -15,4 +15,6 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 // Import from the simple storage module which contains the working implementation
+const { storage } = require("./storage-simple");
+exports.storage = storage;
 __exportStar(require("./storage-simple"), exports);

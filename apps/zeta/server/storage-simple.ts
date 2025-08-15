@@ -9,9 +9,9 @@ import {
   type DataDeprecation, type InsertDataDeprecation, type QuantumProtocol, type InsertQuantumProtocol,
   type FaqCategory, type InsertFaqCategory, type FaqItem, type InsertFaqItem,
   type HowToGuide, type InsertHowToGuide
-} from "@shared/schema";
+} from "../../../packages/shared/index.js";
 import { db } from "./db.js";
-import { eq, desc, and, gte, lt } from "drizzle-orm";
+// import { eq, desc, and, gte, lt } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { cache } from "./cache.js";

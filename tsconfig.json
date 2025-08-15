@@ -1,5 +1,10 @@
 {
 	"compilerOptions": {
+			"paths": {
+				"packages/shared": ["packages/shared/index.d.ts"],
+				"packages/shared/*": ["packages/shared/*"],
+				"shared/schema": ["packages/shared/schema.d.ts"]
+		},
 		"target": "ES2020",
 		"module": "NodeNext",
 		"esModuleInterop": true,
@@ -7,7 +12,15 @@
 		"strict": true,
 		"skipLibCheck": true,
 		"outDir": "dist",
-		"moduleResolution": "nodenext"
+		"moduleResolution": "nodenext",
+		"baseUrl": "."
 	},
-		"include": ["server/**/*.ts", "apps/**/*.ts", "packages/**/*.ts", "types/**/*.d.ts"]
+		"include": ["server/**/*.ts", "apps/**/*.ts", "packages/**/*.ts", "types/**/*.d.ts", "drizzle-orm.d.ts"],
+			"exclude": [
+				"node_modules/drizzle-orm/mysql-core/**/*",
+				"node_modules/drizzle-orm/singlestore-core/**/*",
+				"node_modules/drizzle-orm/sqlite-core/**/*",
+				"node_modules/drizzle-orm/neon-serverless/**/*",
+				"node_modules/drizzle-orm/gel-core/**/*"
+			]
 }
