@@ -1,15 +1,32 @@
-# ---- Builder ----
-FROM node:18 AS builder
+# ---- base ----
+FROM node:18-bullseye AS base
 WORKDIR /app
-COPY package*.json ./
-COPY . .
-RUN npm install --production=false
-RUN npm run build
+ENV NODE_ENV=production
 
-# ---- Runner ----
-FROM node:18-slim AS runner
+# ---- deps ----
+FROM base AS deps
+COPY package*.json ./
+# Copy client package manifest if present
+COPY client/package*.json ./client/ 2>/dev/null || true
+RUN npm ci
+RUN bash -lc 'if [ -f client/package.json ]; then cd client && npm ci; fi'
+
+# ---- build ----
+FROM deps AS build
+COPY . .
+# Build server always
+RUN npm run build:server
+# Build client only if it exists
+RUN bash -lc 'if [ -f client/package.json ]; then cd client && npm run build; else echo "[skip] no client build"; fi'
+
+# ---- runtime ----
+FROM base AS runtime
 WORKDIR /app
-COPY --from=builder /app .
-RUN npm prune --production
-EXPOSE 3000
-CMD ["npm", "start"]
+ENV PORT=8080
+# Copy only what we need
+COPY --from=build /app/dist /app/dist
+COPY --from=deps /app/node_modules /app/node_modules
+COPY package*.json ./
+# Health
+EXPOSE 8080
+CMD ["node", "dist/server/index.js"]

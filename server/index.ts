@@ -1,54 +1,52 @@
-import express from 'express';
-import path from 'path';
+import express from "express";
+import cookieParser from "cookie-parser";
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT ? Number(process.env.PORT) : 8080;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../dist/public')));
+app.use(cookieParser());
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Zebulon Oracle System is running' });
-});
+// Health + readiness
+app.get("/healthz", (_req, res) => res.status(200).json({ ok: true }));
+app.get("/readyz", (_req, res) => res.status(200).json({ ready: true }));
 
-// System status endpoint
-app.get('/api/system/status', (req, res) => {
+// Version + echo for quick checks
+app.get("/api/version", (_req, res) => {
   res.json({
-    oracleCore: {
-      active: true,
-      memory: 92,
-      queries: 847,
-      uptime: '99.97%',
-      lastActivity: new Date().toISOString(),
-      databaseConnections: 5,
-      responseTime: '12ms',
-    },
-    system: {
-      status: 'operational',
-      version: '1.0.0',
-      components: ['Zebulon Oracle', 'Database Engine', 'Query Processor'],
-    },
+    name: "zebulon-core-backend",
+    version: process.env.APP_VERSION || "0.1.0",
+    env: process.env.NODE_ENV || "production"
   });
 });
 
-// Serve React app for all non-API routes
-app.get('*', (req, res) => {
-  if (!req.path.startsWith('/api')) {
-    res.sendFile(path.join(__dirname, '../dist/public/index.html'));
-  } else {
-    res.status(404).json({ error: 'API endpoint not found' });
-  }
+app.post("/api/echo", (req, res) => {
+  res.json({ received: req.body ?? null });
 });
 
-// Error handler
-app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  const status = err.status || err.statusCode || 500;
-  const message = err.message || 'Internal Server Error';
-  res.status(status).json({ message });
-  console.error(err);
+// Minimal stubbed “AI/memory” endpoints (no external deps)
+type MemoryItem = { id: string; data: any; ts: number };
+const memory: Record<string, MemoryItem> = {};
+
+app.post("/api/memory", (req, res) => {
+  const id = String(Date.now());
+  memory[id] = { id, data: req.body ?? null, ts: Date.now() };
+  res.status(201).json(memory[id]);
 });
 
+app.get("/api/memory/:id", (req, res) => {
+  const item = memory[req.params.id];
+  if (!item) return res.status(404).json({ error: "not found" });
+  res.json(item);
+});
+
+// Root
+app.get("/", (_req, res) => {
+  res.status(200).send("Zebulon Core Backend is running.");
+});
+
+// Start
 app.listen(PORT, () => {
-  console.log(`🚀 Zebulon Oracle System running on port ${PORT}`);
+  // eslint-disable-next-line no-console
+  console.log(`Server listening on :${PORT}`);
 });
