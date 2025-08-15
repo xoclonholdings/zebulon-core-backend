@@ -22,6 +22,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "drizzle-kit": "^0.20.16",
+    "drizzle-orm": "^0.44.4",
     "express": "^4.18.2",
     "memoizee": "^0.4.15",
     "morgan": "^1.10.0",
