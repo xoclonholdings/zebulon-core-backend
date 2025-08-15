@@ -1,3 +1,22 @@
+/**
+ * Temporary stub for Zeta StorageSimple module.
+ * This allows the backend to build and run while Zeta is disabled.
+ */
+
+export const StorageSimple = {
+  get: async (...args: any[]): Promise<null> => null,
+  set: async (...args: any[]): Promise<void> => {},
+  delete: async (...args: any[]): Promise<void> => {},
+};
+
+// Example usage: create a storage for user sessions
+export type SessionData = {
+  userId: number;
+  token: string;
+  expiresAt: Date;
+};
+
+export const sessionStorage = new InMemoryStorage<SessionData>();
 // apps/zeta/server/storage-simple.ts
 
 // Simple in-memory storage implementation for Zebulon-Core-backend
